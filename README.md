@@ -1,1 +1,2 @@
-# ElasticSearch
+# MyFeed
+- 사용자별 게시글을 추천해주는 커뮤니티
