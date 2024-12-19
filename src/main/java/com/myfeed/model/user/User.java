@@ -34,7 +34,6 @@ public class User {
 
     private boolean isActive;
 
-
     public User(Long uid, String password, String uname, String nickname, String email, String profileImage) {
         this.uid = uid;
         this.password = password;
