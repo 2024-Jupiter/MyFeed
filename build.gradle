@@ -38,6 +38,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	implementation group: 'org.mindrot', name: 'jbcrypt', version: '0.4'
+	implementation group: 'org.springframework.security', name: 'spring-security-oauth2-client', version: '6.4.1'
 }
 
 tasks.named('test') {

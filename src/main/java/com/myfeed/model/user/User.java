@@ -12,12 +12,12 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "users")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class User {
     @Id
-    private String uid;
+    private Long uid;
 
     private String password;
 
@@ -32,8 +32,9 @@ public class User {
 
     private String role;
 
+    private boolean isActive;
 
-    public User(String uid, String password, String uname, String nickname, String email, String profileImage) {
+    public User(Long uid, String password, String uname, String nickname, String email, String profileImage) {
         this.uid = uid;
         this.password = password;
         this.uname = uname;
@@ -41,5 +42,6 @@ public class User {
         this.email = email;
         this.profileImage = profileImage;
         this.role = "ROLE_USER";
+        this.isActive = true;
     }
 }
