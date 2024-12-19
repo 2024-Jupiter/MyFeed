@@ -1,6 +1,5 @@
-package com.myfeed.model.comment;
+package com.myfeed.model.post;
 
-import com.myfeed.model.post.PostCommentList;
 import com.myfeed.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,32 +12,38 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Entity
-@Table(name = "comments")
+@Table(name = "posts")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Comment {
+public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long cid;
+    private long pid;
 
     @ManyToOne
     @JoinColumn(name = "uid")
     private User user;
 
-    @OneToMany(mappedBy = "Comment", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "Post", cascade = CascadeType.ALL)
     private List<PostCommentList> postCommentLists = new ArrayList<>();
 
+    private String category;
+    private String title;
     private String content;
+    private String imgSrc;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
+    private int viewCount;
+    private int likeCount;
 
     public void addPostCommentList(PostCommentList postCommentList) {
         if (this.postCommentLists == null)
             this.postCommentLists = new ArrayList<>();
         this.postCommentLists.add(postCommentList);
-        postCommentList.setComment(this);
+        postCommentList.setPost(this);
     }
 }
