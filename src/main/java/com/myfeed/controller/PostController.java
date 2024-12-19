@@ -42,7 +42,6 @@ public class PostController {
         return "api/post/update";
     }
 
-    /*
     @PostMapping("/update")
     public String updatePostProc(@RequestBody Post post) {
         Post updatedPost = postService.findByPid(post.getPid());
@@ -54,6 +53,4 @@ public class PostController {
         updatedPost.setContent(post.getContent());
 
     }
-
-     */
 }
