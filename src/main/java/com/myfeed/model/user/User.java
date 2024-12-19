@@ -3,12 +3,18 @@ package com.myfeed.model.user;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "users")
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class User {
     @Id
     private Long uid;
@@ -26,6 +32,8 @@ public class User {
 
     private String role;
 
+    private boolean isActive;
+
 
     public User(Long uid, String password, String uname, String nickname, String email, String profileImage) {
         this.uid = uid;
@@ -35,5 +43,6 @@ public class User {
         this.email = email;
         this.profileImage = profileImage;
         this.role = "ROLE_USER";
+        this.isActive = true;
     }
 }
