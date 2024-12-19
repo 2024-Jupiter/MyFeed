@@ -1,4 +1,4 @@
-package com.myfeed.model.Post;
+package com.myfeed.model.post;
 
 import com.myfeed.model.comment.Comment;
 import com.myfeed.model.user.User;
@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.elasticsearch.annotations.Document;
 
 @Entity
 @Data
@@ -27,6 +28,6 @@ public class PostCommentList {
     private Post post;
 
     @ManyToOne
-    @JoinColumn(name = "cid")
+    @JoinColumn(name = "cid", nullable = true)
     private Comment comment;
 }
