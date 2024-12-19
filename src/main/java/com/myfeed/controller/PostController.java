@@ -32,4 +32,24 @@ public class PostController {
         postService.createPost(uid, category, title, content, imgSrc);
         return "redirect:/api/postEs/list";
     }
+
+    @GetMapping("/update/{pid}")
+    public String updatePostForm(@PathVariable long pid, Model model) {
+        Post post = postService.findByPid(pid);
+        model.addAttribute("post", post);
+        return "api/post/update";
+    }
+
+    /*
+    @PostMapping("/update")
+    public String updatePostProc(@RequestBody Post post) {
+        Post updatedPost = postService.findByPid(post.getPid());
+        User user = userService.findByUid(post.getUser().getUid());
+
+        updatedPost.setUser(user);
+        updatedPost.setCategory(post.getCategory());
+        updatedPost.setTitle(post.getTitle());
+        updatedPost.setContent(post.getContent());
+
+    }
 }
