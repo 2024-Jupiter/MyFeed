@@ -18,10 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/api/user")
 public class UserController {
     @Autowired UserService userService;
-    @GetMapping("/hello")
-    public String hello(){
-        return "hello";
-    }
 
     // 회원 가입
     @GetMapping("/register")
@@ -30,26 +26,26 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String registerProc(Long uid, String pwd,String pwd2, String uname, String nickname, String email, String profileImage){
-        if (userService.findByUid(uid) == null && pwd.equals(pwd2) && pwd.length() >= 4){
+    public String registerProc(String email, String pwd,String pwd2, String uname, String nickname, String profileImage){
+        if (userService.findByEmail(email) == null && pwd.equals(pwd2) && pwd.length() >= 4){
             String hashedPwd = BCrypt.hashpw(pwd, BCrypt.gensalt());
-            User user = new User(uid, hashedPwd, uname, nickname, email, profileImage);
+            User user = new User(email, hashedPwd, uname, nickname, profileImage);
             userService.registerUser(user);
         }
         return "redirect:/api/board/list";
     }
 
     // 회원 탈퇴
-    @GetMapping("/{uid}")
-    public String delete(@PathVariable Long uid) {
-        userService.deleteUser(uid);
+    @GetMapping("/{id}")
+    public String delete(@PathVariable Long id) {
+        userService.deleteUser(id);
         return "redirect:/user/list";
     }
 
     // 회원정보 상세보기
-    @GetMapping("/detail/{uid}")
-    public String detail(@PathVariable Long uid, Model model){
-        User user = userService.findByUid(uid);
+    @GetMapping("/detail/{id}")
+    public String detail(@PathVariable Long id, Model model){
+        User user = userService.findById(id);
         model.addAttribute("user", user);
         return "user/detail";
     }
@@ -64,12 +60,12 @@ public class UserController {
     @GetMapping("/loginSuccess")
     public String loginSuccess(HttpSession session, Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String uid = authentication.getName();
+        String email = authentication.getName();
+        User user = userService.findByEmail(email);
 
-        User user = userService.findByUid(uid);
-        session.setAttribute("sessUid", uid);
-        session.setAttribute("sessUname", user.getUname());
-        String msg = user.getUname() + "님 환영합니다.";
+
+        session.setAttribute("sessId", user.getId());
+        String msg = user.getNickname() + "님 환영합니다.";
         String url = "/";
         model.addAttribute("msg", msg);
         model.addAttribute("url", url); 
