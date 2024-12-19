@@ -25,7 +25,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String registerProc(String uid, String pwd,String pwd2, String uname, String nickname, String email, String profileImage){
+    public String registerProc(Long uid, String pwd,String pwd2, String uname, String nickname, String email, String profileImage){
         if (userService.findByUid(uid) == null && pwd.equals(pwd2) && pwd.length() >= 4){
             String hashedPwd = BCrypt.hashpw(pwd, BCrypt.gensalt());
             User user = new User(uid, hashedPwd, uname, nickname, email, profileImage);
@@ -36,14 +36,14 @@ public class UserController {
 
     // 회원 탈퇴
     @GetMapping("/{uid}")
-    public String delete(@PathVariable String uid) {
+    public String delete(@PathVariable Long uid) {
         userService.deleteUser(uid);
         return "redirect:/user/list";
     }
 
     // 회원정보 상세보기
     @GetMapping("/detail/{uid}")
-    public String detail(@PathVariable String uid, Model model){
+    public String detail(@PathVariable Long uid, Model model){
         User user = userService.findByUid(uid);
         model.addAttribute("user", user);
         return "user/detail";
