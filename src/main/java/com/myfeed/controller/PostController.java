@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Controller
 @RequestMapping("/api/post")
 public class PostController {
-    @Autowired PostService postService;]
+    @Autowired PostService postService;
     @Autowired UserService userService;
 
     @GetMapping("/create")
