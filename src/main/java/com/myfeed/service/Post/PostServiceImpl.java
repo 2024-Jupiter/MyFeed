@@ -24,6 +24,11 @@ public class PostServiceImpl implements PostService {
     @Autowired PostEsRepository postEsRepository;
     @Autowired UserRepository userRepository;
 
+    @Override
+    public Post findByPid(long pid) {
+        return postRepository.findById(pid).orElse(null);
+    }
+
     @Transactional
     @Override
     public Post createPost(String uid, String category, String title, String content, String imgSrc) {
