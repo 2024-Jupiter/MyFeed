@@ -38,4 +38,4 @@ out/
 
 /logs/
 
-/resources/application-local.yaml
+application-local.yaml
