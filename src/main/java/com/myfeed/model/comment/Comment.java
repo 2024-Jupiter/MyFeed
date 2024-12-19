@@ -1,12 +1,13 @@
 package com.myfeed.model.comment;
 
-import com.myfeed.model.Post.PostCommentList;
+import com.myfeed.model.post.PostCommentList;
 import com.myfeed.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

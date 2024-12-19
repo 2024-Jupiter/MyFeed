@@ -1,4 +1,4 @@
-package com.myfeed.model.Post;
+package com.myfeed.model.post;
 
 import com.myfeed.model.user.User;
 import jakarta.persistence.*;
@@ -6,10 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Entity
 @Table(name = "posts")
