@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class User {
     @Id
-    private String uid;
+    private Long uid;
 
     private String password;
 
@@ -27,7 +27,7 @@ public class User {
     private String role;
 
 
-    public User(String uid, String password, String uname, String nickname, String email, String profileImage) {
+    public User(Long uid, String password, String uname, String nickname, String email, String profileImage) {
         this.uid = uid;
         this.password = password;
         this.uname = uname;
