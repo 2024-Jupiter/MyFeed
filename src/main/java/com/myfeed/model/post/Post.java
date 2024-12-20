@@ -1,12 +1,12 @@
 package com.myfeed.model.post;
 
+import com.myfeed.model.board.Tag;
 import com.myfeed.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,7 +29,10 @@ public class Post {
     private User user;
 
     @OneToMany(mappedBy = "Post", cascade = CascadeType.ALL)
-    private List<PostCommentList> postCommentLists = new ArrayList<>();
+    private List<PostReplyList> postReplyLists = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    private Tag tag;
 
     private String category;
     private String title;
@@ -40,10 +43,10 @@ public class Post {
     private int viewCount;
     private int likeCount;
 
-    public void addPostCommentList(PostCommentList postCommentList) {
-        if (this.postCommentLists == null)
-            this.postCommentLists = new ArrayList<>();
-        this.postCommentLists.add(postCommentList);
-        postCommentList.setPost(this);
+    public void addPostCommentList(PostReplyList postReplyList) {
+        if (this.postReplyLists == null)
+            this.postReplyLists = new ArrayList<>();
+        this.postReplyLists.add(postReplyList);
+        postReplyList.setPost(this);
     }
 }
