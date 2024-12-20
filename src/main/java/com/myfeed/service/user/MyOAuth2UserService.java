@@ -30,9 +30,9 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
         String provider = userRequest.getClientRegistration().getRegistrationId();
         switch (provider) {
             case "kakao":
-                long kid = (long) oAuth2User.getAttribute("id");
+                long kid = (long) oAuth2User.getAttribute("id"); //todo
                 uid = provider + "_" + kid;
-                user = userService.findByUid(uid);
+                user = userService.findByEmail(uid);
                 if (user != null && !user.isActive()) {
                     throw new DisabledException("비활성화된 회원입니다.");
                 }
@@ -44,7 +44,7 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
                     uname = (uname == null) ? "kakao_user" : uname;
                     email = (String) account.get("email");
                     profileUrl = (String) properties.get("profile_image");
-                    user = new User(uid, hashedPwd, uname, uname, email, profileUrl);
+                    user = new User(email, hashedPwd, uname, uname,profileUrl);
                     userService.registerUser(user);
                 }
                 break;

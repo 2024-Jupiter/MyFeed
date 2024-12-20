@@ -4,7 +4,11 @@ import com.myfeed.model.user.User;
 
 public interface UserService {
 
-    User findByUid(Long uid);
+    User findById(Long uid);
+
+    User findByUsername(String username);
+
+    User findByEmail(String email);
 
     void updateUser(User user);
 
