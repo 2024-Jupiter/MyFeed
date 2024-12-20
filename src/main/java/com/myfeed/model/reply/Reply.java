@@ -1,4 +1,4 @@
-package com.myfeed.model.comment;
+package com.myfeed.model.reply;
 
 import com.myfeed.model.post.PostCommentList;
 import com.myfeed.model.user.User;
@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,16 +18,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Comment {
+public class Reply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long cid;
+    private long rid;
 
     @ManyToOne
     @JoinColumn(name = "uid")
     private User user;
 
-    @OneToMany(mappedBy = "Comment", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "Reply", cascade = CascadeType.ALL)
     private List<PostCommentList> postCommentLists = new ArrayList<>();
 
     private String content;
@@ -39,6 +38,6 @@ public class Comment {
         if (this.postCommentLists == null)
             this.postCommentLists = new ArrayList<>();
         this.postCommentLists.add(postCommentList);
-        postCommentList.setComment(this);
+        postCommentList.setReply(this);
     }
 }

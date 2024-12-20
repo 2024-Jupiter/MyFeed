@@ -2,6 +2,8 @@ package com.myfeed.model.user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -17,15 +19,16 @@ import lombok.NoArgsConstructor;
 @Builder
 public class User {
     @Id
-    private Long uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String email;
 
     private String password;
 
-    private String uname;
+    private String username;
 
     private String nickname;
-
-    private String email;
 
     @Column(nullable = true)
     private String profileImage;
@@ -34,12 +37,11 @@ public class User {
 
     private boolean isActive;
 
-    public User(Long uid, String password, String uname, String nickname, String email, String profileImage) {
-        this.uid = uid;
-        this.password = password;
-        this.uname = uname;
-        this.nickname = nickname;
+    public User(String email, String password, String username, String nickname, String profileImage) {
         this.email = email;
+        this.password = password;
+        this.username = username;
+        this.nickname = nickname;
         this.profileImage = profileImage;
         this.role = "ROLE_USER";
         this.isActive = true;

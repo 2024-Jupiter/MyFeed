@@ -7,11 +7,13 @@ import java.util.List;
 public interface PostService {
     Post findByPid(long pid);
 
-    Post createPost(String uid, String category, String title, String content, String imgSrc);
+    Post createPost(long uid, String category, String title, String content, String imgSrc);
+
+    List<Post> getMyPostList(long uid);
 
     void updatePost(Post post);
 
     void deletePost(long pid);
 
-    List<Post> getPostsByUser(String uid);
+    List<Post> getPostsByUser(long uid);
 }

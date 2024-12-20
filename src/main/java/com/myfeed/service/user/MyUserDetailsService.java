@@ -4,6 +4,7 @@ import com.myfeed.model.user.MyUserDetails;
 import com.myfeed.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,16 +16,17 @@ public class MyUserDetailsService implements UserDetailsService {
     @Autowired
     private UserService userService;
 
+    // 폼로그인 예외처리
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.findByUid(username);
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userService.findByEmail(email);
 
         if (user == null) {
-            log.warn("Login 실패: 아이디를 찾을 수 없습니다. (username: " + username + ")");
-            throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + username);
+            log.warn("form Login 실패: 이메일을 찾을 수 없습니다. (user email: " + email + ")");
+            throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email);
         }
 
-        log.info("Login 시도: " + user.getUid());
+        log.info("form Login 시도: " + user.getNickname());
         return new MyUserDetails(user);
     }
 }

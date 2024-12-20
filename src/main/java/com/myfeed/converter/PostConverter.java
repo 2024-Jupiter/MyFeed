@@ -31,8 +31,8 @@ public class PostConverter {
                         .map(comment -> {
                             Map<String, Object> commentMap = new HashMap<>();
                             commentMap.put("lid", comment.getLid());
-                            commentMap.put("uid", comment.getUser() != null ? comment.getUser().getUid() : null);
-                            commentMap.put("comment", comment.getComment() != null ? comment.getComment().getContent() : null);
+                            commentMap.put("uid", comment.getUser() != null ? comment.getUser().getId() : null);
+                            commentMap.put("Reply", comment.getReply() != null ? comment.getReply().getContent() : null);
                             return commentMap;
                         })
                         .collect(Collectors.toList()))

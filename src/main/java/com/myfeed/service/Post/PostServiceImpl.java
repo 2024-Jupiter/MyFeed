@@ -31,7 +31,7 @@ public class PostServiceImpl implements PostService {
 
     @Transactional
     @Override
-    public Post createPost(String uid, String category, String title, String content, String imgSrc) {
+    public Post createPost(long uid, String category, String title, String content, String imgSrc) {
         User user = userRepository.findById(uid).orElse(null);
         Post post = Post.builder()
                 .user(user).category(category).title(title).content(content).imgSrc(imgSrc)
@@ -43,6 +43,11 @@ public class PostServiceImpl implements PostService {
         PostEs postEs = PostConverter.toElasticsearchDocument(savedPost);
         postEsRepository.save(postEs);
         return savedPost;
+    }
+
+    @Override
+    public List<Post> getMyPostList(long uid) {
+        return postRepository.findByUserUid(uid);
     }
 
     @Transactional
@@ -61,7 +66,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> getPostsByUser(String uid) {
+    public List<Post> getPostsByUser(long uid) {
         return postRepository.findByUserUid(uid);
     }
 }
