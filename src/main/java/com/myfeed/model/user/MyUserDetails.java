@@ -34,7 +34,7 @@ public class MyUserDetails implements UserDetails, OAuth2User {
             @Override
             public String getAuthority() {
 //                System.out.println("getAuthority(): " + user.getRole());
-                return user.getRole();
+                return String.valueOf(user.getRole());
             }
         });
         return collection;
@@ -46,8 +46,7 @@ public class MyUserDetails implements UserDetails, OAuth2User {
     }
 
     @Override
-    public String getUsername() {
-        return user.getEmail(); }
+    public String getUsername() { return user.getEmail(); }
 
     @Override
     public boolean isEnabled() {

@@ -33,17 +33,20 @@ public class User {
     @Column(nullable = true)
     private String profileImage;
 
-    private String role;
+    private Role role;
+
+    private LoginProvider loginProvider;
 
     private boolean isActive;
 
-    public User(String email, String password, String username, String nickname, String profileImage) {
+    public User(String email, String password, String username, String nickname, String profileImage, LoginProvider loginProvider) {
         this.email = email;
         this.password = password;
         this.username = username;
         this.nickname = nickname;
         this.profileImage = profileImage;
-        this.role = "ROLE_USER";
+        this.loginProvider = loginProvider;
+        this.role = Role.USER;
         this.isActive = true;
     }
 }
