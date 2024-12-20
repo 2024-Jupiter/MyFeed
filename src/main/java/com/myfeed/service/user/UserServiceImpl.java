@@ -11,8 +11,18 @@ public class UserServiceImpl implements UserService {
     UserRepository userRepository;
 
     @Override
-    public User findByUid(String uid) {
-        return userRepository.findById(uid).orElse(null);
+    public User findById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public User findByUsername(String uname) {
+        return userRepository.findByUsername(uname).orElse(null);
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
     }
 
     @Override
@@ -27,8 +37,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public void deleteUser(String uid) {
+    public void deleteUser(Long uid) {
         userRepository.deleteById(uid);
     }
-
 }
