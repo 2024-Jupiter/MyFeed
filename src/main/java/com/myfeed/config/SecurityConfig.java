@@ -19,7 +19,7 @@ public class SecurityConfig {
         http.csrf(auth -> auth.disable())       // CSRF 방어 기능 비활성화
                 .headers(x -> x.frameOptions(y -> y.disable()))     // H2-console
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/user/register", "/api/board/**","/api/user/**" ).permitAll()
+                        .requestMatchers("/api/user/register", "/api/board/**","/api/user/**", "/view/home" ).permitAll()
                         .requestMatchers("/api/admin/users/*/status", "/api/admin/users", "/api/admin/boards/report", "/api/admin/boards/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
