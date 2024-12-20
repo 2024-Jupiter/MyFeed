@@ -1,5 +1,6 @@
 package com.myfeed.controller;
 
+import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.User;
 import com.myfeed.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class UserController {
     @Autowired UserService userService;
 
-    // 회원 가입
+    // 회원 가입(폼)
     @GetMapping("/register")
     public String registerForm(){
         return "user/register";
@@ -29,7 +30,7 @@ public class UserController {
     public String registerProc(String email, String pwd,String pwd2, String uname, String nickname, String profileImage){
         if (userService.findByEmail(email) == null && pwd.equals(pwd2) && pwd.length() >= 4){
             String hashedPwd = BCrypt.hashpw(pwd, BCrypt.gensalt());
-            User user = new User(email, hashedPwd, uname, nickname, profileImage);
+            User user = new User(email, hashedPwd, uname, nickname, profileImage, LoginProvider.FORM);
             userService.registerUser(user);
         }
         return "redirect:/api/board/list";
