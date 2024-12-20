@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PostCommentList {
+public class PostReplyList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long lid;

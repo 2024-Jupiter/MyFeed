@@ -1,7 +1,7 @@
 package com.myfeed.converter;
 
 import com.myfeed.model.post.Post;
-import com.myfeed.model.post.PostCommentList;
+import com.myfeed.model.post.PostReplyList;
 import com.myfeed.model.post.PostEs;
 import com.myfeed.model.user.User;
 
@@ -27,7 +27,7 @@ public class PostConverter {
                         "viewCount", post.getViewCount(),
                         "likeCount", post.getLikeCount()
                 ))
-                .comments(post.getPostCommentLists().stream()
+                .comments(post.getPostReplyLists().stream()
                         .map(comment -> {
                             Map<String, Object> commentMap = new HashMap<>();
                             commentMap.put("lid", comment.getLid());
@@ -40,7 +40,7 @@ public class PostConverter {
     }
 
     // Elasticsearch 문서 -> JPA 엔티티 변환 (옵션)
-    public static Post toJpaEntity(PostEs postEs, User user, List<PostCommentList> comments) {
+    public static Post toJpaEntity(PostEs postEs, User user, List<PostReplyList> comments) {
         return Post.builder()
                 .pid(Long.parseLong(postEs.getPostId()))
                 .user(user)
@@ -52,7 +52,7 @@ public class PostConverter {
                 .updateAt((LocalDateTime) postEs.getPost().get("updateAt"))
                 .viewCount((int) postEs.getPost().get("viewCount"))
                 .likeCount((int) postEs.getPost().get("likeCount"))
-                .postCommentLists(comments)
+                .postReplyLists(comments)
                 .build();
     }
 }

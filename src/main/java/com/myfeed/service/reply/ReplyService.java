@@ -8,15 +8,11 @@ import java.util.List;
 public interface ReplyService {
     public static final int PAGE_SIZE = 10;
 
-    Reply findByCid(long cid);
+    Reply findByRid(long rid);
 
-    List<Reply> getCommentsByPage(long pid, int page);
+    Reply createReply(long uid, long pid, String content);
 
-    Reply createComment(long uid, long pid, String content, LocalDateTime createAt, LocalDateTime updateAt);
+    void updateReply(Reply reply);
 
-    void updateComment(Reply reply);
-
-    void deleteComment(long cid);
-
-    List<Reply> getCommentsByUser(long uid);
+    void deleteReply(long cid);
 }
