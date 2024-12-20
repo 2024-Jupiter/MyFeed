@@ -25,7 +25,7 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        String uid, email, uname, profileUrl;
+        String email, uname, profileUrl;
         String hashedPwd = bCryptPasswordEncoder.encode("Social Login");
         User user = null;
 
