@@ -46,12 +46,13 @@ public class MyUserDetails implements UserDetails, OAuth2User {
     }
 
     @Override
-    public String getUsername() {
-        return user.getUname();
+    public String getUsername() { return user.getEmail(); }
+
+    @Override
+    public boolean isEnabled() {
+        return user.isActive();
     }
 
     @Override
-    public String getName() {
-        return user.getNickname();
-    }
+    public String getName() { return String.valueOf(user.getId()); }
 }
