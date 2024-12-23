@@ -73,6 +73,13 @@ public class UserController {
         return "common/alertMsg";
     }
 
+    // 로그아웃
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/board/list;";
+    }
+
 
 
 }
