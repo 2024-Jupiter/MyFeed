@@ -27,8 +27,8 @@ public class PostEsService {
         Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Query query = NativeQuery.builder()
                 .withQuery(buildMatchQuery(field, keyword))
-                .withSort(Sort.by(Sort.Order.desc("_score")))       // 1. matchScore 기준 정렬
-                .withSort(Sort.by(direction, sortFieldToUse))     // 2. titel/author.keyword 기준 정렬
+                .withSort(Sort.by(Sort.Order.desc("_score")))
+                .withSort(Sort.by(direction, sortFieldToUse))
                 .withTrackScores(true)
                 .withPageable(pageable)
                 .build();

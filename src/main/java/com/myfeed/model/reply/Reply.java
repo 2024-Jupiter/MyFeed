@@ -1,13 +1,12 @@
-package com.myfeed.model.comment;
+package com.myfeed.model.reply;
 
-import com.myfeed.model.post.PostCommentList;
+import com.myfeed.model.post.PostReplyList;
 import com.myfeed.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.elasticsearch.annotations.Document;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,26 +18,26 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Comment {
+public class Reply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long cid;
+    private long rid;
 
     @ManyToOne
     @JoinColumn(name = "uid")
     private User user;
 
-    @OneToMany(mappedBy = "Comment", cascade = CascadeType.ALL)
-    private List<PostCommentList> postCommentLists = new ArrayList<>();
+    @OneToMany(mappedBy = "Reply", cascade = CascadeType.ALL)
+    private List<PostReplyList> postReplyLists = new ArrayList<>();
 
     private String content;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
 
-    public void addPostCommentList(PostCommentList postCommentList) {
-        if (this.postCommentLists == null)
-            this.postCommentLists = new ArrayList<>();
-        this.postCommentLists.add(postCommentList);
-        postCommentList.setComment(this);
+    public void addPostCommentList(PostReplyList postReplyList) {
+        if (this.postReplyLists == null)
+            this.postReplyLists = new ArrayList<>();
+        this.postReplyLists.add(postReplyList);
+        postReplyList.setReply(this);
     }
 }
