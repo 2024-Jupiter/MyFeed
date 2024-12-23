@@ -73,6 +73,18 @@ public class UserController {
         return "common/alertMsg";
     }
 
-
-
+    // 사용자 정보 수정
+    @PostMapping("/update")
+    public String updateProc(String email, String pwd,String pwd2, String username, String nickname, String profileImage) {
+        User user = userService.findByEmail(email);
+        if (pwd.equals(pwd2) && pwd.length()>=4){
+            String hashedPwd = BCrypt.hashpw(pwd, BCrypt.gensalt());
+            user.setPassword(hashedPwd);
+        }
+        user.setUsername(username);
+        user.setNickname(nickname);
+        user.setProfileImage(profileImage);
+        userService.updateUser(user);
+        return "redirect:/board/list";
+    }
 }
