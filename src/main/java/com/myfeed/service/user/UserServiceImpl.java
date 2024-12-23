@@ -16,7 +16,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUsername(String uname) {
+    public User findByUsername(String uname) { // todo
         return userRepository.findByUsername(uname).orElse(null);
     }
 
@@ -35,6 +35,14 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    @Override
+    public void setTempPassword(String email, String tempPassword) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user != null) {
+            user.setPassword(tempPassword);
+            userRepository.save(user);
+        }
+    }
 
     @Override
     public void deleteUser(Long uid) {

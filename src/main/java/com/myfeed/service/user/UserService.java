@@ -15,4 +15,6 @@ public interface UserService {
     void registerUser(User user);
 
     void deleteUser(Long uid);
+
+    void setTempPassword(String email, String tempPassword);
 }
