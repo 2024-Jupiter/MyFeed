@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RequestMapping("/send-email")
+@RequestMapping("/api/send-email")
 @RestController
 @RequiredArgsConstructor
 public class EmailController {
 
     private final EmailService emailService;
 
-    @PostMapping("/password")
+    @PostMapping("/find-password")
     public ResponseEntity sendPasswordMail(@RequestParam EmailPostDto emailPostDto) {
         EmailMessage emailMessage = EmailMessage.builder()
                 .to(emailPostDto.getEmailAddress())
