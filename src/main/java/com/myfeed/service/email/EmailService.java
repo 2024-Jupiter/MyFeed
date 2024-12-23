@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -21,6 +22,10 @@ public class EmailService {
     private final UserService userService;
 
     public String sendMail(EmailMessage emailMessage, String type) {
+        if (userService.findByEmail(emailMessage.getTo()) == null) {
+            throw new UsernameNotFoundException("해당 이메일로 등록된 사용자가 없습니다.");
+        }
+
         String authNum = createCode();
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();

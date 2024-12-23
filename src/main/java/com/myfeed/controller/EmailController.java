@@ -19,6 +19,10 @@ public class EmailController {
 
     @PostMapping("/find-password")
     public ResponseEntity sendPasswordMail(@RequestParam EmailPostDto emailPostDto) {
+        if (emailPostDto == null || emailPostDto.getEmailAddress() == null || emailPostDto.getEmailAddress().isEmpty()) {
+            return ResponseEntity.badRequest().body("이메일 주소를 입력해주세요.");
+        }
+
         EmailMessage emailMessage = EmailMessage.builder()
                 .to(emailPostDto.getEmailAddress())
                 .subject("[MyFeed] 비밀번호 찾기")
