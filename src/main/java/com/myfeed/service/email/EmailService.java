@@ -66,6 +66,7 @@ public class EmailService {
     public String setContext(String code, String type) {
         Context context = new Context();
         context.setVariable("code", code);
+        // type에 따라 다른 경로 html 파일을 불러오기(src/main/resources/templates/.. .html)
         return templateEngine.process(type, context);
     }
 
