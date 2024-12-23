@@ -88,8 +88,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public void unBlockUser(long uid) {
         User user = userRepository.findById(uid).orElse(null);
-        user.setBlockStatus(BlockStatus.NORMAL_STATUS);
-        user.setUnBlockAt(LocalDateTime.now());
+        user.setActive(true);
         userRepository.save(user);
     }
 
@@ -97,8 +96,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public void blockUser(long uid) {
         User user = userRepository.findById(uid).orElse(null);
-        user.setBlockStatus(BlockStatus.BLOCK_STATUS);
-        user.setBlockAt(LocalDateTime.now());
+        user.setActive(false);
         userRepository.save(user);
     }
 }
