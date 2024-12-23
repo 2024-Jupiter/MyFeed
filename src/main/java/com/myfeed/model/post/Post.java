@@ -1,12 +1,14 @@
 package com.myfeed.model.post;
 
 import com.myfeed.model.board.Tag;
+import com.myfeed.model.report.ReportType;
 import com.myfeed.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,5 +45,10 @@ public class Post {
     private int viewCount;
     private int likeCount;
 
-    // 신고 시간 필요
+    // 블락 처리
+    @Enumerated(EnumType.STRING)
+    private BlockStatus blockStatus = BlockStatus.NORMAL_STATUS;
+
+    private LocalDateTime blockAt;
+    private LocalDateTime unBlockAt;
 }

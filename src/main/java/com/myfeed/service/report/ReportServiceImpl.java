@@ -1,5 +1,6 @@
 package com.myfeed.service.report;
 
+import com.myfeed.model.post.BlockStatus;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.report.Report;
@@ -53,16 +54,51 @@ public class ReportServiceImpl implements ReportService {
                 .description(description).reportedAt(LocalDateTime.now())
                 .build();
 
-        return reportRepository.save(report);
+        Report savedReport = reportRepository.save(report);
+
+        if (reply == null) {
+            post.setBlockStatus(BlockStatus.BLOCK_STATUS);
+            post.setBlockAt(LocalDateTime.now());
+            postRepository.save(post);
+        } else {
+            reply.setBlockStatus(BlockStatus.BLOCK_STATUS);
+            reply.setBlockAt(LocalDateTime.now());
+            replyRepository.save(reply);
+        }
+
+        return savedReport;
     }
 
     @Override
-    public Post deletePost(long pid) {
-        return reportRepository.deletePost(pid);
+    public void unBlockPost(long pid) {
+        Post post = postRepository.findById(pid).orElse(null);
+        post.setBlockStatus(BlockStatus.NORMAL_STATUS);
+        post.setUnBlockAt(LocalDateTime.now());
+        postRepository.save(post);
     }
 
     @Override
-    public Reply deleteReply(long rid) {
-        return reportRepository.deleteReply(rid);
+    public void unBlockReply(long rid) {
+        Reply reply = replyRepository.findById(rid).orElse(null);
+        reply.setBlockStatus(BlockStatus.NORMAL_STATUS);
+        reply.setUnBlockAt(LocalDateTime.now());
+        replyRepository.save(reply);
+    }
+
+    @Override
+    public void unBlockUser(long uid) {
+        User user = userRepository.findById(uid).orElse(null);
+        user.setBlockStatus(BlockStatus.NORMAL_STATUS);
+        user.setUnBlockAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    // 사용자 비활성화
+    @Override
+    public void blockUser(long uid) {
+        User user = userRepository.findById(uid).orElse(null);
+        user.setBlockStatus(BlockStatus.BLOCK_STATUS);
+        user.setBlockAt(LocalDateTime.now());
+        userRepository.save(user);
     }
 }

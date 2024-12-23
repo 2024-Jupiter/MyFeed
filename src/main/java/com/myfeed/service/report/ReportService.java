@@ -18,7 +18,11 @@ public interface ReportService {
 
     Report saveReport(ReportType reportType, long pid, long uid, long rid, String description);
 
-    Post deletePost(long pid);
+    void unBlockPost(long pid);
 
-    Reply deleteReply(long rid);
+    void unBlockReply(long rid);
+
+    void unBlockUser(long uid);
+
+    void blockUser(long uid);
 }

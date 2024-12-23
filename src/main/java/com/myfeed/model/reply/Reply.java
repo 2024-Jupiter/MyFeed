@@ -1,5 +1,6 @@
 package com.myfeed.model.reply;
 
+import com.myfeed.model.post.BlockStatus;
 import com.myfeed.model.post.PostReplyList;
 import com.myfeed.model.user.User;
 import jakarta.persistence.*;
@@ -33,6 +34,13 @@ public class Reply {
     private String content;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
+
+    // 블락 처리
+    @Enumerated(EnumType.STRING)
+    private BlockStatus blockStatus = BlockStatus.NORMAL_STATUS;
+
+    private LocalDateTime blockAt;
+    private LocalDateTime unBlockAt;
 
     public void addPostCommentList(PostReplyList postReplyList) {
         if (this.postReplyLists == null)

@@ -44,8 +44,7 @@ public class ReplyServiceImpl implements ReplyService {
     @Override
     public Page<Reply> getPageByPostContaining(int page, Post post) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        long pid = post.getPid();
-        return replyRepository.findByPostContaining(pid, pageable);
+        return replyRepository.findByPostContaining(post, pageable);
     }
 
     @Override

@@ -60,7 +60,6 @@ public class ReplyController {
 
     @PreAuthorize("#user.id == authentication.principal.id")
     @GetMapping("/delete/{pid}")
-    @CheckPermission("ADMIN")
     public String delete(@PathVariable long rid) {
         replyService.deleteReply(rid);
 
@@ -73,12 +72,12 @@ public class ReplyController {
         return "redirect:/api/post/detail/" + pid;
     }
 
-    @GetMapping("/save")
+    @GetMapping("/report/{rid}")
     public String saveReportForm() {
         return "api/report/save";
     }
 
-    @PostMapping("/save")
+    @PostMapping("/report")
     public String saveReportProc(ReportType reportType,
                                  @RequestParam long pid, @RequestParam long uid,
                                  @RequestParam long rid, @RequestParam(required = false) String description) {
