@@ -42,4 +42,6 @@ public class Post {
     private LocalDateTime updateAt;
     private int viewCount;
     private int likeCount;
+
+    // 신고 시간 필요
 }

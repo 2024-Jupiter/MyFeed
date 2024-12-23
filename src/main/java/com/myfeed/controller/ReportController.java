@@ -2,7 +2,6 @@ package com.myfeed.controller;
 
 import com.myfeed.ascept.CheckPermission;
 import com.myfeed.model.report.Report;
-import com.myfeed.model.report.ReportType;
 import com.myfeed.service.report.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -48,6 +47,7 @@ public class ReportController {
         return "api/report/replyList/" + rid;
     }
 
+    // block 처리 & 신고 처리 시간
     @GetMapping("/deletePost/{pid}")
     public String deletePost(@PathVariable long pid) {
         reportService.deletePost(pid);
