@@ -20,6 +20,7 @@ public class PostEsService {
     @Autowired private ElasticsearchTemplate elasticsearchTemplate;
 
     // 자연어 처리 필요
+    // 차단된 게시글 안보이게
     public Page<PostEsDto> getPagedPosts(int page, String field, String keyword, String sortField, String sortDirection) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
         // 정렬 필드에 keyword 서브 필드 사용

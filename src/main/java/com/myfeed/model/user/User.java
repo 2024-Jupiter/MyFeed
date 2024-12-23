@@ -1,15 +1,13 @@
 package com.myfeed.model.user;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.myfeed.model.post.BlockStatus;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -39,7 +37,15 @@ public class User {
 
     private boolean isActive;
 
-    public User(String email, String password, String username, String nickname, String profileImage, LoginProvider loginProvider) {
+    // 블락 처리
+    @Enumerated(EnumType.STRING)
+    private BlockStatus blockStatus = BlockStatus.NORMAL_STATUS;
+
+    private LocalDateTime blockAt;
+
+    private LocalDateTime unBlockAt;
+
+    public User(String email, String password, String username, String nickname, String profileImage) {
         this.email = email;
         this.password = password;
         this.username = username;
