@@ -42,11 +42,4 @@ public class Post {
     private LocalDateTime updateAt;
     private int viewCount;
     private int likeCount;
-
-    public void addPostCommentList(PostReplyList postReplyList) {
-        if (this.postReplyLists == null)
-            this.postReplyLists = new ArrayList<>();
-        this.postReplyLists.add(postReplyList);
-        postReplyList.setPost(this);
-    }
 }

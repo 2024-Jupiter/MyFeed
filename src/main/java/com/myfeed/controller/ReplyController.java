@@ -1,12 +1,14 @@
 package com.myfeed.controller;
 
+import com.myfeed.ascept.CheckPermission;
 import com.myfeed.model.post.PostReplyList;
 import com.myfeed.model.reply.Reply;
-import com.myfeed.model.user.User;
+import com.myfeed.model.report.ReportType;
 import com.myfeed.service.Post.PostReplyListService;
 import com.myfeed.service.reply.ReplyService;
-import com.myfeed.service.user.UserService;
+import com.myfeed.service.report.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,7 @@ import java.util.List;
 public class ReplyController {
     @Autowired ReplyService replyService;
     @Autowired PostReplyListService postReplyListService;
+    @Autowired ReportService reportService;
 
     @GetMapping("/create")
     public String CreateReplyForm() {
@@ -31,9 +34,6 @@ public class ReplyController {
         return "redirect:/api/post/detail/" + pid;
     }
 
-    // listAll(관리자) - 신고된 글 list(enum)
-
-
     @GetMapping("/update/{rid}")
     public String updateReplyForm(@PathVariable long rid, Model model) {
         Reply reply = replyService.findByRid(rid);
@@ -41,6 +41,7 @@ public class ReplyController {
         return "api/reply/update";
     }
 
+    @PreAuthorize("#user.id == authentication.principal.id")
     @PostMapping("/update")
     public String updateReplyProc(@RequestBody Reply reply) {
         Reply updatedReply = replyService.findByRid(reply.getRid());
@@ -49,24 +50,39 @@ public class ReplyController {
         replyService.updateReply(updatedReply);
 
         long pid = 0L;
-        List<PostReplyList> postReplyLists = postReplyListService.findByReplyRid(reply.getRid());
+        List<PostReplyList> postReplyLists = postReplyListService.getPostReplyListByReplyRid(reply.getRid());
         for (PostReplyList lists: postReplyLists) {
             pid = lists.getPost().getPid();
             break;
         }
-        return "redirect:/api/post/detail" + pid;
+        return "redirect:/api/post/detail/" + pid;
     }
 
+    @PreAuthorize("#user.id == authentication.principal.id")
     @GetMapping("/delete/{pid}")
+    @CheckPermission("ADMIN")
     public String delete(@PathVariable long rid) {
         replyService.deleteReply(rid);
 
         long pid = 0L;
-        List<PostReplyList> postReplyLists = postReplyListService.findByReplyRid(rid);
+        List<PostReplyList> postReplyLists = postReplyListService.getPostReplyListByPostPid(rid);
         for (PostReplyList lists: postReplyLists) {
             pid = lists.getPost().getPid();
             break;
         }
-        return "redirect:/api/post/detail" + pid;
+        return "redirect:/api/post/detail/" + pid;
+    }
+
+    @GetMapping("/save")
+    public String saveReportForm() {
+        return "api/report/save";
+    }
+
+    @PostMapping("/save")
+    public String saveReportProc(ReportType reportType,
+                                 @RequestParam long pid, @RequestParam long uid,
+                                 @RequestParam long rid, @RequestParam(required = false) String description) {
+        reportService.saveReport(reportType, pid, rid, uid, description);
+        return "redirect:/api/post/detail/" + pid;
     }
 }

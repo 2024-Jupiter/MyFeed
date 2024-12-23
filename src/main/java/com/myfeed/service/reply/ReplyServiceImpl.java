@@ -8,6 +8,9 @@ import com.myfeed.repository.ReplyRepository;
 import com.myfeed.repository.PostRepository;
 import com.myfeed.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -35,6 +38,14 @@ public class ReplyServiceImpl implements ReplyService {
                 .build();
         reply.addPostCommentList(postReplyList);
         return replyRepository.save(reply);
+    }
+
+    // 일레스틱 서치 게시글 내 댓글 리스트
+    @Override
+    public Page<Reply> getPageByPostContaining(int page, Post post) {
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+        long pid = post.getPid();
+        return replyRepository.findByPostContaining(pid, pageable);
     }
 
     @Override
