@@ -80,6 +80,13 @@ public class UserController {
         return "common/alertMsg";
     }
 
+    // 로그아웃
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/board/list;";
+    }
+
     // 사용자 정보 수정
     @PostMapping("/update")
     public String updateProc(String email, String pwd,String pwd2, String username, String nickname, String profileImage) {
@@ -102,7 +109,6 @@ public class UserController {
                         @RequestParam(name="active", defaultValue = "true") boolean active,
                         Model model) {
         Page<User> pagedUsers = userService.getPagedUser(page, active);
-
         model.addAttribute("pagedUsers", pagedUsers);
         model.addAttribute("isActive", active);
         model.addAttribute("currentUserPage", page);
