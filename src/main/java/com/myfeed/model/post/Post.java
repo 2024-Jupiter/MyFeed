@@ -27,10 +27,10 @@ public class Post {
     private long pid;
 
     @ManyToOne
-    @JoinColumn(name = "uid")
+    @JoinColumn(name = "id")
     private User user;
 
-    @OneToMany(mappedBy = "Post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<PostReplyList> postReplyLists = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)

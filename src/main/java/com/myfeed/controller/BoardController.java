@@ -34,24 +34,24 @@ public class BoardController {
     @Autowired ReplyService replyService;
 
     // 차단 된 댓글 안보이게
-    @GetMapping("/list")
-    public String getPagedBoardByCategory(@RequestParam(name="p", defaultValue = "1") int page, @RequestParam("tag") Tag tag, Model model) {
-        Page<Board> boardPage = boardService.getPagedBoardByCategory(page, tag);
-
-        List<Board> filteredBoardList = new ArrayList<>();
-        for (Board board: boardPage.getContent()) {
-            if (board.getPost().getBlockStatus() == BlockStatus.NORMAL_STATUS) {
-                filteredBoardList.add(board);
-            } else {
-                model.addAttribute("message", "차단된 게시글입니다.");
-            }
-        }
-
-        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        Page<Board> filteredPagedResult = new PageImpl<>(filteredBoardList, pageable, boardPage.getTotalElements());
-        model.addAttribute("boardPage", filteredPagedResult);
-        return "api/board/list";
-    }
+    // @GetMapping("/list")
+    // public String getPagedBoardByCategory(@RequestParam(name="p", defaultValue = "1") int page, @RequestParam("tag") Tag tag, Model model) {
+    //     Page<Board> boardPage = boardService.getPagedBoardByCategory(page, tag);
+    //
+    //     List<Board> filteredBoardList = new ArrayList<>();
+    //     for (Board board: boardPage.getContent()) {
+    //         if (board.getPost().getBlockStatus() == BlockStatus.NORMAL_STATUS) {
+    //             filteredBoardList.add(board);
+    //         } else {
+    //             model.addAttribute("message", "차단된 게시글입니다.");
+    //         }
+    //     }
+    //
+    //     Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+    //     Page<Board> filteredPagedResult = new PageImpl<>(filteredBoardList, pageable, boardPage.getTotalElements());
+    //     model.addAttribute("boardPage", filteredPagedResult);
+    //     return "api/board/list";
+    // }
 
     @GetMapping("detail/{pid}")
     public String detail(@RequestParam(name="p", defaultValue = "1") int page, @PathVariable long pid, Model model) {

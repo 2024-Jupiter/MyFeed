@@ -40,7 +40,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<Report> getReportByUserUid(long uid) {
-        return reportRepository.findByUserUid(uid);
+        return reportRepository.findByUserId(uid);
     }
 
     @Override

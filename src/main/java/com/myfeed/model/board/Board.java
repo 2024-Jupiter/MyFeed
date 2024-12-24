@@ -16,10 +16,10 @@ import lombok.NoArgsConstructor;
 public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long bid;
+    private Long bid;
 
     @ManyToOne
-    @JoinColumn(name = "uid")
+    @JoinColumn(name = "id")
     private User user;
 
     @ManyToOne

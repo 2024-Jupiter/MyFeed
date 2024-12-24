@@ -1,6 +1,7 @@
 package com.myfeed.model.reply;
 
 import com.myfeed.model.post.BlockStatus;
+import com.myfeed.model.post.Post;
 import com.myfeed.model.post.PostReplyList;
 import com.myfeed.model.user.User;
 import jakarta.persistence.*;
@@ -25,11 +26,15 @@ public class Reply {
     private long rid;
 
     @ManyToOne
-    @JoinColumn(name = "uid")
+    @JoinColumn(name = "id")
     private User user;
 
-    @OneToMany(mappedBy = "Reply", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "reply", cascade = CascadeType.ALL)
     private List<PostReplyList> postReplyLists = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "pid") // 실제 외래 키 이름 확인
+    private Post post;
 
     private String content;
     private LocalDateTime createAt;
