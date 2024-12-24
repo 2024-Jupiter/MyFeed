@@ -25,7 +25,7 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        String uid, email, uname, profileUrl;
+        String email, uname, profileUrl;
         String hashedPwd = bCryptPasswordEncoder.encode("Social Login");
         User user = null;
 
@@ -51,6 +51,37 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
                     userService.registerUser(user);
                 }
                 break;
+
+                case "google":
+                    email = oAuth2User.getAttribute("email");
+                    user = userService.findByEmail(email);
+                    if (user == null) {
+                        uname = oAuth2User.getAttribute("name");
+                        String sub = oAuth2User.getAttribute("sub");
+                        uname = (uname == null) ? "g_"+sub : uname;
+                        email = oAuth2User.getAttribute("email");
+                        profileUrl = oAuth2User.getAttribute("picture");
+                        user = new User(email, hashedPwd, uname, uname,profileUrl, LoginProvider.GOOGLE);
+                        userService.registerUser(user);
+                        log.info("구글 계정을 통해 회원가입이 되었습니다.: " + user.getUsername());
+                    }
+                    break;
+
+                case "github":
+                    email = oAuth2User.getAttribute("email");
+                    user = userService.findByEmail(email);
+                    if (user == null) {
+                        uname = oAuth2User.getAttribute("name");
+                        int id = oAuth2User.getAttribute("id");
+                        uname = (uname == null) ? "g_"+id : uname;
+                        email = oAuth2User.getAttribute("email");
+                        profileUrl = oAuth2User.getAttribute("avatar_url");
+                        user = new User(email, hashedPwd, uname, uname,profileUrl, LoginProvider.GITHUB);
+                        userService.registerUser(user);
+                        log.info("깃허브 계정을 통해 회원가입이 되었습니다. " + user.getUsername());
+                    }
+                    break;
+
 
         }
         return new MyUserDetails(user, oAuth2User.getAttributes());
