@@ -37,15 +37,7 @@ public class User {
 
     private boolean isActive;
 
-    // 블락 처리
-    @Enumerated(EnumType.STRING)
-    private BlockStatus blockStatus = BlockStatus.NORMAL_STATUS;
-
-    private LocalDateTime blockAt;
-
-    private LocalDateTime unBlockAt;
-
-    public User(String email, String password, String username, String nickname, String profileImage) {
+    public User(String email, String password, String username, String nickname, String profileImage, LoginProvider loginProvider) {
         this.email = email;
         this.password = password;
         this.username = username;
