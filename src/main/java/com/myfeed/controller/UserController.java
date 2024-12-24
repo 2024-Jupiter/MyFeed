@@ -1,13 +1,17 @@
 package com.myfeed.controller;
 
+import com.myfeed.ascept.CheckPermission;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.User;
+import com.myfeed.repository.UserRepository;
 import com.myfeed.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -93,6 +97,7 @@ public class UserController {
 
     // 활성/비활성 회원 목록 가져오기
     @GetMapping("/list")
+    @CheckPermission("ADMIN")
     public String list(@RequestParam(name="p", defaultValue = "1") int page,
                         @RequestParam(name="active", defaultValue = "true") boolean active,
                         Model model) {
@@ -102,5 +107,19 @@ public class UserController {
         model.addAttribute("isActive", active);
         model.addAttribute("currentUserPage", page);
         return "user/list";
+    }
+
+    //회원 활성/비활성 여부 수정하기
+    @PostMapping("/{uid}/status")
+    @CheckPermission("ADMIN")
+    public String updateUserState(@PathVariable Long id,
+                                    @RequestParam(name="active") boolean active,
+                                    Model model) {
+        User user = userService.findById(id);
+        if (user.isActive() != active) {
+            user.setActive(active);
+            userService.updateUser(user);
+        }
+        return "redirect:/user/list";
     }
 }
