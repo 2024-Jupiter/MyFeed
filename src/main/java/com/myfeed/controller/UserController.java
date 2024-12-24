@@ -1,12 +1,19 @@
 package com.myfeed.controller;
 
 import com.myfeed.ascept.CheckPermission;
+import com.myfeed.exception.user.MissingRequiredFieldException;
 import com.myfeed.model.user.LoginProvider;
+import com.myfeed.model.user.RegisterDto;
+import com.myfeed.model.user.Role;
 import com.myfeed.model.user.User;
 import com.myfeed.repository.UserRepository;
 import com.myfeed.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -16,11 +23,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/api/user")
@@ -33,17 +43,27 @@ public class UserController {
         return "user/register";
     }
 
+    //restcontroller
+    // todo DTO로 data 받아서 스크립트에서 bean validation으로 검증로직 구현하기
     @PostMapping("/register")
-    public String registerProc(String email, String pwd,String pwd2, String uname, String nickname, String profileImage){
-        if (userService.findByEmail(email) == null && pwd.equals(pwd2) && pwd.length() >= 4){
-            String hashedPwd = BCrypt.hashpw(pwd, BCrypt.gensalt());
-            User user = User.builder()
-                    .email(email).password(hashedPwd)
-                    .username(uname).nickname(nickname)
-                    .profileImage(profileImage).loginProvider(LoginProvider.FORM).build();
-            userService.registerUser(user);
-        }
-        return "redirect:/api/board/list";
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> registerProc(@Validated @RequestBody RegisterDto registerDto){
+        Map<String, Object> messagemap = new HashMap<>();
+        //전화번호 3 부분으로 쪼개기
+        // pwd, pwd2 동일 검증 로직
+        // pwd 조건 만족하는지 검증 로직 만들기
+        // 유효한 이메일, 휴대전화 인증 로직
+        String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
+        User user = User.builder()
+                .email(registerDto.getEmail()).password(hashedPwd)
+                .username(registerDto.getUname()).nickname(registerDto.getNickname())
+                .role(Role.USER).isActive(true)
+                .profileImage(registerDto.getProfileImage())
+                .phoneNumber(registerDto.getPhoneNumber())
+                .loginProvider(LoginProvider.FORM).build();
+        userService.registerUser(user);
+
+        return ResponseEntity.ok(messagemap);
     }
 
     // 회원 탈퇴

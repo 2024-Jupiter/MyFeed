@@ -20,13 +20,16 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String email;
+    private String email; // 필수값
 
-    private String password;
+    private String password; // 필수값
 
     private String username;
 
-    private String nickname;
+    @Column(nullable = true)
+    private String phoneNumber; // 폼 로그인 시 필수값
+
+    private String nickname; // 필수값
 
     @Column(nullable = true)
     private String profileImage;
@@ -37,14 +40,7 @@ public class User {
 
     private boolean isActive;
 
-    public User(String email, String password, String username, String nickname, String profileImage, LoginProvider loginProvider) {
-        this.email = email;
-        this.password = password;
-        this.username = username;
-        this.nickname = nickname;
-        this.profileImage = profileImage;
-        this.loginProvider = loginProvider;
-        this.role = Role.USER;
-        this.isActive = true;
-    }
+    private LocalDateTime createAt;
+
+    private LocalDateTime updateAt;
 }
