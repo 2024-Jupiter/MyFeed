@@ -2,6 +2,7 @@ package com.myfeed.service.board;
 
 import com.myfeed.model.board.Board;
 import com.myfeed.model.board.Tag;
+import com.myfeed.model.post.Post;
 import com.myfeed.repository.BoardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

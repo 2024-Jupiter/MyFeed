@@ -1,5 +1,6 @@
 package com.myfeed.model.board;
 
+// 수정 필요
 public enum Tag {
     POLITICS("정치"),
     ENTERTAINMENT("연예"),
