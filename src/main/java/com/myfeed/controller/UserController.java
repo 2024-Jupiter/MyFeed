@@ -37,7 +37,10 @@ public class UserController {
     public String registerProc(String email, String pwd,String pwd2, String uname, String nickname, String profileImage){
         if (userService.findByEmail(email) == null && pwd.equals(pwd2) && pwd.length() >= 4){
             String hashedPwd = BCrypt.hashpw(pwd, BCrypt.gensalt());
-            User user = new User(email, hashedPwd, uname, nickname, profileImage, LoginProvider.FORM);
+            User user = User.builder()
+                    .email(email).password(hashedPwd)
+                    .username(uname).nickname(nickname)
+                    .profileImage(profileImage).loginProvider(LoginProvider.FORM).build();
             userService.registerUser(user);
         }
         return "redirect:/api/board/list";
