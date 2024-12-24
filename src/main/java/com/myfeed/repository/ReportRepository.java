@@ -12,11 +12,11 @@ import java.util.List;
 public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findByPostPid(long pid);
 
-    List<Report> findByUserUid(long uid);
+    List<Report> findByUserId(long uid);
 
     List<Report> findByReplyRid(long rid);
 
-    Post deletePost(long pid);
+    // Post deletePost(long pid);
 
-    Reply deleteReply(long rid);
+    // Reply deleteReply(long rid);
 }

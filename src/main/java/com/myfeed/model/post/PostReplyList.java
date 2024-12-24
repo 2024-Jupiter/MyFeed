@@ -19,7 +19,7 @@ public class PostReplyList {
     private long lid;
 
     @ManyToOne
-    @JoinColumn(name = "uid")
+    @JoinColumn(name = "id")
     private User user;
 
     @ManyToOne

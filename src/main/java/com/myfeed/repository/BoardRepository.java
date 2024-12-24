@@ -9,5 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
-    Page<Board> findByCategory(Tag tag, Pageable pageable);
+
+    // Page<Board> findByCategory(Tag tag, Pageable pageable);
 }

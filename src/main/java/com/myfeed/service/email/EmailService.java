@@ -17,7 +17,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 @Service
 @RequiredArgsConstructor
 public class EmailService {
-    private final JavaMailSender javaMailSender;
+    // private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine templateEngine;
     private final UserService userService;
 
@@ -28,19 +28,19 @@ public class EmailService {
 
         String authNum = createCode();
 
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        // MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 
         if (type.equals("password")) {
             userService.setTempPassword(emailMessage.getTo(), authNum);
         }
 
         try {
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-            mimeMessageHelper.setTo(emailMessage.getTo());
-            mimeMessageHelper.setSubject(emailMessage.getSubject());
-            mimeMessageHelper.setText(setContext(authNum, type), true);
+            // MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+            // mimeMessageHelper.setTo(emailMessage.getTo());
+            // mimeMessageHelper.setSubject(emailMessage.getSubject());
+            // mimeMessageHelper.setText(setContext(authNum, type), true);
 
-            javaMailSender.send(mimeMessage);
+            // javaMailSender.send(mimeMessage);
 
             log.info("Email sent to " + emailMessage.getTo());
 
