@@ -90,6 +90,29 @@ class UserControllerTest {
                 .andDo(print()); // 요청 및 응답 로깅
     }
 
+    @DisplayName("사용자 추가 실패 - 비밀번호 길이 8 미만")
+    @Test
+    void addUserFail_ShortPassword() throws Exception {
+        // given
+        final RegisterDto registerDto = RegisterDto.builder()
+                .email("mangkyu@naver.com")
+                .pwd("pwd")
+                .pwd2("pwd")
+                .uname("fdgsdfgsd")
+                .nickname("dfsdfg")
+                .phoneNumber("1234")
+                .build();
+
+        // when
+        final ResultActions resultActions = mockMvc.perform(
+                        MockMvcRequestBuilders.post("/api/user/register")
+                                .content(gson.toJson(registerDto))
+                                .contentType(MediaType.APPLICATION_JSON)
+                ).andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
+                .andExpect(status().isBadRequest())
+                .andDo(print()); // 요청 및 응답 로깅
+    }
+
 
     @DisplayName("사용자 추가 성공")
     @Test

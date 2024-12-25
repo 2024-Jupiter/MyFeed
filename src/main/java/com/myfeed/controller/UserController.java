@@ -36,8 +36,6 @@ public class UserController {
         return "user/register";
     }
 
-    //restcontroller
-    // todo DTO로 data 받아서 스크립트에서 bean validation으로 검증로직 구현하기
     @PostMapping("/register")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> registerProc(@Validated @RequestBody RegisterDto registerDto){
