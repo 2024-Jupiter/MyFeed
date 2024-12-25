@@ -74,8 +74,10 @@ public class UserController {
 
     // 로그인
     @GetMapping("/login")
+    @ResponseBody
     public String loginForm() {
-        return "user/login";
+        return "<h1>hello<h1>";
+        //return "user/login"
     }
 
     // 로그인 성공 시

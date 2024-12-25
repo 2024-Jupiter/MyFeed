@@ -30,8 +30,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(auth -> auth
-                         .loginPage("/user/login") // template 위치
-                        .loginProcessingUrl("/api/user/login")  // 엔드포인트
+                        .loginPage("/api/user/login") // template return url
+                        .loginProcessingUrl("/api/user/login")  // post 엔드포인트
                         .usernameParameter("email")
                         .passwordParameter("pwd")
                         .defaultSuccessUrl("/api/user/loginSuccess", true)
