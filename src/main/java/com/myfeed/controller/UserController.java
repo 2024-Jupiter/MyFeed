@@ -1,22 +1,15 @@
 package com.myfeed.controller;
 
-import com.myfeed.ascept.CheckPermission;
-import com.myfeed.exception.user.MissingRequiredFieldException;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
 import com.myfeed.model.user.Role;
 import com.myfeed.model.user.User;
-import com.myfeed.repository.UserRepository;
 import com.myfeed.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -127,7 +120,6 @@ public class UserController {
 
     // 활성/비활성 회원 목록 가져오기
     @GetMapping("/list")
-    @CheckPermission("ADMIN")
     public String list(@RequestParam(name="p", defaultValue = "1") int page,
                         @RequestParam(name="active", defaultValue = "true") boolean active,
                         Model model) {
@@ -140,7 +132,6 @@ public class UserController {
 
     //회원 활성/비활성 여부 수정하기
     @PostMapping("/{uid}/status")
-    @CheckPermission("ADMIN")
     public String updateUserState(@PathVariable Long id,
                                     @RequestParam(name="active") boolean active,
                                     Model model) {
