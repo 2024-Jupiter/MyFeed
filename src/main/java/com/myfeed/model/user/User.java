@@ -1,39 +1,50 @@
 package com.myfeed.model.user;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.myfeed.model.post.BlockStatus;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
+@Table(name = "users")
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class User {
     @Id
-    private String uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String email;
 
     private String password;
 
-    private String uname;
+    private String username;
 
     private String nickname;
-
-    private String email;
 
     @Column(nullable = true)
     private String profileImage;
 
-    private String role;
+    private Role role;
 
+    private LoginProvider loginProvider;
 
-    public User(String uid, String password, String uname, String nickname, String email, String profileImage) {
-        this.uid = uid;
-        this.password = password;
-        this.uname = uname;
-        this.nickname = nickname;
+    private boolean isActive;
+
+    public User(String email, String password, String username, String nickname, String profileImage, LoginProvider loginProvider) {
         this.email = email;
+        this.password = password;
+        this.username = username;
+        this.nickname = nickname;
         this.profileImage = profileImage;
-        this.role = "ROLE_USER";
+        this.loginProvider = loginProvider;
+        this.role = Role.USER;
+        this.isActive = true;
     }
 }
