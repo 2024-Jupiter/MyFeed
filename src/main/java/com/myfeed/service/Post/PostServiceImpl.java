@@ -44,7 +44,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<Post> getMyPostList(long uid) {
-        return postRepository.findByUserUid(uid);
+        return postRepository.findByUserId(uid);
     }
 
     @Transactional

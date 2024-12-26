@@ -58,19 +58,19 @@ public class ReplyController {
         return "redirect:/api/post/detail/" + pid;
     }
 
-    @PreAuthorize("#user.id == authentication.principal.id")
-    @GetMapping("/delete/{pid}")
-    public String delete(@PathVariable long rid) {
-        replyService.deleteReply(rid);
-
-        long pid = 0L;
-        List<PostReplyList> postReplyLists = postReplyListService.getPostReplyListByPostPid(rid);
-        for (PostReplyList lists: postReplyLists) {
-            pid = lists.getPost().getPid();
-            break;
-        }
-        return "redirect:/api/post/detail/" + pid;
-    }
+    // @PreAuthorize("#user.id == authentication.principal.id")
+    // @GetMapping("/delete/{pid}")
+    // public String delete(@PathVariable long rid) {
+    //     replyService.deleteReply(rid);
+    //
+    //     long pid = 0L;
+    //     List<PostReplyList> postReplyLists = postReplyListService.getPostReplyListByPostPid(rid);
+    //     for (PostReplyList lists: postReplyLists) {
+    //         pid = lists.getPost().getPid();
+    //         break;
+    //     }
+    //     return "redirect:/api/post/detail/" + pid;
+    // }
 
     @GetMapping("/report/{rid}")
     public String saveReportForm() {

@@ -52,8 +52,8 @@ public class ReplyServiceImpl implements ReplyService {
         replyRepository.save(reply);
     }
 
-    @Override
-    public void deleteReply (long cid) {
-        replyRepository.deleteById(cid);
-    }
+    // @Override
+    // public void deleteReply (long cid) {
+    //     replyRepository.deleteById(cid);
+    // }
 }

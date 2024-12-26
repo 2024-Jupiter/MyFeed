@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface BoardService {
     public static final int PAGE_SIZE = 8;
-
-    Page<Board> getPagedBoardByCategory(int page, Tag tag);
+    //
+    // Page<Board> getPagedBoardByCategory(int page, Tag tag);
 }

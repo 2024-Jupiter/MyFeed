@@ -26,7 +26,7 @@ public class Report {
     private ReportType reportType;
 
     @ManyToOne
-    @JoinColumn(name = "uid")
+    @JoinColumn(name = "id")
     private User user;
 
     @ManyToOne

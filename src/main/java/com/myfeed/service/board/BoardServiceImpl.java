@@ -16,9 +16,9 @@ import java.util.List;
 public class BoardServiceImpl implements BoardService {
     @Autowired private BoardRepository boardRepository;
 
-    @Override
-    public Page<Board> getPagedBoardByCategory(int page, Tag tag) {
-        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        return boardRepository.findByCategory(tag, pageable);
-    }
+    // @Override
+    // public Page<Board> getPagedBoardByCategory(int page, Tag tag) {
+    //     Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+    //     return boardRepository.findByCategory(tag, pageable);
+    // }
 }
