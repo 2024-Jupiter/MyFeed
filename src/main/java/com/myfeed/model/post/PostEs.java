@@ -1,5 +1,6 @@
 package com.myfeed.model.post;
 
+import com.myfeed.model.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -19,23 +21,48 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PostEs {
+public class PostEs extends BaseTimeEntity {
     @Id
     @Column(name = "id", nullable = false)
     private String id;
 
+    // 글쓴이 정보
+    @Field(type = FieldType.Keyword)
+    private String userId;
+
+    @Field(type = FieldType.Keyword)
+    private String userNickName;
+
+    @Field(type = FieldType.Keyword)
+    private String userStatus;
+
     // 게시글 정보
-    @Field(type = FieldType.Object)
-    @Column(name = "post", nullable = true)
-    private Map<String, Object> post;
+    @Field(type = FieldType.Text)
+    private String title;
 
-    // 이미지 리스트
-    @Field(type = FieldType.Object)
-    @Column(name = "images", nullable = true)
-    private List<Map<String, Object>> images;
+    @Field(type = FieldType.Text)
+    private String content;
 
-    // 댓글 리스트
-    @Field(type = FieldType.Object)
-    @Column(name = "replies", nullable = true)
-    private List<Map<String, Object>> replies;
+    @Field(type = FieldType.Keyword)
+    private PostCategory category;
+
+    @Field(type = FieldType.Integer)
+    private int viewCount;
+
+    @Field(type = FieldType.Integer)
+    private int likeCount;
+
+    @Field(type = FieldType.Keyword)
+    private BlockStatus blockStatus;
+
+    @Field(type = FieldType.Date)
+    private LocalDateTime blockAt;
+
+    @Field(type = FieldType.Date)
+    private LocalDateTime unBlockAt;
+
+    @Field(type = FieldType.Keyword)
+    private List<String> imageUrls;
+
+
 }
