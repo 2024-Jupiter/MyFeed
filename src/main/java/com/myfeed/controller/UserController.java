@@ -151,6 +151,7 @@ public class UserController {
         User user = userService.findById(id);
         if (user.isActive() != status) {
             user.setActive(status);
+            user.setUpdatedAt(LocalDateTime.now());
             userService.updateUser(user);
         }
         return "redirect:/user/list";
