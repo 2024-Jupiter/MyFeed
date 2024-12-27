@@ -1,19 +1,15 @@
 package com.myfeed.model.post;
-
-import com.myfeed.model.board.Tag;
-import com.myfeed.model.report.ReportType;
+import com.myfeed.model.reply.Reply;
 import com.myfeed.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 
 @Entity
 @Table(name = "posts")
@@ -22,33 +18,59 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Post {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long pid;
+    @Column(name = "id")
+    private long id;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<PostReplyList> postReplyLists = new ArrayList<>();
+    private List<Reply> replies = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<Image> images = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    private Tag tag;
+    @Column(name = "category", nullable = false)
+    private Category category = Category.GENERAL;
 
-    private String category;
+    @Column(name = "title", nullable = false)
     private String title;
+
+    @Column(name = "content", nullable = false)
     private String content;
-    private String imgSrc;
+
+    @Column(name = "create_at", nullable = false)
     private LocalDateTime createAt;
+
+    @Column(name = "update_at")
     private LocalDateTime updateAt;
-    private int viewCount;
-    private int likeCount;
 
-    // 블락 처리
+    @Column(name = "view_count", columnDefinition = "int default 0")
+    private int viewCount = 0;
+
+    @Column(name = "like_count", columnDefinition = "int default 0")
+    private int likeCount = 0;
+
     @Enumerated(EnumType.STRING)
-    private BlockStatus blockStatus = BlockStatus.NORMAL_STATUS;
+    @Column(name = "status", nullable = false)
+    private BlockStatus status = BlockStatus.NORMAL_STATUS;
 
-    private LocalDateTime blockAt;
-    private LocalDateTime unBlockAt;
+    public void addReply(Reply reply) {
+        if (this.replies == null)
+            this.replies = new ArrayList<>();
+        this.replies.add(reply);
+        reply.setPost(this);
+    }
+
+    public void addImage(Image image) {
+        if (this.images == null)
+            this.images = new ArrayList<>();
+        this.images.add(image);
+        image.setPost(this);
+    }
 }

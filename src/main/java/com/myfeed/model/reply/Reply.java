@@ -2,7 +2,6 @@ package com.myfeed.model.reply;
 
 import com.myfeed.model.post.BlockStatus;
 import com.myfeed.model.post.Post;
-import com.myfeed.model.post.PostReplyList;
 import com.myfeed.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,8 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "comments")
@@ -23,34 +20,27 @@ import java.util.List;
 public class Reply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long rid;
+    @Column(name = "id")
+    private long id;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "reply", cascade = CascadeType.ALL)
-    private List<PostReplyList> postReplyLists = new ArrayList<>();
-
     @ManyToOne
-    @JoinColumn(name = "pid") // 실제 외래 키 이름 확인
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
+    @Column(name = "content", nullable = false)
     private String content;
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createAt;
+
+    @Column(name = "updated_at")
     private LocalDateTime updateAt;
 
-    // 블락 처리
     @Enumerated(EnumType.STRING)
-    private BlockStatus blockStatus = BlockStatus.NORMAL_STATUS;
-
-    private LocalDateTime blockAt;
-    private LocalDateTime unBlockAt;
-
-    public void addPostCommentList(PostReplyList postReplyList) {
-        if (this.postReplyLists == null)
-            this.postReplyLists = new ArrayList<>();
-        this.postReplyLists.add(postReplyList);
-        postReplyList.setReply(this);
-    }
+    @Column(name = "status", nullable = false)
+    private BlockStatus status = BlockStatus.NORMAL_STATUS;
 }
