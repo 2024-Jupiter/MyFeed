@@ -1,6 +1,7 @@
 package com.myfeed.service.Post;
 
 import com.myfeed.converter.PostConverter;
+import com.myfeed.model.base.BaseTimeEntity;
 import com.myfeed.model.post.Category;
 import com.myfeed.model.post.Image;
 import com.myfeed.model.post.Post;
@@ -31,6 +32,11 @@ public class PostServiceImpl implements PostService {
         return postRepository.findById(pid).orElse(null);
     }
 
+    @Override
+    public User getByUserUid(long uid) {
+        return postRepository.findByUserUid(uid);
+    }
+
     // 게시글 작성 (관리자 만 뉴스 글 작성 가능)
     @Transactional
     @Override
@@ -41,7 +47,6 @@ public class PostServiceImpl implements PostService {
             category = Category.NEWS;
             Post post = Post.builder()
                     .user(user).category(category).title(title).content(content)
-                    .createAt(LocalDateTime.now())
                     .viewCount(0).likeCount(0)
                     .build();
 
@@ -58,7 +63,6 @@ public class PostServiceImpl implements PostService {
             category = Category.GENERAL;
             Post post = Post.builder()
                     .user(user).category(category).title(title).content(content)
-                    .createAt(LocalDateTime.now())
                     .viewCount(0).likeCount(0)
                     .build();
 

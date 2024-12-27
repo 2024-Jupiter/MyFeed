@@ -1,4 +1,5 @@
 package com.myfeed.model.post;
+import com.myfeed.model.base.BaseTimeEntity;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.user.User;
 import jakarta.persistence.*;
@@ -17,8 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Post {
-
+public class Post extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -44,12 +44,6 @@ public class Post {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "create_at", nullable = false)
-    private LocalDateTime createAt;
-
-    @Column(name = "update_at")
-    private LocalDateTime updateAt;
-
     @Column(name = "view_count", columnDefinition = "int default 0")
     private int viewCount = 0;
 
@@ -73,4 +67,5 @@ public class Post {
         this.images.add(image);
         image.setPost(this);
     }
+
 }

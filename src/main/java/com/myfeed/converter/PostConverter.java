@@ -20,8 +20,6 @@ public class PostConverter {
                         "category", post.getCategory(),
                         "title", post.getTitle(),
                         "content", post.getContent(),
-                        "createAt", post.getCreateAt(),
-                        "updateAt", post.getUpdateAt(),
                         "viewCount", post.getViewCount(),
                         "likeCount", post.getLikeCount(),
                         "status", post.getStatus()
@@ -42,8 +40,6 @@ public class PostConverter {
                             replyMap.put("user_id", reply.getUser() != null ? reply.getUser().getId() : null);
                             replyMap.put("post_id", reply.getPost() != null ? reply.getPost().getId() : null);
                             replyMap.put("content", reply.getContent());
-                            replyMap.put("createAt", reply.getCreateAt());
-                            replyMap.put("updateAt", reply.getUpdateAt());
                             replyMap.put("status", reply.getStatus());
                             return replyMap;
                         })
@@ -61,8 +57,6 @@ public class PostConverter {
                 .content((String) postEs.getPost().get("content"))
                 .images(images)
                 .replies(replies)
-                .createAt((LocalDateTime) postEs.getPost().get("createAt"))
-                .updateAt((LocalDateTime) postEs.getPost().get("updateAt"))
                 .viewCount((int) postEs.getPost().get("viewCount"))
                 .likeCount((int) postEs.getPost().get("likeCount"))
                 .build();

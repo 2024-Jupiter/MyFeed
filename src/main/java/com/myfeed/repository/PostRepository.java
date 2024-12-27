@@ -1,16 +1,20 @@
 package com.myfeed.repository;
 
 import com.myfeed.model.post.Post;
+import com.myfeed.model.user.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
     // 내 게시글 페이지네이션
     Page<Post> findByUserUid(long uid, Pageable pageable);
+
+    User findByUserUid(long uid);
 
     // 조회수 증가
     @Modifying

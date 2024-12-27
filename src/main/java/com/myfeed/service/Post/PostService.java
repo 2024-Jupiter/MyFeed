@@ -2,6 +2,7 @@ package com.myfeed.service.Post;
 
 import com.myfeed.model.post.Category;
 import com.myfeed.model.post.Post;
+import com.myfeed.model.user.User;
 import org.springframework.data.domain.Page;
 
 public interface PostService {
@@ -9,6 +10,8 @@ public interface PostService {
 
     // 게시글 가져오기
     Post findByPid(long pid);
+
+    User getByUserUid(long uid);
 
     // 게시글 작성
     Post createPost(long uid, Category category, String title, String content, String imgSrc);

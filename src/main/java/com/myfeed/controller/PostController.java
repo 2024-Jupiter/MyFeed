@@ -6,6 +6,7 @@ import com.myfeed.model.post.Image;
 import com.myfeed.model.post.Post;;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.report.ReportType;
+import com.myfeed.model.user.User;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.reply.ReplyService;
 import com.myfeed.service.report.ReportService;
@@ -53,10 +54,17 @@ public class PostController {
         Page<Post> myPostPage = postService.getMyPostList(page, uid);
 
         List<Post> filteredMyList = new ArrayList<>();
+        User user = postService.getByUserUid(uid);
         for (Post post: filteredMyList) {
+            if (user.isDeleted()) {
+                filteredMyList.add(post);
+            }
             if (post.getStatus() == BlockStatus.NORMAL_STATUS) {
                 filteredMyList.add(post);
-                model.addAttribute("message", "차단된 게시글입니다.");
+            } else {
+                Post blockedPostPlaceholder = new Post();
+                blockedPostPlaceholder.setTitle("차단된 게시글입니다.");
+                filteredMyList.add(blockedPostPlaceholder);
             }
         }
 
@@ -85,6 +93,7 @@ public class PostController {
                          @RequestParam(name = "likeAction", required = false) String likeAction,
                          HttpSession session, Model model) {
         Post post = postService.findByPid(pid);
+        User user = post.getUser();
         List<Image> imgaeList = post.getImages();
 
         postService.incrementViewCount(pid);
@@ -98,9 +107,15 @@ public class PostController {
 
         List<Reply> filteredReplyList = new ArrayList<>();
         for (Reply reply : pagedResult.getContent()) {
+            if (user.isDeleted()) {
+                filteredReplyList.add(reply);
+            }
             if (reply.getStatus() == BlockStatus.NORMAL_STATUS) {
                 filteredReplyList.add(reply);
-                model.addAttribute("message", "차단된 댓글입니다.");
+            } else {
+                Reply blockedReplyPlaceholder = new Reply();
+                blockedReplyPlaceholder.setContent("차단된 댓글입니다.");
+                filteredReplyList.add(blockedReplyPlaceholder);
             }
         }
 
@@ -142,7 +157,6 @@ public class PostController {
         updatedPost.setTitle(post.getTitle());
         updatedPost.setContent(post.getContent());
         updatedPost.setImages(post.getImages());
-        updatedPost.setUpdateAt(LocalDateTime.now());
 
         postService.updatePost(updatedPost);
         return "redirect:/api/post/detail/" + post.getId();

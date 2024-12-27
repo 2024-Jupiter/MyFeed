@@ -10,8 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-
 @Controller
 @RequestMapping("/api/reply")
 public class ReplyController {
@@ -43,7 +41,6 @@ public class ReplyController {
     public String updateReplyProc(@RequestBody Reply reply) {
         Reply updatedReply = replyService.findByRid(reply.getId());
         updatedReply.setContent(reply.getContent());
-        updatedReply.setUpdateAt(LocalDateTime.now());
         replyService.updateReply(updatedReply);
 
         long pid = updatedReply.getPost().getId();

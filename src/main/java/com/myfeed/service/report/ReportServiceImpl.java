@@ -49,8 +49,7 @@ public class ReportServiceImpl implements ReportService {
         Post post = postRepository.findById(pid).orElse(null);
 
         Report report = Report.builder()
-                .reportType(reportType).post(post).description(description)
-                .createAt(LocalDateTime.now()).status(ProcessStatus.PENDING)
+                .reportType(reportType).post(post).description(description).status(ProcessStatus.PENDING)
                 .build();
 
         return reportRepository.save(report);
@@ -62,8 +61,7 @@ public class ReportServiceImpl implements ReportService {
         Reply reply = replyRepository.findById(rid).orElse(null);
 
         Report report = Report.builder()
-                .reportType(reportType).reply(reply).description(description)
-                .createAt(LocalDateTime.now()).status(ProcessStatus.PENDING)
+                .reportType(reportType).reply(reply).description(description).status(ProcessStatus.PENDING)
                 .build();
 
         return reportRepository.save(report);
@@ -76,7 +74,6 @@ public class ReportServiceImpl implements ReportService {
         Report report = reportRepository.findById(rpId).orElse(null);
         post.setStatus(BlockStatus.BLOCK_STATUS);
         report.setStatus(ProcessStatus.COMPLETED);
-        report.setUpdateAt(LocalDateTime.now());
         postRepository.save(post);
     }
 
@@ -87,7 +84,6 @@ public class ReportServiceImpl implements ReportService {
         Report report = reportRepository.findById(rpId).orElse(null);
         post.setStatus(BlockStatus.NORMAL_STATUS);
         report.setStatus(ProcessStatus.RELEASED);
-        report.setUpdateAt(LocalDateTime.now());
         postRepository.save(post);
     }
 
@@ -98,7 +94,6 @@ public class ReportServiceImpl implements ReportService {
         Report report = reportRepository.findById(rpId).orElse(null);
         reply.setStatus(BlockStatus.BLOCK_STATUS);
         report.setStatus(ProcessStatus.COMPLETED);
-        report.setUpdateAt(LocalDateTime.now());
         replyRepository.save(reply);
     }
 
@@ -109,7 +104,6 @@ public class ReportServiceImpl implements ReportService {
         Report report = reportRepository.findById(rpId).orElse(null);
         reply.setStatus(BlockStatus.NORMAL_STATUS);
         report.setStatus(ProcessStatus.RELEASED);
-        report.setUpdateAt(LocalDateTime.now());
         replyRepository.save(reply);
     }
 }
