@@ -20,31 +20,42 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String email;
+    @Column(nullable = false)
+    private String email; // 필수값
 
-    private String password;
+    @Column(nullable = false)
+    private String password; // 필수값
 
+    @Column(nullable = false)
     private String username;
 
-    private String nickname;
+    @Column
+    private String phoneNumber; // 폼 로그인 시 필수값
 
-    @Column(nullable = true)
+    @Column(nullable = false)
+    private String nickname; // 필수값
+
+    @Column
     private String profileImage;
 
-    private Role role;
+    @Column(nullable = false)
+    private Role role = Role.USER;
 
+    @Column(nullable = false)
     private LoginProvider loginProvider;
 
-    private boolean isActive;
+    @Column(nullable = false, name = "state")
+    private boolean isActive = true; // status
 
-    public User(String email, String password, String username, String nickname, String profileImage, LoginProvider loginProvider) {
-        this.email = email;
-        this.password = password;
-        this.username = username;
-        this.nickname = nickname;
-        this.profileImage = profileImage;
-        this.loginProvider = loginProvider;
-        this.role = Role.USER;
-        this.isActive = true;
-    }
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column
+    private LocalDateTime updatedAt;
+
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
+    @Column
+    private LocalDateTime deletedAt;
 }
