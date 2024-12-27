@@ -18,12 +18,14 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Post {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
@@ -32,17 +34,31 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Image> images = new ArrayList<>();
 
-    private Category category;
-    private String title;
-    private String content;
-    private LocalDateTime createAt;
-    private LocalDateTime updateAt;
-    private int viewCount;
-    private int likeCount;
-
-    // 블락 처리
     @Enumerated(EnumType.STRING)
-    private BlockStatus blockStatus = BlockStatus.NORMAL_STATUS;
+    @Column(name = "category", nullable = false)
+    private Category category = Category.GENERAL;
+
+    @Column(name = "title", nullable = false)
+    private String title;
+
+    @Column(name = "content", nullable = false)
+    private String content;
+
+    @Column(name = "create_at", nullable = false)
+    private LocalDateTime createAt;
+
+    @Column(name = "update_at")
+    private LocalDateTime updateAt;
+
+    @Column(name = "view_count", columnDefinition = "int default 0")
+    private int viewCount = 0;
+
+    @Column(name = "like_count", columnDefinition = "int default 0")
+    private int likeCount = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private BlockStatus status = BlockStatus.NORMAL_STATUS;
 
     public void addReply(Reply reply) {
         if (this.replies == null)

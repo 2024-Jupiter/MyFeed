@@ -39,7 +39,7 @@ public class PostServiceImpl implements PostService {
             category = Category.NEWS;
             Post post = Post.builder()
                     .user(user).category(category).title(title).content(content)
-                    .createAt(LocalDateTime.now()).updateAt(LocalDateTime.now())
+                    .createAt(LocalDateTime.now())
                     .viewCount(0).likeCount(0)
                     .build();
 
@@ -56,7 +56,7 @@ public class PostServiceImpl implements PostService {
             category = Category.GENERAL;
             Post post = Post.builder()
                     .user(user).category(category).title(title).content(content)
-                    .createAt(LocalDateTime.now()).updateAt(LocalDateTime.now())
+                    .createAt(LocalDateTime.now())
                     .viewCount(0).likeCount(0)
                     .build();
 

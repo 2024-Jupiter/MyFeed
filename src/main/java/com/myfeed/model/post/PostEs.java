@@ -18,7 +18,6 @@ import java.util.Map;
 @AllArgsConstructor
 @Builder
 public class PostEs {
-
     @Id
     @Column(name = "id", nullable = false)
     private String id;

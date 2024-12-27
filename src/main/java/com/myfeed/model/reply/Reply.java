@@ -20,21 +20,27 @@ import java.time.LocalDateTime;
 public class Reply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
+    @Column(name = "content", nullable = false)
     private String content;
+
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createAt;
+
+    @Column(name = "updated_at")
     private LocalDateTime updateAt;
 
-    // 블락 처리
     @Enumerated(EnumType.STRING)
-    private BlockStatus blockStatus = BlockStatus.NORMAL_STATUS;
+    @Column(name = "status", nullable = false)
+    private BlockStatus status = BlockStatus.NORMAL_STATUS;
 }

@@ -31,7 +31,7 @@ public class ReplyServiceImpl implements ReplyService {
         Post post = postRepository.findById(pid).orElse(null);
         Reply reply = Reply.builder()
                 .user(user).post(post).content(content)
-                .createAt(LocalDateTime.now()).updateAt(LocalDateTime.now())
+                .createAt(LocalDateTime.now())
                 .build();
         post.addReply(reply);
         return replyRepository.save(reply);
