@@ -10,7 +10,6 @@ import com.myfeed.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,11 +74,13 @@ public class UserController {
 
     // 회원정보 상세보기
     @GetMapping("/detail/{id}")
-    public String detail(@PathVariable Long id, Model model){
+    public String detail(@PathVariable Long id,
+            @RequestParam(name="p", defaultValue = "1") int page,
+            Model model){
         User user = userService.findById(id);
         model.addAttribute("user", user);
-        //List<Post> postList = postService.getMyPostList(id);
-        //model.addAttribute("postList", postList);
+        Page<Post> postList = postService.getMyPostList(page, id);
+        model.addAttribute("postList", postList);
         return "user/detail";
     }
 
@@ -148,7 +149,6 @@ public class UserController {
         User user = userService.findById(id);
         if (user.isActive() != status) {
             user.setActive(status);
-            user.setUpdatedAt(LocalDateTime.now());
             userService.updateUser(user);
         }
         return "redirect:/user/list";
