@@ -24,7 +24,7 @@ public class PostConverter {
                         "updateAt", post.getUpdateAt(),
                         "viewCount", post.getViewCount(),
                         "likeCount", post.getLikeCount(),
-                        "blockStatus", post.getBlockStatus()
+                        "status", post.getStatus()
                 ))
                 .images(post.getImages().stream()
                         .map(image -> {
@@ -44,7 +44,7 @@ public class PostConverter {
                             replyMap.put("content", reply.getContent());
                             replyMap.put("createAt", reply.getCreateAt());
                             replyMap.put("updateAt", reply.getUpdateAt());
-                            replyMap.put("blockStatus", reply.getBlockStatus());
+                            replyMap.put("status", reply.getStatus());
                             return replyMap;
                         })
                         .collect(Collectors.toList()))
