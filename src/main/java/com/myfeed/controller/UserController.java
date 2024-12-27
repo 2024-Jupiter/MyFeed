@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -79,8 +78,8 @@ public class UserController {
     public String detail(@PathVariable Long id, Model model){
         User user = userService.findById(id);
         model.addAttribute("user", user);
-        List<Post> postList = postService.getMyPostList(id);
-        model.addAttribute("postList", postList);
+        //List<Post> postList = postService.getMyPostList(id);
+        //model.addAttribute("postList", postList);
         return "user/detail";
     }
 

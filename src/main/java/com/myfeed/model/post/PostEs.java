@@ -21,13 +21,21 @@ import java.util.Map;
 @Builder
 public class PostEs {
     @Id
-    private String postId;
+    @Column(name = "id", nullable = false)
+    private String id;
 
     // 게시글 정보
     @Field(type = FieldType.Object)
+    @Column(name = "post", nullable = true)
     private Map<String, Object> post;
 
-    // 댓글
-    @Field(type = FieldType.Nested)
-    private List<Map<String, Object>> comments;
+    // 이미지 리스트
+    @Field(type = FieldType.Object)
+    @Column(name = "images", nullable = true)
+    private List<Map<String, Object>> images;
+
+    // 댓글 리스트
+    @Field(type = FieldType.Object)
+    @Column(name = "replies", nullable = true)
+    private List<Map<String, Object>> replies;
 }
