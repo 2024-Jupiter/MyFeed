@@ -1,5 +1,5 @@
 package com.myfeed.model.post;
 
-public enum Status {
+public enum BlockStatus {
     NORMAL_STATUS, BLOCK_STATUS;
 }
