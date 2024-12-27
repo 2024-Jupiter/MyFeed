@@ -1,5 +1,7 @@
 package com.myfeed.model.user;
 
+import com.myfeed.model.base.BaseTimeEntity;
+import com.myfeed.model.post.BlockStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class User {
+public class User extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -45,12 +47,6 @@ public class User {
 
     @Column(nullable = false, name = "state")
     private boolean isActive = true; // status
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column
-    private LocalDateTime updatedAt;
 
     @Column(nullable = false)
     private boolean isDeleted = false;

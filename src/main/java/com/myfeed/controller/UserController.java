@@ -58,7 +58,6 @@ public class UserController {
                 .profileImage(registerDto.getProfileImage())
                 .phoneNumber(registerDto.getPhoneNumber())
                 .loginProvider(LoginProvider.FORM)
-                .createdAt(LocalDateTime.now())
                 .build();
         userService.registerUser(user);
 
@@ -125,7 +124,6 @@ public class UserController {
         user.setUsername(username);
         user.setNickname(nickname);
         user.setProfileImage(profileImage);
-        user.setUpdatedAt(LocalDateTime.now());
         userService.updateUser(user);
         return "redirect:/board/list";
     }
