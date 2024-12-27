@@ -2,7 +2,6 @@ package com.myfeed.service.reply;
 
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.post.Post;
-import com.myfeed.model.post.PostReplyList;
 import com.myfeed.model.user.User;
 import com.myfeed.repository.ReplyRepository;
 import com.myfeed.repository.PostRepository;
@@ -31,12 +30,10 @@ public class ReplyServiceImpl implements ReplyService {
         User user = userRepository.findById(uid).orElse(null);
         Post post = postRepository.findById(pid).orElse(null);
         Reply reply = Reply.builder()
-                .content(content).createAt(LocalDateTime.now()).updateAt(LocalDateTime.now())
+                .user(user).post(post).content(content)
+                .createAt(LocalDateTime.now()).updateAt(LocalDateTime.now())
                 .build();
-        PostReplyList postReplyList = PostReplyList.builder()
-                .user(user).post(post).reply(reply)
-                .build();
-        reply.addPostCommentList(postReplyList);
+        post.addReply(reply);
         return replyRepository.save(reply);
     }
 

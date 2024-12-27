@@ -11,15 +11,16 @@ import com.myfeed.repository.ReplyRepository;
 import com.myfeed.repository.ReportRepository;
 import com.myfeed.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class ReportServiceImpl implements ReportService {
     @Autowired ReportRepository reportRepository;
-    @Autowired UserRepository userRepository;
     @Autowired ReplyRepository replyRepository;
     @Autowired PostRepository postRepository;
 
@@ -29,76 +30,66 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<Report> getReportByPostPid(long pid) {
-        return reportRepository.findByPostPid(pid);
+    public Page<Report> getReportByPostPid(int page, long pid) {
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+        return reportRepository.findByPostPid(pid, pageable);
     }
 
     @Override
-    public List<Report> getReportByReplyRid(long rid) {
-        return reportRepository.findByReplyRid(rid);
+    public Page<Report> getReportByReplyRid(int page, long rid) {
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+        return reportRepository.findByReplyRid(rid, pageable);
     }
 
     @Override
-    public List<Report> getReportByUserUid(long uid) {
-        return reportRepository.findByUserUid(uid);
-    }
-
-    @Override
-    public Report saveReport(ReportType reportType, long pid, long uid, long rid, String description) {
+    public Report reportPost(ReportType reportType, long pid, String description) {
         Post post = postRepository.findById(pid).orElse(null);
-        User user = userRepository.findById(uid).orElse(null);
-        Reply reply = replyRepository.findById(rid).orElse(null);
 
         Report report = Report.builder()
-                .reportType(reportType).post(post).user(user).reply(reply)
+                .reportType(reportType).post(post)
                 .description(description).reportedAt(LocalDateTime.now())
                 .build();
 
-        Report savedReport = reportRepository.save(report);
+        return reportRepository.save(report);
+    }
 
-        if (reply == null) {
-            post.setBlockStatus(BlockStatus.BLOCK_STATUS);
-            post.setBlockAt(LocalDateTime.now());
-            postRepository.save(post);
-        } else {
-            reply.setBlockStatus(BlockStatus.BLOCK_STATUS);
-            reply.setBlockAt(LocalDateTime.now());
-            replyRepository.save(reply);
-        }
+    @Override
+    public Report reportReply(ReportType reportType, long rid, String description) {
+        Reply reply = replyRepository.findById(rid).orElse(null);
 
-        return savedReport;
+        Report report = Report.builder()
+                .reportType(reportType).reply(reply)
+                .description(description).reportedAt(LocalDateTime.now())
+                .build();
+
+        return reportRepository.save(report);
+    }
+
+    @Override
+    public void BlockPost(long pid) {
+        Post post = postRepository.findById(pid).orElse(null);
+        post.setBlockStatus(BlockStatus.BLOCK_STATUS);
+        postRepository.save(post);
     }
 
     @Override
     public void unBlockPost(long pid) {
         Post post = postRepository.findById(pid).orElse(null);
         post.setBlockStatus(BlockStatus.NORMAL_STATUS);
-        post.setUnBlockAt(LocalDateTime.now());
         postRepository.save(post);
+    }
+
+    @Override
+    public void BlockReply(long rid) {
+        Reply reply = replyRepository.findById(rid).orElse(null);
+        reply.setBlockStatus(BlockStatus.BLOCK_STATUS);
+        replyRepository.save(reply);
     }
 
     @Override
     public void unBlockReply(long rid) {
         Reply reply = replyRepository.findById(rid).orElse(null);
         reply.setBlockStatus(BlockStatus.NORMAL_STATUS);
-        reply.setUnBlockAt(LocalDateTime.now());
         replyRepository.save(reply);
-    }
-
-    @Override
-    public void unBlockUser(long uid) {
-        User user = userRepository.findById(uid).orElse(null);
-        user.setBlockStatus(BlockStatus.NORMAL_STATUS);
-        user.setUnBlockAt(LocalDateTime.now());
-        userRepository.save(user);
-    }
-
-    // 사용자 비활성화
-    @Override
-    public void blockUser(long uid) {
-        User user = userRepository.findById(uid).orElse(null);
-        user.setBlockStatus(BlockStatus.BLOCK_STATUS);
-        user.setBlockAt(LocalDateTime.now());
-        userRepository.save(user);
     }
 }

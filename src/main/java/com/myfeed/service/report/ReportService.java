@@ -4,25 +4,28 @@ import com.myfeed.model.post.Post;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.report.Report;
 import com.myfeed.model.report.ReportType;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface ReportService {
+    public static final int PAGE_SIZE = 10;
+
     Report findByRid(long rpId);
 
-    List<Report> getReportByPostPid(long pid);
+    Page<Report> getReportByPostPid(int page, long pid);
 
-    List<Report> getReportByReplyRid(long rid);
+    Page<Report> getReportByReplyRid(int page, long rid);
 
-    List<Report> getReportByUserUid(long uid);
+    Report reportPost(ReportType reportType, long pid, String description);
 
-    Report saveReport(ReportType reportType, long pid, long uid, long rid, String description);
+    Report reportReply(ReportType reportType, long rid, String description);
+
+    void BlockPost(long pid);
 
     void unBlockPost(long pid);
 
+    void BlockReply(long rid);
+
     void unBlockReply(long rid);
-
-    void unBlockUser(long uid);
-
-    void blockUser(long uid);
 }

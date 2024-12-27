@@ -1,7 +1,7 @@
 package com.myfeed.model.reply;
 
 import com.myfeed.model.post.BlockStatus;
-import com.myfeed.model.post.PostReplyList;
+import com.myfeed.model.post.Post;
 import com.myfeed.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,8 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "comments")
@@ -22,14 +20,15 @@ import java.util.List;
 public class Reply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long rid;
+    private long id;
 
     @ManyToOne
-    @JoinColumn(name = "uid")
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "Reply", cascade = CascadeType.ALL)
-    private List<PostReplyList> postReplyLists = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
 
     private String content;
     private LocalDateTime createAt;
@@ -38,14 +37,4 @@ public class Reply {
     // 블락 처리
     @Enumerated(EnumType.STRING)
     private BlockStatus blockStatus = BlockStatus.NORMAL_STATUS;
-
-    private LocalDateTime blockAt;
-    private LocalDateTime unBlockAt;
-
-    public void addPostCommentList(PostReplyList postReplyList) {
-        if (this.postReplyLists == null)
-            this.postReplyLists = new ArrayList<>();
-        this.postReplyLists.add(postReplyList);
-        postReplyList.setReply(this);
-    }
 }

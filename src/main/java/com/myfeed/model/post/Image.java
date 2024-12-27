@@ -1,7 +1,5 @@
-package com.myfeed.model.board;
+package com.myfeed.model.post;
 
-import com.myfeed.model.post.Post;
-import com.myfeed.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,20 +7,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "images")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Board {
+public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long bid;
+    private long id;
 
     @ManyToOne
-    @JoinColumn(name = "uid")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "pid")
+    @JoinColumn(name = "post_id")
     private Post post;
+
+    private String imageSrc;
 }

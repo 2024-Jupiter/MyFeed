@@ -1,19 +1,15 @@
 package com.myfeed.model.post;
-
-import com.myfeed.model.board.Tag;
-import com.myfeed.model.report.ReportType;
+import com.myfeed.model.reply.Reply;
 import com.myfeed.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 
 @Entity
 @Table(name = "posts")
@@ -24,22 +20,21 @@ import java.util.List;
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long pid;
+    private long id;
 
     @ManyToOne
-    @JoinColumn(name = "uid")
+    @JoinColumn(name = "id")
     private User user;
 
-    @OneToMany(mappedBy = "Post", cascade = CascadeType.ALL)
-    private List<PostReplyList> postReplyLists = new ArrayList<>();
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<Reply> replies = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    private Tag tag;
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<Image> images = new ArrayList<>();
 
-    private String category;
+    private Category category;
     private String title;
     private String content;
-    private String imgSrc;
     private LocalDateTime createAt;
     private LocalDateTime updateAt;
     private int viewCount;
@@ -49,6 +44,17 @@ public class Post {
     @Enumerated(EnumType.STRING)
     private BlockStatus blockStatus = BlockStatus.NORMAL_STATUS;
 
-    private LocalDateTime blockAt;
-    private LocalDateTime unBlockAt;
+    public void addReply(Reply reply) {
+        if (this.replies == null)
+            this.replies = new ArrayList<>();
+        this.replies.add(reply);
+        reply.setPost(this);
+    }
+
+    public void addImage(Image image) {
+        if (this.images == null)
+            this.images = new ArrayList<>();
+        this.images.add(image);
+        image.setPost(this);
+    }
 }

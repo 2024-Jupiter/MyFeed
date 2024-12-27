@@ -19,13 +19,17 @@ import java.util.Map;
 @Builder
 public class PostEs {
     @Id
-    private String postId;
+    private String id;
 
     // 게시글 정보
     @Field(type = FieldType.Object)
     private Map<String, Object> post;
 
+    // 이미지
+    @Field(type = FieldType.Object)
+    private List<Map<String, Object>> images;
+
     // 댓글
-    @Field(type = FieldType.Nested)
-    private List<Map<String, Object>> comments;
+    @Field(type = FieldType.Object)
+    private List<Map<String, Object>> replies;
 }

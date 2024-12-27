@@ -20,21 +20,17 @@ import java.time.LocalDateTime;
 public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long rpId;
+    private Long id;
 
     @Enumerated(EnumType.STRING)
     private ReportType reportType;
 
     @ManyToOne
-    @JoinColumn(name = "uid")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "pid")
+    @JoinColumn(name = "post_id", nullable = true)
     private Post post;
 
     @ManyToOne
-    @JoinColumn(name = "rid")
+    @JoinColumn(name = "reply_id", nullable = true)
     private Reply reply;
 
     @Column(length = 500)
