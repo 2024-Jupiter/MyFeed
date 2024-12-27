@@ -1,15 +1,20 @@
 package com.myfeed.controller;
 
+import com.myfeed.model.post.Post;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
 import com.myfeed.model.user.Role;
 import com.myfeed.model.user.User;
+import com.myfeed.service.Post.PostService;
 import com.myfeed.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -29,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/api/user")
 public class UserController {
     @Autowired UserService userService;
+    @Autowired PostService postService;
 
     // 회원 가입(폼)
     @GetMapping("/register")
@@ -40,6 +46,7 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> registerProc(@Validated @RequestBody RegisterDto registerDto){
         Map<String, Object> messagemap = new HashMap<>();
+        // todo
         //전화번호 3 부분으로 쪼개기
         // pwd, pwd2 동일 검증 로직
         // pwd 조건 만족하는지 검증 로직 만들기
@@ -51,7 +58,9 @@ public class UserController {
                 .role(Role.USER).isActive(true)
                 .profileImage(registerDto.getProfileImage())
                 .phoneNumber(registerDto.getPhoneNumber())
-                .loginProvider(LoginProvider.FORM).build();
+                .loginProvider(LoginProvider.FORM)
+                .createdAt(LocalDateTime.now())
+                .build();
         userService.registerUser(user);
 
         return ResponseEntity.ok(messagemap);
@@ -60,7 +69,9 @@ public class UserController {
     // 회원 탈퇴
     @GetMapping("/{id}")
     public String delete(@PathVariable Long id) {
-        userService.deleteUser(id);
+        User user = userService.findById(id);
+        user.setDeleted(true);
+        user.setDeletedAt(LocalDateTime.now());
         return "redirect:/user/list";
     }
 
@@ -86,7 +97,6 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         User user = userService.findByEmail(email);
-
 
         session.setAttribute("sessId", user.getId());
         String msg = user.getNickname() + "님 환영합니다.";
@@ -114,6 +124,7 @@ public class UserController {
         user.setUsername(username);
         user.setNickname(nickname);
         user.setProfileImage(profileImage);
+        user.setUpdatedAt(LocalDateTime.now());
         userService.updateUser(user);
         return "redirect:/board/list";
     }

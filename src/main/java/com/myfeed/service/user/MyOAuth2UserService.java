@@ -5,6 +5,7 @@ import com.myfeed.model.user.MyUserDetails;
 import com.myfeed.model.user.Role;
 import com.myfeed.model.user.User;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.DisabledException;
@@ -51,7 +52,8 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
                     user = User.builder()
                                     .email(email).password(hashedPwd)
                                     .username(nickname).nickname(nickname).role(Role.USER).isActive(true)
-                                    .profileImage(profileUrl).loginProvider(LoginProvider.KAKAO).build();
+                                    .profileImage(profileUrl).loginProvider(LoginProvider.KAKAO)
+                                    .createdAt(LocalDateTime.now()).build();
                     userService.registerUser(user);
                 }
                 break;
@@ -68,7 +70,8 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
                         user = User.builder()
                                 .email(email).password(hashedPwd)
                                 .username(uname).nickname(uname).role(Role.USER).isActive(true)
-                                .profileImage(profileUrl).loginProvider(LoginProvider.GOOGLE).build();
+                                .profileImage(profileUrl).loginProvider(LoginProvider.GOOGLE)
+                                .createdAt(LocalDateTime.now()).build();
                         userService.registerUser(user);
                         log.info("구글 계정을 통해 회원가입이 되었습니다.: " + user.getUsername());
                     }
@@ -86,7 +89,8 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
                         user = User.builder()
                                 .email(email).password(hashedPwd)
                                 .username(uname).nickname(uname).role(Role.USER).isActive(true)
-                                .profileImage(profileUrl).loginProvider(LoginProvider.GITHUB).build();
+                                .profileImage(profileUrl).loginProvider(LoginProvider.GITHUB)
+                                .createdAt(LocalDateTime.now()).build();
                         userService.registerUser(user);
                         log.info("깃허브 계정을 통해 회원가입이 되었습니다. " + user.getUsername());
                     }
