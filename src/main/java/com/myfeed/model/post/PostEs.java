@@ -23,7 +23,8 @@ import java.util.Map;
 @Builder
 public class PostEs extends BaseTimeEntity {
     @Id
-    private String postId;
+    @Column(name = "id", nullable = false)
+    private String id;
 
     // 글쓴이 정보
     @Field(type = FieldType.Keyword)
@@ -62,5 +63,6 @@ public class PostEs extends BaseTimeEntity {
 
     @Field(type = FieldType.Keyword)
     private List<String> imageUrls;
+
 
 }
