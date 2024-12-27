@@ -13,13 +13,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class Image {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id", nullable = true)
     private Post post;
 
+    @Column(name = "image_src")
     private String imageSrc;
 }
