@@ -144,7 +144,7 @@ public class UserController {
     }
 
     //회원 활성/비활성 여부 수정하기
-    @PostMapping("/{uid}/status")
+    @PostMapping("/status/{uid}")
     public String updateUserState(@PathVariable Long id,
                                     @RequestParam(name="active") boolean active,
                                     Model model) {
