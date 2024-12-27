@@ -80,6 +80,8 @@ public class UserController {
     public String detail(@PathVariable Long id, Model model){
         User user = userService.findById(id);
         model.addAttribute("user", user);
+        List<Post> postList = postService.getMyPostList(id);
+        model.addAttribute("postList", postList);
         return "user/detail";
     }
 
