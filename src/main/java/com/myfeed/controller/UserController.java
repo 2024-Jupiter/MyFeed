@@ -115,7 +115,7 @@ public class UserController {
         return "redirect:/board/list;";
     }
 
-    // 사용자 정보 수정
+    // 사용자 정보 수정 // todo DTO로 받아오기
     @PostMapping("/update")
     public String updateProc(String email, String pwd,String pwd2, String username, String nickname, String profileImage) {
         User user = userService.findByEmail(email);
@@ -134,11 +134,11 @@ public class UserController {
     // 활성/비활성 회원 목록 가져오기
     @GetMapping("/list")
     public String list(@RequestParam(name="p", defaultValue = "1") int page,
-                        @RequestParam(name="active", defaultValue = "true") boolean active,
+                        @RequestParam(name="status", defaultValue = "true") boolean status,
                         Model model) {
-        Page<User> pagedUsers = userService.getPagedUser(page, active);
+        Page<User> pagedUsers = userService.getPagedUser(page, status);
         model.addAttribute("pagedUsers", pagedUsers);
-        model.addAttribute("isActive", active);
+        model.addAttribute("status", status);
         model.addAttribute("currentUserPage", page);
         return "user/list";
     }
@@ -146,11 +146,11 @@ public class UserController {
     //회원 활성/비활성 여부 수정하기
     @PostMapping("/status/{uid}")
     public String updateUserState(@PathVariable Long id,
-                                    @RequestParam(name="active") boolean active,
+                                    @RequestParam(name="status") boolean status,
                                     Model model) {
         User user = userService.findById(id);
-        if (user.isActive() != active) {
-            user.setActive(active);
+        if (user.isActive() != status) {
+            user.setActive(status);
             userService.updateUser(user);
         }
         return "redirect:/user/list";
