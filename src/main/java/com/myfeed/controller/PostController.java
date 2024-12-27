@@ -53,7 +53,7 @@ public class PostController {
 
         List<Post> filteredMyList = new ArrayList<>();
         for (Post post: filteredMyList) {
-            if (post.getBlockStatus() == BlockStatus.NORMAL_STATUS) {
+            if (post.getStatus() == BlockStatus.NORMAL_STATUS) {
                 filteredMyList.add(post);
                 model.addAttribute("message", "차단된 게시글입니다.");
             }
@@ -97,7 +97,7 @@ public class PostController {
 
         List<Reply> filteredReplyList = new ArrayList<>();
         for (Reply reply : pagedResult.getContent()) {
-            if (reply.getBlockStatus() == BlockStatus.NORMAL_STATUS) {
+            if (reply.getStatus() == BlockStatus.NORMAL_STATUS) {
                 filteredReplyList.add(reply);
                 model.addAttribute("message", "차단된 댓글입니다.");
             }

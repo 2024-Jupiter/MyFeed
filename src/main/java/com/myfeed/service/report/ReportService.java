@@ -21,11 +21,11 @@ public interface ReportService {
 
     Report reportReply(ReportType reportType, long rid, String description);
 
-    void BlockPost(long pid);
+    void BlockPost(long pid, long rpId);
 
-    void unBlockPost(long pid);
+    void unBlockPost(long pid, long rpId);
 
-    void BlockReply(long rid);
+    void BlockReply(long rid, long rpId);
 
-    void unBlockReply(long rid);
+    void unBlockReply(long rid, long rpId);
 }

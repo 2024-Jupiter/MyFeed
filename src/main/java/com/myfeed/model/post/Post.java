@@ -23,7 +23,7 @@ public class Post {
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
@@ -42,7 +42,7 @@ public class Post {
 
     // 블락 처리
     @Enumerated(EnumType.STRING)
-    private BlockStatus blockStatus = BlockStatus.NORMAL_STATUS;
+    private BlockStatus status = BlockStatus.NORMAL_STATUS;
 
     public void addReply(Reply reply) {
         if (this.replies == null)

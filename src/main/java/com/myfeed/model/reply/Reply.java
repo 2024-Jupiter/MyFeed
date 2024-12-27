@@ -36,5 +36,5 @@ public class Reply {
 
     // 블락 처리
     @Enumerated(EnumType.STRING)
-    private BlockStatus blockStatus = BlockStatus.NORMAL_STATUS;
+    private BlockStatus status = BlockStatus.NORMAL_STATUS;
 }

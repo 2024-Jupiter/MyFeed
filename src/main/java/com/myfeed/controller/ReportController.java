@@ -75,28 +75,28 @@ public class ReportController {
 
     @GetMapping("BlockPost/{pid}")
     @CheckPermission("ADMIN")
-    public String BlockPost(@PathVariable long pid) {
-        reportService.BlockPost(pid);
+    public String BlockPost(@PathVariable long pid, @PathVariable long rpId) {
+        reportService.BlockPost(pid, rpId);
         return "redirect:/api/admin/report/postList/" + pid;
     }
     @GetMapping("unBlockPost/{pid}")
     @CheckPermission("ADMIN")
-    public String unBlockPost(@PathVariable long pid) {
-        reportService.unBlockPost(pid);
+    public String unBlockPost(@PathVariable long pid, @PathVariable long rpId) {
+        reportService.unBlockPost(pid, rpId);
         return "redirect:/api/admin/report/postList/" + pid;
     }
 
     @GetMapping("BlockReply/{rid}")
     @CheckPermission("ADMIN")
-    public String BlockReply(@PathVariable long rid) {
-        reportService.BlockReply(rid);
+    public String BlockReply(@PathVariable long rid, @PathVariable long rpId) {
+        reportService.BlockReply(rid, rpId);
         return "redirect:/api/admin/report/replyList/" + rid;
     }
 
     @GetMapping("unBlockReply/{rid}")
     @CheckPermission("ADMIN")
-    public String unBlockReply(@PathVariable long rid) {
-        reportService.unBlockReply(rid);
+    public String unBlockReply(@PathVariable long rid, @PathVariable long rpId) {
+        reportService.unBlockReply(rid, rpId);
         return "redirect:/api/admin/report/replyList/" + rid;
     }
 }

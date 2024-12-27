@@ -3,6 +3,7 @@ package com.myfeed.service.report;
 import com.myfeed.model.post.BlockStatus;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.reply.Reply;
+import com.myfeed.model.report.ProcessStatus;
 import com.myfeed.model.report.Report;
 import com.myfeed.model.report.ReportType;
 import com.myfeed.model.user.User;
@@ -46,8 +47,8 @@ public class ReportServiceImpl implements ReportService {
         Post post = postRepository.findById(pid).orElse(null);
 
         Report report = Report.builder()
-                .reportType(reportType).post(post)
-                .description(description).reportedAt(LocalDateTime.now())
+                .type(reportType).post(post).description(description)
+                .createdAt(LocalDateTime.now()).status(ProcessStatus.PENDING)
                 .build();
 
         return reportRepository.save(report);
@@ -58,38 +59,50 @@ public class ReportServiceImpl implements ReportService {
         Reply reply = replyRepository.findById(rid).orElse(null);
 
         Report report = Report.builder()
-                .reportType(reportType).reply(reply)
-                .description(description).reportedAt(LocalDateTime.now())
+                .type(reportType).reply(reply).description(description)
+                .createdAt(LocalDateTime.now()).status(ProcessStatus.PENDING)
                 .build();
 
         return reportRepository.save(report);
     }
 
     @Override
-    public void BlockPost(long pid) {
+    public void BlockPost(long pid, long rpId) {
         Post post = postRepository.findById(pid).orElse(null);
-        post.setBlockStatus(BlockStatus.BLOCK_STATUS);
+        Report report = reportRepository.findById(rpId).orElse(null);
+        post.setStatus(BlockStatus.BLOCK_STATUS);
+        report.setStatus(ProcessStatus.COMPLETE);
+        report.setUpdateAt(LocalDateTime.now());
         postRepository.save(post);
     }
 
     @Override
-    public void unBlockPost(long pid) {
+    public void unBlockPost(long pid, long rpId) {
         Post post = postRepository.findById(pid).orElse(null);
-        post.setBlockStatus(BlockStatus.NORMAL_STATUS);
+        Report report = reportRepository.findById(rpId).orElse(null);
+        post.setStatus(BlockStatus.BLOCK_STATUS);
+        report.setStatus(ProcessStatus.RELEASED);
+        report.setUpdateAt(LocalDateTime.now());
         postRepository.save(post);
     }
 
     @Override
-    public void BlockReply(long rid) {
+    public void BlockReply(long rid, long rpId) {
         Reply reply = replyRepository.findById(rid).orElse(null);
-        reply.setBlockStatus(BlockStatus.BLOCK_STATUS);
+        Report report = reportRepository.findById(rpId).orElse(null);
+        reply.setStatus(BlockStatus.BLOCK_STATUS);
+        report.setStatus(ProcessStatus.COMPLETE);
+        report.setUpdateAt(LocalDateTime.now());
         replyRepository.save(reply);
     }
 
     @Override
-    public void unBlockReply(long rid) {
+    public void unBlockReply(long rid, long rpId) {
         Reply reply = replyRepository.findById(rid).orElse(null);
-        reply.setBlockStatus(BlockStatus.NORMAL_STATUS);
+        Report report = reportRepository.findById(rpId).orElse(null);
+        reply.setStatus(BlockStatus.BLOCK_STATUS);
+        report.setStatus(ProcessStatus.RELEASED);
+        report.setUpdateAt(LocalDateTime.now());
         replyRepository.save(reply);
     }
 }

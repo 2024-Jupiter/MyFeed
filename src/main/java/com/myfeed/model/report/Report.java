@@ -2,7 +2,6 @@ package com.myfeed.model.report;
 
 import com.myfeed.model.post.Post;
 import com.myfeed.model.reply.Reply;
-import com.myfeed.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +22,10 @@ public class Report {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private ReportType reportType;
+    private ReportType type;
+
+    @Enumerated(EnumType.STRING)
+    private ProcessStatus status = ProcessStatus.RELEASED;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = true)
@@ -36,5 +38,6 @@ public class Report {
     @Column(length = 500)
     private String description;
 
-    private LocalDateTime reportedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updateAt;
 }
