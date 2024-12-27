@@ -22,6 +22,7 @@ import java.util.List;
 public class ReportController {
     @Autowired ReportService reportService;
 
+    // 첫 화면 어떻게 할지 정해 지지 않아서 임의로 구현
     @GetMapping("list")
     @CheckPermission("ADMIN")
     public String list(){
@@ -74,12 +75,15 @@ public class ReportController {
         return "api/admin/report/completedList/" + status;
     }
 
+    // 게시글 차단
     @GetMapping("BlockPost/{pid}")
     @CheckPermission("ADMIN")
     public String BlockPost(@PathVariable long pid, @PathVariable long rpId) {
         reportService.BlockPost(pid, rpId);
         return "redirect:/api/admin/report/postList/" + pid;
     }
+
+    // 게시글 차단 해제
     @GetMapping("unBlockPost/{pid}")
     @CheckPermission("ADMIN")
     public String unBlockPost(@PathVariable long pid, @PathVariable long rpId) {
@@ -87,6 +91,7 @@ public class ReportController {
         return "redirect:/api/admin/report/postList/" + pid;
     }
 
+    // 댓글 차단
     @GetMapping("BlockReply/{rid}")
     @CheckPermission("ADMIN")
     public String BlockReply(@PathVariable long rid, @PathVariable long rpId) {
@@ -94,6 +99,7 @@ public class ReportController {
         return "redirect:/api/admin/report/replyList/" + rid;
     }
 
+    // 댓글 차단 해제
     @GetMapping("unBlockReply/{rid}")
     @CheckPermission("ADMIN")
     public String unBlockReply(@PathVariable long rid, @PathVariable long rpId) {

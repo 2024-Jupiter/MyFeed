@@ -9,16 +9,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
+    // 내 게시글 페이지네이션
     Page<Post> findByUserUid(long uid, Pageable pageable);
 
+    // 조회수 증가
     @Modifying
     @Query("UPDATE Post p SET p.viewCount = p.viewCount + 1 WHERE p.pid = :pid")
     void incrementViewCount(@Param("pid") Long pid);
 
+    // 좋아요 증가
     @Modifying
     @Query("UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.pid = :pid")
     void incrementLikeCount(@Param("pid") Long pid);
 
+    // 좋아요 감소
     @Modifying
     @Query("UPDATE Post p SET p.likeCount = p.likeCount - 1 WHERE p.pid = :pid AND p.likeCount > 0")
     void decrementLikeCount(@Param("pid") Long pid);

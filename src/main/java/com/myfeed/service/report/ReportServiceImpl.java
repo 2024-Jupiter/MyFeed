@@ -23,23 +23,27 @@ public class ReportServiceImpl implements ReportService {
     @Autowired ReplyRepository replyRepository;
     @Autowired PostRepository postRepository;
 
+    // 신고 불러오기
     @Override
     public Report findByRid(long rpId) {
         return reportRepository.findById(rpId).orElse(null);
     }
 
+    // 처리 대기 신고 리스트 (차단)
     @Override
     public Page<Report> getReportByPendingStatus(int page, ProcessStatus status) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
         return reportRepository.findReportByPendingStatus(pageable, status);
     }
 
+    // 처리 완료 신고 리스트 (차단 해제)
     @Override
     public Page<Report> getReportByCompletedStatus(int page, ProcessStatus status) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
         return reportRepository.findReportByCompletedStatus(pageable, status);
     }
 
+    // 게시글 신고
     @Override
     public Report reportPost(ReportType reportType, long pid, String description) {
         Post post = postRepository.findById(pid).orElse(null);
@@ -52,6 +56,7 @@ public class ReportServiceImpl implements ReportService {
         return reportRepository.save(report);
     }
 
+    // 댓글 신고
     @Override
     public Report reportReply(ReportType reportType, long rid, String description) {
         Reply reply = replyRepository.findById(rid).orElse(null);
@@ -64,6 +69,7 @@ public class ReportServiceImpl implements ReportService {
         return reportRepository.save(report);
     }
 
+    // 게시글 차단
     @Override
     public void BlockPost(long pid, long rpId) {
         Post post = postRepository.findById(pid).orElse(null);
@@ -74,6 +80,7 @@ public class ReportServiceImpl implements ReportService {
         postRepository.save(post);
     }
 
+    // 게시글 해제
     @Override
     public void unBlockPost(long pid, long rpId) {
         Post post = postRepository.findById(pid).orElse(null);
@@ -84,6 +91,7 @@ public class ReportServiceImpl implements ReportService {
         postRepository.save(post);
     }
 
+    // 댓글 차단
     @Override
     public void BlockReply(long rid, long rpId) {
         Reply reply = replyRepository.findById(rid).orElse(null);
@@ -94,6 +102,7 @@ public class ReportServiceImpl implements ReportService {
         replyRepository.save(reply);
     }
 
+    // 댓글 해제
     @Override
     public void unBlockReply(long rid, long rpId) {
         Reply reply = replyRepository.findById(rid).orElse(null);

@@ -33,11 +33,12 @@ public class PostController {
     @Autowired ReplyService replyService;
     @Autowired ReportService reportService;
 
+    // 게시글 작성
     @GetMapping("/create")
     public String CreatePostForm() {
         return "api/post/create";
     }
-
+    // 게시글 작성
     @PostMapping("/create")
     public String createPostProc(@PathVariable long uid, @RequestParam Category category,
                                  @RequestParam String title, @RequestParam String content, @RequestParam String imgSrc) {
@@ -45,7 +46,7 @@ public class PostController {
         return "redirect:/api/postEs/list";
     }
 
-    // 게시글 페이지네이션
+    // 내 게시글 페이지네이션
     @GetMapping("/myList/{uid}")
     public  String myList(@RequestParam(name="p", defaultValue = "1") int page,
                           @PathVariable long uid, HttpSession session, Model model) {
@@ -78,7 +79,7 @@ public class PostController {
         return "api/post/myList" + uid;
     }
 
-    // 댓글 페이지네이션
+    // 게시글 상페보기 - 댓글 페이지네이션
     @GetMapping("detail/{pid}")
     public String detail(@RequestParam(name="p", defaultValue = "1") int page, @PathVariable long pid,
                          @RequestParam(name = "likeAction", required = false) String likeAction,
@@ -125,13 +126,14 @@ public class PostController {
         return "api/post/detail/" + pid;
     }
 
+    // 게시글 수정
     @GetMapping("/update/{pid}")
     public String updatePostForm(@PathVariable long pid, Model model) {
         Post post = postService.findByPid(pid);
         model.addAttribute("post", post);
         return "api/post/update";
     }
-
+    // 게시글 수정
     @PreAuthorize("#user.id == authentication.principal.id")
     @PostMapping("/update")
     public String updatePostProc(@RequestBody Post post) {
@@ -146,6 +148,7 @@ public class PostController {
         return "redirect:/api/post/detail/" + post.getId();
     }
 
+    // 게시글 수정
     @PreAuthorize("#user.id == authentication.principal.id")
     @GetMapping("/delete/{pid}")
     public String delete(@PathVariable long pid) {
@@ -153,11 +156,12 @@ public class PostController {
         return "redirect:/api/post/myList";
     }
 
+    // 신고
     @GetMapping("/report/{pid}")
     public String saveReportForm() {
         return "api/report/save";
     }
-
+    // 신고
     @PostMapping("/report")
     public String saveReportProc(ReportType reportType,
                                  @RequestParam long pid, @RequestParam(required = false) String description) {
