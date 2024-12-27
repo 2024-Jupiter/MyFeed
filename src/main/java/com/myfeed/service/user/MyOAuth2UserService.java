@@ -3,12 +3,10 @@ package com.myfeed.service.user;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.MyUserDetails;
 import com.myfeed.model.user.Role;
-import com.myfeed.model.user.User;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;

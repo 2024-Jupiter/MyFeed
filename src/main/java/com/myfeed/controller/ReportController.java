@@ -1,6 +1,7 @@
 package com.myfeed.controller;
 
 import com.myfeed.ascept.CheckPermission;
+import com.myfeed.model.report.ProcessStatus;
 import com.myfeed.model.report.Report;
 import com.myfeed.service.report.ReportService;
 import jakarta.servlet.http.HttpSession;
@@ -27,12 +28,12 @@ public class ReportController {
         return "api/admin/report/list";
     }
 
-    // 신고 게시글 페이지네이션
-    @GetMapping("/postList/{pid}")
+    // 신고 대기 리스트(차단 가능) 페이지네이션 - PENDING
+    @GetMapping("/pendingList/{status}")
     @CheckPermission("ADMIN")
-    public String reportPost(@RequestParam(name="p", defaultValue = "1") int page,
-                             @PathVariable long pid, HttpSession session, Model model) {
-        Page<Report> reportPostPage = reportService.getReportByPostPid(page, pid);
+    public String pendingList(@RequestParam(name="p", defaultValue = "1") int page,
+                              @RequestParam("status") ProcessStatus status, HttpSession session, Model model) {
+        Page<Report> reportPostPage = reportService.getReportByPendingStatus(page, status);
 
         int totalPages = reportPostPage.getTotalPages();
         int startPage = (int) Math.ceil((page - 0.5) / reportService.PAGE_SIZE - 1) * reportService.PAGE_SIZE + 1;
@@ -47,30 +48,30 @@ public class ReportController {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("pageList", pageList);
-        return "api/admin/report/postList/" + pid;
+        return "api/admin/report/pendingList/" + status;
     }
 
-    // 신고 댓글 페이지네이션
-    @GetMapping("/replyList/{rid}")
+    // 신고 완료 리스트(해제 가능) 페이지네이션 - COMPLETED
+    @GetMapping("/completedList/{status}")
     @CheckPermission("ADMIN")
-    public String reportReply(@RequestParam(name="p", defaultValue = "1") int page,
-                              @PathVariable long rid, HttpSession session, Model model) {
-        Page<Report> reportReplyPage = reportService.getReportByReplyRid(page, rid);
+    public String reportPost(@RequestParam(name="p", defaultValue = "1") int page,
+                             @RequestParam("status") ProcessStatus status, HttpSession session, Model model) {
+        Page<Report> reportPostPage = reportService.getReportByCompletedStatus(page, status);
 
-        int totalPages = reportReplyPage.getTotalPages();
+        int totalPages = reportPostPage.getTotalPages();
         int startPage = (int) Math.ceil((page - 0.5) / reportService.PAGE_SIZE - 1) * reportService.PAGE_SIZE + 1;
         int endPage = Math.min(startPage + reportService.PAGE_SIZE - 1, totalPages);
         List<Integer> pageList = new ArrayList<>();
         for (int i = startPage; i <= endPage; i++)
             pageList.add(i);
 
-        session.setAttribute("currentReportReplyPage", page);
-        model.addAttribute("reportReplyList", reportReplyPage.getContent());
+        session.setAttribute("currentReportPostPage", page);
+        model.addAttribute("reportPostList", reportPostPage.getContent());
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("pageList", pageList);
-        return "api/admin/report/replyList/" + rid;
+        return "api/admin/report/completedList/" + status;
     }
 
     @GetMapping("BlockPost/{pid}")
