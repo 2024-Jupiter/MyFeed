@@ -1,13 +1,16 @@
 package com.myfeed.model.user;
 
+import com.myfeed.annotation.PasswordMatch;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
+@PasswordMatch
 public class RegisterDto {
 
     @NotBlank(message = "이메일을 입력하세요.")
