@@ -1,6 +1,5 @@
 package com.myfeed.controller;
 
-import co.elastic.clients.elasticsearch.watcher.ScheduleTriggerEvent;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
@@ -58,6 +57,7 @@ public class UserController {
                 .build();
         userService.registerUser(user);
         messagemap.put("success","회원가입 되었습니다.");
+        messagemap.put("redirectUrl","/home");
         return ResponseEntity.ok(messagemap);
     }
 
@@ -74,14 +74,15 @@ public class UserController {
         Map<String, Object> messagemap = new HashMap<>();
         userService.updateUser(id, updateDto);
         messagemap.put("success","회원정보가 수정되었습니다.");
-        return ResponseEntity.ok(messagemap); // 이후 해당 user detail 페이지로 리다이렉트
+        String redirectUrl = "/"+id+"/detail";
+        messagemap.put("redirectUrl",redirectUrl);
+        return ResponseEntity.ok(messagemap);
     }
 
     @GetMapping("/check-email")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> checkUserExist(@RequestParam(name="email") String email) {
         Map<String, Object> messagemap = new HashMap<>();
-        // 만약 해당 email 가진 email이 회원 중에 있으면 return responseEntity.bad
         if (userService.findByEmail(email) != null) {
             messagemap.put("state", "error");
             messagemap.put("message", "이미 회원가입된 이메일입니다.");
@@ -102,7 +103,7 @@ public class UserController {
     }
 
     // 회원정보 상세보기
-    @GetMapping("/detail/{id}")
+    @GetMapping("/{id}/detail")
     public String detail(@PathVariable Long id,
             @RequestParam(name="p", defaultValue = "1") int page,
             Model model){
@@ -156,7 +157,7 @@ public class UserController {
     }
 
     //회원 활성/비활성 여부 수정하기
-    @PostMapping("/status/{uid}")
+    @PostMapping("{uid}/status")
     public String updateUserState(@PathVariable Long id,
                                     @RequestParam(name="status") boolean status,
                                     Model model) {
