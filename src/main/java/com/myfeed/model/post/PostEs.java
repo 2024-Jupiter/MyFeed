@@ -1,6 +1,6 @@
 package com.myfeed.model.post;
 
-import com.myfeed.model.BaseTimeEntity;
+import com.myfeed.model.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,6 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @Document(indexName = "posts")
 @Data
@@ -44,7 +43,7 @@ public class PostEs extends BaseTimeEntity {
     private String content;
 
     @Field(type = FieldType.Keyword)
-    private PostCategory category;
+    private Category category;
 
     @Field(type = FieldType.Integer)
     private int viewCount;

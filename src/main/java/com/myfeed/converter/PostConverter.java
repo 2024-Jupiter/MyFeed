@@ -4,10 +4,7 @@ import com.myfeed.model.post.*;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.user.User;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PostConverter {
@@ -15,50 +12,44 @@ public class PostConverter {
     // JPA 엔티티 -> Elasticsearch 문서 변환
     public static PostEs toElasticsearchDocument(Post post) {
         return PostEs.builder()
-                .id(String.valueOf(post.getId())) // ID 변환
-                .post(Map.of(
-                        "category", post.getCategory(),
-                        "title", post.getTitle(),
-                        "content", post.getContent(),
-                        "viewCount", post.getViewCount(),
-                        "likeCount", post.getLikeCount(),
-                        "status", post.getStatus()
-                ))
-                .images(post.getImages().stream()
-                        .map(image -> {
-                            Map<String, Object> imageMap = new HashMap<>();
-                            imageMap.put("id", image.getId());
-                            imageMap.put("post_id", image.getPost() != null ? image.getPost().getId() : null);
-                            imageMap.put("imageSrc", image.getImageSrc() != null ? image.getImageSrc().getBytes() : null);
-                            return imageMap;
-                        })
-                        .collect(Collectors.toList()))
-                .replies(post.getReplies().stream()
-                        .map(reply -> {
-                            Map<String, Object> replyMap = new HashMap<>();
-                            replyMap.put("id", reply.getId());
-                            replyMap.put("user_id", reply.getUser() != null ? reply.getUser().getId() : null);
-                            replyMap.put("post_id", reply.getPost() != null ? reply.getPost().getId() : null);
-                            replyMap.put("content", reply.getContent());
-                            replyMap.put("status", reply.getStatus());
-                            return replyMap;
-                        })
+                .id(String.valueOf(post.getId()))
+                .userId(String.valueOf(post.getUser().getId()))
+                .userNickName(post.getUser().getNickname())
+                .userStatus(post.getUser().isDeleted() ? "DELETED" : "ACTIVE")
+                .title(post.getTitle())
+                .content(post.getContent())
+                .category(Category.valueOf(post.getCategory().name()))
+                .viewCount(post.getViewCount())
+                .likeCount(post.getLikeCount())
+                .blockStatus(post.getStatus())
+                .blockAt(post.getStatus() == BlockStatus.BLOCK_STATUS ? post.getUpdatedAt() : null)
+                .unBlockAt(post.getStatus() == BlockStatus.NORMAL_STATUS ? post.getUpdatedAt() : null)
+                .imageUrls(post.getImages().stream()
+                        .map(Image::getImageSrc)
                         .collect(Collectors.toList()))
                 .build();
     }
 
-    // Elasticsearch 문서 -> JPA 엔티티 변환 (옵션)
+    // Elasticsearch 문서 -> JPA 엔티티 변환
     public static Post toJpaEntity(PostEs postEs, User user, List<Reply> replies, List<Image> images) {
-        return Post.builder()
-                .id(Long.parseLong(postEs.getId()))
-                .user(user)
-                .category((Category) postEs.getPost().get("category"))
-                .title((String) postEs.getPost().get("title"))
-                .content((String) postEs.getPost().get("content"))
-                .images(images)
-                .replies(replies)
-                .viewCount((int) postEs.getPost().get("viewCount"))
-                .likeCount((int) postEs.getPost().get("likeCount"))
-                .build();
+        Post post = new Post();
+        post.setId(Long.parseLong(postEs.getId()));
+        post.setUser(user);
+        post.setTitle(postEs.getTitle());
+        post.setContent(postEs.getContent());
+        post.setCategory(Category.valueOf(postEs.getCategory().name()));
+        post.setViewCount(postEs.getViewCount());
+        post.setLikeCount(postEs.getLikeCount());
+        post.setStatus(postEs.getBlockStatus());
+
+        // Replies와 Images 설정
+        if (replies != null) {
+            replies.forEach(post::addReply);
+        }
+        if (images != null) {
+            images.forEach(post::addImage);
+        }
+
+        return post;
     }
 }
