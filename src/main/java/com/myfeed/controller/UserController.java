@@ -79,6 +79,7 @@ public class UserController {
         return ResponseEntity.ok(messagemap);
     }
 
+    // 이메일 중복확인
     @GetMapping("/check-email")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> checkUserExist(@RequestParam(name="email") String email) {
@@ -89,7 +90,22 @@ public class UserController {
             return ResponseEntity.badRequest().body(messagemap);
         }
         messagemap.put("state", "success");
-        messagemap.put("message", "이메일을 사용할 수 있습니다.");
+        messagemap.put("message", "이메일("+email+")을 사용할 수 있습니다.");
+        return ResponseEntity.ok().body(messagemap);
+    }
+
+    // 닉네임 중복확인
+    @GetMapping("/check-nickname")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkNicknameExist(@RequestParam(name="nickname") String nickname) {
+        Map<String, Object> messagemap = new HashMap<>();
+        if (userService.findByNickname(nickname) != null) {
+            messagemap.put("state", "error");
+            messagemap.put("message", "이미 존재하는 닉네임입니다.");
+            return ResponseEntity.badRequest().body(messagemap);
+        }
+        messagemap.put("state", "success");
+        messagemap.put("message", "닉네임 " + nickname +"을 사용할 수 있습니다.");
         return ResponseEntity.ok().body(messagemap);
     }
 
@@ -160,7 +176,7 @@ public class UserController {
                                     @RequestParam(name="status") boolean status,
                                     Model model) {
         userService.updateUserStatus(id, status);
-        //todo
+        //todo model로 넘겨주는 parameter 추가 예정,,
         return "redirect:/user/list";
     }
 }

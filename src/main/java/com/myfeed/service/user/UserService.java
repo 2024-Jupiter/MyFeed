@@ -13,6 +13,8 @@ public interface UserService {
 
     User findByEmail(String email);
 
+    User findByNickname(String nickname);
+
     void updateUser(Long id, UpdateDto updateDto);
 
     void updateUserStatus(Long id, boolean status);

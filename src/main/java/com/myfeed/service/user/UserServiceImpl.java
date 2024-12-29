@@ -22,13 +22,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUsername(String uname) { // todo
+    public User findByUsername(String uname) {
         return userRepository.findByUsername(uname).orElse(null);
     }
 
     @Override
     public User findByEmail(String email) {
         return userRepository.findByEmail(email).orElse(null);
+    }
+
+    @Override
+    public User findByNickname(String nickname) {return userRepository.findByNickname(nickname).orElse(null);
     }
 
     @Override

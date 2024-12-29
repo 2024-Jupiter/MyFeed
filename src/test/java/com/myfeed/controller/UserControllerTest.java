@@ -1,13 +1,11 @@
 package com.myfeed.controller;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.config.http.MatcherType.mvc;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.myfeed.MyfeedApplication;
 import com.myfeed.jwt.JwtRequestFilter;
 import com.myfeed.jwt.JwtTokenUtil;
 import com.myfeed.model.user.RegisterDto;
@@ -23,12 +21,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+//MyFeedApplication.java에서 @EnableJpaAuditing 주석 처리 필요//
 @WebMvcTest(UserController.class) //
 //@ContextConfiguration(classes = MyfeedApplication.class)
 @AutoConfigureMockMvc(addFilters = false) // Security 필터 비활성화
