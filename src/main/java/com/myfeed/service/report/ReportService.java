@@ -2,27 +2,40 @@ package com.myfeed.service.report;
 
 import com.myfeed.model.post.Post;
 import com.myfeed.model.reply.Reply;
+import com.myfeed.model.report.ProcessStatus;
 import com.myfeed.model.report.Report;
 import com.myfeed.model.report.ReportType;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface ReportService {
+    public static final int PAGE_SIZE = 10;
+
+    // 신고 불러 오기
     Report findByRid(long rpId);
 
-    List<Report> getReportByPostPid(long pid);
+    // 처리 대기 신고 리스트 (차단)
+    Page<Report> getReportByPendingStatus(int page, ProcessStatus status);
 
-    List<Report> getReportByReplyRid(long rid);
+    // 처리 완료 신고 리스트 (차단 해제)
+    Page<Report> getReportByCompletedStatus(int page, ProcessStatus status);
 
-    List<Report> getReportByUserUid(long uid);
+    // 게시글 신고
+    Report reportPost(ReportType reportType, long pid, String description);
 
-    Report saveReport(ReportType reportType, long pid, long uid, long rid, String description);
+    // 댓글 신고
+    Report reportReply(ReportType reportType, long rid, String description);
 
-    void unBlockPost(long pid);
+    // 게시글 차단
+    void BlockPost(long pid, long rpId);
 
-    void unBlockReply(long rid);
+    // 게시글 해제
+    void unBlockPost(long pid, long rpId);
 
-    void unBlockUser(long uid);
+    // 댓글 차단
+    void BlockReply(long rid, long rpId);
 
-    void blockUser(long uid);
+    // 댓긍 해제
+    void unBlockReply(long rid, long rpId);
 }

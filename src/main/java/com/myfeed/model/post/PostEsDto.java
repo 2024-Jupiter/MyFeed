@@ -1,6 +1,7 @@
 package com.myfeed.model.post;
 
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class PostEsDto {
+    @Column(name = "postEs")
     private PostEs postEs;
-    private double matchScore;
 
+    @Column(name = "match_score")
+    private double matchScore;
 }
