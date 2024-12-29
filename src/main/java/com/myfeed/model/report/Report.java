@@ -1,8 +1,8 @@
 package com.myfeed.model.report;
 
+import com.myfeed.model.base.BaseTimeEntity;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.reply.Reply;
-import com.myfeed.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,28 +17,28 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Report {
+public class Report extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long rpId;
+    @Column(name = "id")
+    private Long id;
 
     @Enumerated(EnumType.STRING)
-    private ReportType reportType;
+    @Column(name = "type", nullable = false)
+    private ReportType type;
 
     @ManyToOne
-    @JoinColumn(name = "id")
-    private User user;
-
-    @ManyToOne
-    @JoinColumn(name = "pid")
+    @JoinColumn(name = "post_id", nullable = true)
     private Post post;
 
     @ManyToOne
-    @JoinColumn(name = "rid")
+    @JoinColumn(name = "reply_id", nullable = true)
     private Reply reply;
 
-    @Column(length = 500)
+    @Column(name = "description")
     private String description;
 
-    private LocalDateTime reportedAt;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ProcessStatus status = ProcessStatus.RELEASED;
 }

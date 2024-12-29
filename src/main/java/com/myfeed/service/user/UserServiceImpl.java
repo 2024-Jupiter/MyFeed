@@ -2,7 +2,6 @@ package com.myfeed.service.user;
 
 import com.myfeed.model.user.User;
 import com.myfeed.repository.UserRepository;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

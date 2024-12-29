@@ -1,7 +1,6 @@
 package com.myfeed.service.user;
 
 import com.myfeed.model.user.User;
-import java.util.List;
 import org.springframework.data.domain.Page;
 
 public interface UserService {

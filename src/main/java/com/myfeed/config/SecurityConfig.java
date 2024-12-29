@@ -12,11 +12,13 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
     @Autowired private AuthenticationFailureHandler failureHandler;
     @Autowired private MyOAuth2UserService myOAuth2UserService;
+    @Autowired private JwtRequestFilter jwtRequestFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -28,8 +30,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(auth -> auth
-                         .loginPage("/user/login") // template 위치
-                        .loginProcessingUrl("/api/user/login")  // 엔드포인트
+                        .loginPage("/api/user/login") // template return url
+                        .loginProcessingUrl("/api/user/login")  // post 엔드포인트
                         .usernameParameter("email")
                         .passwordParameter("pwd")
                         .defaultSuccessUrl("/api/user/loginSuccess", true)
@@ -49,13 +51,11 @@ public class SecurityConfig {
                         .failureHandler(failureHandler)
                 )
         ;
+        // JwtRequestFilter 추가
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+
 
         return http.build();
-    }
-
-    @Bean
-    public JwtRequestFilter jwtRequestFilter() {
-        return new JwtRequestFilter();
     }
 
     @Bean
