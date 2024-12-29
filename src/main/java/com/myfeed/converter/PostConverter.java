@@ -18,7 +18,7 @@ public class PostConverter {
                 .userStatus(post.getUser().isDeleted() ? "DELETED" : "ACTIVE")
                 .title(post.getTitle())
                 .content(post.getContent())
-                .category(PostCategory.valueOf(post.getCategory().name()))
+                .category(Category.valueOf(post.getCategory().name()))
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikeCount())
                 .blockStatus(post.getStatus())

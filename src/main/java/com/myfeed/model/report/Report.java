@@ -24,8 +24,8 @@ public class Report extends BaseTimeEntity {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "report_type", nullable = false)
-    private ReportType reportType;
+    @Column(name = "type", nullable = false)
+    private ReportType type;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = true)

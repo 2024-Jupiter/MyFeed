@@ -49,7 +49,7 @@ public class ReportServiceImpl implements ReportService {
         Post post = postRepository.findById(pid).orElse(null);
 
         Report report = Report.builder()
-                .reportType(reportType).post(post).description(description).status(ProcessStatus.PENDING)
+                .type(reportType).post(post).description(description).status(ProcessStatus.PENDING)
                 .build();
 
         return reportRepository.save(report);
@@ -61,7 +61,7 @@ public class ReportServiceImpl implements ReportService {
         Reply reply = replyRepository.findById(rid).orElse(null);
 
         Report report = Report.builder()
-                .reportType(reportType).reply(reply).description(description).status(ProcessStatus.PENDING)
+                .type(reportType).reply(reply).description(description).status(ProcessStatus.PENDING)
                 .build();
 
         return reportRepository.save(report);
