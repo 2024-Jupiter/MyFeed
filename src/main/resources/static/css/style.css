@@ -10219,7 +10219,7 @@ a.text-dark:focus {
 .login .rectangle {
   position: absolute;
   width: 100%;
-  height: 220px;
+  height: 300px;
   top: 0;
   left: 0;
   background-color: #ffffff;
@@ -10256,7 +10256,7 @@ a.text-dark:focus {
   position: absolute;
   width: 90%;
   height: 4%;
-  top: 18.5%;
+  top: 15.9%;
   /* left: 62px; */
   background-color: #fee500;
 }
@@ -10281,9 +10281,27 @@ a.text-dark:focus {
   border-color: #dedede;
 }
 
+.login .rectangle-5 {
+  position: absolute;
+  width: 90%;
+  height: 4%;
+  top: 20.5%;
+  background-color: #ffffff;
+  border: 1px solid #dedede;
+}
+
+.login .rectangle-6 {
+  position: absolute;
+  width: 90%;
+  height: 4%;
+  top: 25.2%;
+  background-color: #ffffff;
+  border: 1px solid #dedede;
+}
+
 .login .text-wrapper-2 {
   width: 20%;
-  top: 25%;
+  top: 31%;
   left: 71px;
   color: #000000;
   font-size: 12px;
@@ -10298,7 +10316,7 @@ a.text-dark:focus {
 
 .login .text-wrapper-3 {
   width: 37%;
-  top: 25%;
+  top: 31%;
   left: 137px;
   color: #000000;
   font-size: 12px;
@@ -10321,6 +10339,20 @@ a.text-dark:focus {
 }
 
 .login .kakao {
+  position: absolute;
+  top: 132px;
+  left: 133px;
+  font-family: 'Noto Sans-Medium', Helvetica;
+  font-weight: 500;
+  color: #000000;
+  font-size: 13px;
+  letter-spacing: 0;
+  line-height: normal;
+  padding-top: 1%;
+  cursor: pointer;
+}
+
+.login .github {
   position: absolute;
   top: 132px;
   left: 133px;
