@@ -1,9 +1,8 @@
 package com.myfeed.model.report;
 
-import com.myfeed.model.post.BlockStatus;
+import com.myfeed.model.base.BaseTimeEntity;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.reply.Reply;
-import com.myfeed.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +17,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Report {
+public class Report extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -42,10 +41,4 @@ public class Report {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ProcessStatus status = ProcessStatus.RELEASED;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updateAt;
 }

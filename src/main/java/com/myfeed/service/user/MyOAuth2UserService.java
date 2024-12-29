@@ -2,11 +2,13 @@ package com.myfeed.service.user;
 
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.MyUserDetails;
+import com.myfeed.model.user.Role;
+
+import java.time.LocalDateTime;
+
 import com.myfeed.model.user.User;
-import java.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -25,7 +27,7 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        String uid, email, uname, profileUrl;
+        String email, uname, profileUrl;
         String hashedPwd = bCryptPasswordEncoder.encode("Social Login");
         User user = null;
 
@@ -47,10 +49,67 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
                     nickname = (nickname == null) ? "k_"+kid : nickname;
                     email = (String) account.get("email");
                     profileUrl = (String) properties.get("profile_image");
-                    user = new User(email, hashedPwd, nickname, nickname,profileUrl, LoginProvider.KAKAO);
+                    user = User.builder()
+                                    .email(email)
+                                    .password(hashedPwd)
+                                    .username(nickname)
+                                    .nickname(nickname).role(Role.USER)
+                                    .isActive(true)
+                                    .profileImage(profileUrl)
+                                    .loginProvider(LoginProvider.KAKAO)
+                                    .build();
                     userService.registerUser(user);
                 }
                 break;
+
+                case "google":
+                    email = oAuth2User.getAttribute("email");
+                    user = userService.findByEmail(email);
+                    if (user == null) {
+                        uname = oAuth2User.getAttribute("name");
+                        String sub = oAuth2User.getAttribute("sub");
+                        uname = (uname == null) ? "g_"+sub : uname;
+                        email = oAuth2User.getAttribute("email");
+                        profileUrl = oAuth2User.getAttribute("picture");
+                        user = User.builder()
+                                .email(email)
+                                .password(hashedPwd)
+                                .username(uname)
+                                .nickname(uname)
+                                .role(Role.USER)
+                                .isActive(true)
+                                .profileImage(profileUrl)
+                                .loginProvider(LoginProvider.GOOGLE)
+                                .build();
+                        userService.registerUser(user);
+                        log.info("구글 계정을 통해 회원가입이 되었습니다.: " + user.getUsername());
+                    }
+                    break;
+
+                case "github":
+                    email = oAuth2User.getAttribute("email");
+                    user = userService.findByEmail(email);
+                    if (user == null) {
+                        uname = oAuth2User.getAttribute("name");
+                        int id = oAuth2User.getAttribute("id");
+                        uname = (uname == null) ? "g_"+id : uname;
+                        email = oAuth2User.getAttribute("email");
+                        profileUrl = oAuth2User.getAttribute("avatar_url");
+                        user = User.builder()
+                                .email(email)
+                                .password(hashedPwd)
+                                .username(uname)
+                                .nickname(uname)
+                                .role(Role.USER)
+                                .isActive(true)
+                                .profileImage(profileUrl)
+                                .loginProvider(LoginProvider.GITHUB)
+                                .build();
+                        userService.registerUser(user);
+                        log.info("깃허브 계정을 통해 회원가입이 되었습니다. " + user.getUsername());
+                    }
+                    break;
+
 
         }
         return new MyUserDetails(user, oAuth2User.getAttributes());

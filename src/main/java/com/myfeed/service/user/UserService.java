@@ -1,8 +1,10 @@
 package com.myfeed.service.user;
 
 import com.myfeed.model.user.User;
+import org.springframework.data.domain.Page;
 
 public interface UserService {
+    public static final int PAGE_SIZE = 20;
 
     User findById(Long uid);
 
@@ -15,4 +17,8 @@ public interface UserService {
     void registerUser(User user);
 
     void deleteUser(Long uid);
+
+    void setTempPassword(String email, String tempPassword);
+
+    Page<User> getPagedUser(int page, boolean isActive);
 }
