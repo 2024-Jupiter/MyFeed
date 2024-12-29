@@ -1,7 +1,9 @@
 package com.myfeed.service.user;
 
+import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
 import com.myfeed.repository.UserRepository;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,8 +36,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(User user) {
+    public void updateUser(Long id, UpdateDto updateDto) {
+        User user = findById(id);
+        String hashedPwd = BCrypt.hashpw(updateDto.getPwd(), BCrypt.gensalt());
+        user.setPassword(hashedPwd);
+        user.setUsername(updateDto.getUname());
+        user.setNickname(updateDto.getNickname());
+        user.setProfileImage(updateDto.getProfileImage());
         userRepository.save(user);
+    }
+
+    @Override
+    public void updateUserStatus(Long id, boolean status) {
+        User user = findById(id);
+        if (user.isActive() != status) {
+            user.setActive(status);
+            userRepository.save(user);
+        }
     }
 
     @Override
