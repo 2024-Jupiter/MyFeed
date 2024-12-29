@@ -3,6 +3,7 @@ package com.myfeed.service.user;
 import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
 import com.myfeed.repository.UserRepository;
+import java.time.LocalDateTime;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -65,8 +66,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(Long uid) {
-        userRepository.deleteById(uid);
+    public void deleteUser(Long uid) { // soft delete
+        User user = findById(uid);
+        user.setDeleted(true);
+        user.setDeletedAt(LocalDateTime.now());
+        userRepository.save(user);
     }
 
     @Override

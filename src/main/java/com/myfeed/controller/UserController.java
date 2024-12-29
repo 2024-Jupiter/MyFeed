@@ -96,10 +96,8 @@ public class UserController {
     // 회원 탈퇴
     @GetMapping("/{id}")
     public String delete(@PathVariable Long id) {
-        User user = userService.findById(id);
-        user.setDeleted(true);
-        user.setDeletedAt(LocalDateTime.now());
-        return "redirect:/user/list";
+        userService.deleteUser(id); //soft delete
+        return "redirect:/home";
     }
 
     // 회원정보 상세보기

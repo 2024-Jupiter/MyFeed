@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.config.http.MatcherType.mvc;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.myfeed.MyfeedApplication;
@@ -213,7 +214,7 @@ class UserControllerTest {
 
     }
 
-    @DisplayName("회원가입 실패 - 이미 가입된 이메일")
+    @DisplayName("이메일 중복확인 실패 - 이미 가입된 이메일")
     @Test
     void emailAlreadyExist() throws Exception {
         // given
@@ -232,7 +233,44 @@ class UserControllerTest {
                 .andExpect(status().isBadRequest())
                 .andDo(print());
     }
+    @DisplayName("이메일 중복확인 성공 - 신규 이메일")
+    @Test
+    void emailNotExist() throws Exception {
+        // given
+        User user = User.builder()
+                .email("sarah2316@naver.com").password("password")
+                .username("혜란")
+                .nickname("gPfks")
+                .phoneNumber("1234")
+                .build();
+        Mockito.when(userService.findByEmail("sarah2316@naver.com")).thenReturn(user);
 
 
+        // when
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/check-email")
+                        .param("email","sarah1217@naver.com").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @DisplayName("회원탈퇴성공")
+    @Test
+    void userDelete() throws Exception {
+        // given
+        User user = User.builder()
+                .email("sarah2316@naver.com").password("password")
+                .username("혜란")
+                .nickname("gPfks")
+                .phoneNumber("1234")
+                .build();
+        Long uid = 1L;
+        Mockito.doNothing().when(userService).deleteUser(uid);
+
+        // when
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/home"))
+                .andDo(print());
+    }
 
 }
