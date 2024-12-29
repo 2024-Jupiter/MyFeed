@@ -32,6 +32,7 @@ public class PostServiceImpl implements PostService {
         return postRepository.findById(pid).orElse(null);
     }
 
+    // 게시글의 사용자 아이디 가져오기
     @Override
     public User getByUserUid(long uid) {
         return postRepository.findByUserUid(uid);

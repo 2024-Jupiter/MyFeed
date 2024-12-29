@@ -11,6 +11,7 @@ public interface PostService {
     // 게시글 가져오기
     Post findByPid(long pid);
 
+    // 게시글의 사용자 아이디 가져오기
     User getByUserUid(long uid);
 
     // 게시글 작성

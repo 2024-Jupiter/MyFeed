@@ -1,5 +1,6 @@
 package com.myfeed.controller;
 
+import com.myfeed.model.post.Post;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.report.ReportType;
 import com.myfeed.service.reply.ReplyService;
@@ -62,11 +63,17 @@ public class ReplyController {
     public String saveReportForm() {
         return "api/report/save";
     }
-    // 신고
+    // 신고 (삭제된 사용자는 신고 접수 불가)
     @PostMapping("/report")
-    public String saveReportProc(ReportType reportType, @RequestParam long rid, @RequestParam(required = false) String description) {
-        reportService.reportReply(reportType, rid, description);
+    public String saveReportProc(ReportType reportType, @RequestParam long rid,
+                                 @RequestParam(required = false) String description, Model model) {
         Reply reply = replyService.findByRid(rid);
+        if (!reply.getUser().isDeleted()) {
+            reportService.reportPost(reportType, rid, description);
+            model.addAttribute("message", "댓글 신고가 성공적으로 처리되었습니다.");
+        } else {
+            model.addAttribute("message", "삭제된 사용자입니다.");
+        }
         return "redirect:/api/post/detail/" + reply.getPost().getId();
     }
 }

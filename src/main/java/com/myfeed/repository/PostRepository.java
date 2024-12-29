@@ -14,6 +14,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     // 내 게시글 페이지네이션
     Page<Post> findByUserUid(long uid, Pageable pageable);
 
+    // 게시글의 사용자 아이디 가져오기
     User findByUserUid(long uid);
 
     // 조회수 증가

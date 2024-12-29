@@ -21,7 +21,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -175,11 +174,17 @@ public class PostController {
     public String saveReportForm() {
         return "api/report/save";
     }
-    // 신고
+    // 신고 (삭제된 사용자는 신고 접수 불가)
     @PostMapping("/report")
-    public String saveReportProc(ReportType reportType,
-                                 @RequestParam long pid, @RequestParam(required = false) String description) {
-        reportService.reportPost(reportType, pid, description);
+    public String saveReportProc(ReportType reportType, @RequestParam long pid,
+                                 @RequestParam(required = false) String description, Model model) {
+        Post post = postService.findByPid(pid);
+        if (!post.getUser().isDeleted()) {
+            reportService.reportPost(reportType, pid, description);
+            model.addAttribute("message", "게시글 신고가 성공적으로 처리되었습니다.");
+        } else {
+            model.addAttribute("message", "삭제된 사용자입니다.");
+        }
         return "redirect:/api/post/detail/" + pid;
     }
 }
