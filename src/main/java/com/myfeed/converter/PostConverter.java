@@ -3,6 +3,7 @@ package com.myfeed.converter;
 import com.myfeed.model.post.*;
 import com.myfeed.model.reply.Reply;
 
+import com.myfeed.model.user.User;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
