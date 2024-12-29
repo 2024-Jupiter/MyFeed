@@ -1,6 +1,7 @@
 package com.myfeed.controller;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.config.http.MatcherType.mvc;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -9,11 +10,13 @@ import com.myfeed.MyfeedApplication;
 import com.myfeed.jwt.JwtRequestFilter;
 import com.myfeed.jwt.JwtTokenUtil;
 import com.myfeed.model.user.RegisterDto;
+import com.myfeed.model.user.User;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.user.UserService;
 import com.nimbusds.jose.shaded.gson.Gson;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -208,6 +211,26 @@ class UserControllerTest {
                 .andDo(print());
         // Body = {"registerDto":"비밀번호가 일치하지 않습니다.","pwd":"8자리 이상의 비밀번호를 입력하세요."}
 
+    }
+
+    @DisplayName("회원가입 실패 - 이미 가입된 이메일")
+    @Test
+    void emailAlreadyExist() throws Exception {
+        // given
+        User user = User.builder()
+                .email("sarah2316@naver.com").password("password")
+                .username("혜란")
+                .nickname("gPfks")
+                .phoneNumber("1234")
+                .build();
+        Mockito.when(userService.findByEmail("sarah2316@naver.com")).thenReturn(user);
+
+
+        // when
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/check-email")
+                .param("email","sarah2316@naver.com").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
     }
 
 

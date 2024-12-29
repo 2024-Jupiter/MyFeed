@@ -1,5 +1,6 @@
 package com.myfeed.controller;
 
+import co.elastic.clients.elasticsearch.watcher.ScheduleTriggerEvent;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
@@ -11,9 +12,11 @@ import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import javax.crypto.MacSpi;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -72,6 +75,21 @@ public class UserController {
         userService.updateUser(id, updateDto);
         messagemap.put("success","회원정보가 수정되었습니다.");
         return ResponseEntity.ok(messagemap); // 이후 해당 user detail 페이지로 리다이렉트
+    }
+
+    @GetMapping("/check-email")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkUserExist(@RequestParam(name="email") String email) {
+        Map<String, Object> messagemap = new HashMap<>();
+        // 만약 해당 email 가진 email이 회원 중에 있으면 return responseEntity.bad
+        if (userService.findByEmail(email) != null) {
+            messagemap.put("state", "error");
+            messagemap.put("message", "이미 회원가입된 이메일입니다.");
+            return ResponseEntity.badRequest().body(messagemap);
+        }
+        messagemap.put("state", "success");
+        messagemap.put("message", "이메일을 사용할 수 있습니다.");
+        return ResponseEntity.ok().body(messagemap);
     }
 
     // 회원 탈퇴
