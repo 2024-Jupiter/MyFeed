@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class PostConverter {
-
     // JPA 엔티티 -> Elasticsearch 문서 변환
     public static PostEs toElasticsearchDocument(Post post) {
         return PostEs.builder()
