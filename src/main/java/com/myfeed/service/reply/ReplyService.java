@@ -11,13 +11,18 @@ import java.util.List;
 public interface ReplyService {
     public static final int PAGE_SIZE = 10;
 
+    // 댓글 가져오기
     Reply findByRid(long rid);
 
+    // 댓글 작성
     Reply createReply(long uid, long pid, String content);
 
+    // 게시글 내 댓글 페이지네이션
     Page<Reply> getPageByPostContaining(int page, Post post);
 
+    // 댓글 수정
     void updateReply(Reply reply);
 
-    // void deleteReply(long cid);
+    // 댓글 삭제
+    void deleteReply(long cid);
 }

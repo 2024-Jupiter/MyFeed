@@ -6,6 +6,7 @@ import com.myfeed.model.post.Image;
 import com.myfeed.model.post.Post;;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.report.ReportType;
+import com.myfeed.model.user.User;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.reply.ReplyService;
 import com.myfeed.service.report.ReportService;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,11 +33,12 @@ public class PostController {
     @Autowired ReplyService replyService;
     @Autowired ReportService reportService;
 
+    // 게시글 작성
     @GetMapping("/create")
     public String CreatePostForm() {
         return "api/post/create";
     }
-
+    // 게시글 작성
     @PostMapping("/create")
     public String createPostProc(@PathVariable long uid, @RequestParam Category category,
                                  @RequestParam String title, @RequestParam String content, @RequestParam String imgSrc) {
@@ -45,17 +46,24 @@ public class PostController {
         return "redirect:/api/postEs/list";
     }
 
-    // 게시글 페이지네이션
+    // 내 게시글 페이지네이션
     @GetMapping("/myList/{uid}")
     public  String myList(@RequestParam(name="p", defaultValue = "1") int page,
                           @PathVariable long uid, HttpSession session, Model model) {
         Page<Post> myPostPage = postService.getMyPostList(page, uid);
 
         List<Post> filteredMyList = new ArrayList<>();
+        User user = postService.getByUserUid(uid);
         for (Post post: filteredMyList) {
+            if (user.isDeleted()) {
+                filteredMyList.add(post);
+            }
             if (post.getStatus() == BlockStatus.NORMAL_STATUS) {
                 filteredMyList.add(post);
-                model.addAttribute("message", "차단된 게시글입니다.");
+            } else {
+                Post blockedPostPlaceholder = new Post();
+                blockedPostPlaceholder.setTitle("차단된 게시글입니다.");
+                filteredMyList.add(blockedPostPlaceholder);
             }
         }
 
@@ -78,12 +86,13 @@ public class PostController {
         return "api/post/myList" + uid;
     }
 
-    // 댓글 페이지네이션
+    // 게시글 상페보기 - 댓글 페이지네이션
     @GetMapping("detail/{pid}")
     public String detail(@RequestParam(name="p", defaultValue = "1") int page, @PathVariable long pid,
                          @RequestParam(name = "likeAction", required = false) String likeAction,
                          HttpSession session, Model model) {
         Post post = postService.findByPid(pid);
+        User user = post.getUser();
         List<Image> imgaeList = post.getImages();
 
         postService.incrementViewCount(pid);
@@ -97,9 +106,15 @@ public class PostController {
 
         List<Reply> filteredReplyList = new ArrayList<>();
         for (Reply reply : pagedResult.getContent()) {
+            if (user.isDeleted()) {
+                filteredReplyList.add(reply);
+            }
             if (reply.getStatus() == BlockStatus.NORMAL_STATUS) {
                 filteredReplyList.add(reply);
-                model.addAttribute("message", "차단된 댓글입니다.");
+            } else {
+                Reply blockedReplyPlaceholder = new Reply();
+                blockedReplyPlaceholder.setContent("차단된 댓글입니다.");
+                filteredReplyList.add(blockedReplyPlaceholder);
             }
         }
 
@@ -125,13 +140,14 @@ public class PostController {
         return "api/post/detail/" + pid;
     }
 
+    // 게시글 수정
     @GetMapping("/update/{pid}")
     public String updatePostForm(@PathVariable long pid, Model model) {
         Post post = postService.findByPid(pid);
         model.addAttribute("post", post);
         return "api/post/update";
     }
-
+    // 게시글 수정
     @PreAuthorize("#user.id == authentication.principal.id")
     @PostMapping("/update")
     public String updatePostProc(@RequestBody Post post) {
@@ -140,12 +156,12 @@ public class PostController {
         updatedPost.setTitle(post.getTitle());
         updatedPost.setContent(post.getContent());
         updatedPost.setImages(post.getImages());
-        updatedPost.setUpdateAt(LocalDateTime.now());
 
         postService.updatePost(updatedPost);
         return "redirect:/api/post/detail/" + post.getId();
     }
 
+    // 게시글 수정
     @PreAuthorize("#user.id == authentication.principal.id")
     @GetMapping("/delete/{pid}")
     public String delete(@PathVariable long pid) {
@@ -153,15 +169,22 @@ public class PostController {
         return "redirect:/api/post/myList";
     }
 
+    // 신고
     @GetMapping("/report/{pid}")
     public String saveReportForm() {
         return "api/report/save";
     }
-
+    // 신고 (삭제된 사용자는 신고 접수 불가)
     @PostMapping("/report")
-    public String saveReportProc(ReportType reportType,
-                                 @RequestParam long pid, @RequestParam(required = false) String description) {
-        reportService.reportPost(reportType, pid, description);
+    public String saveReportProc(ReportType reportType, @RequestParam long pid,
+                                 @RequestParam(required = false) String description, Model model) {
+        Post post = postService.findByPid(pid);
+        if (!post.getUser().isDeleted()) {
+            reportService.reportPost(reportType, pid, description);
+            model.addAttribute("message", "게시글 신고가 성공적으로 처리되었습니다.");
+        } else {
+            model.addAttribute("message", "삭제된 사용자입니다.");
+        }
         return "redirect:/api/post/detail/" + pid;
     }
 }
