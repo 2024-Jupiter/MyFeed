@@ -4,6 +4,7 @@ import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.MyUserDetails;
 import com.myfeed.model.user.Role;
 
+import com.myfeed.model.user.User;
 import java.time.LocalDateTime;
 
 import com.myfeed.model.user.User;
