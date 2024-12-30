@@ -1,8 +1,7 @@
-package com.myfeed.controller;
+package com.myfeed.email;
 
-import com.myfeed.model.email.EmailMessage;
-import com.myfeed.model.email.EmailPostDto;
-import com.myfeed.service.email.EmailService;
+import com.myfeed.email.model.EmailMessage;
+import com.myfeed.email.model.EmailPostDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/send-email")
 @RestController
 @RequiredArgsConstructor
-public class EmailController {
+public class EmailController { // todo 형식
 
     private final EmailService emailService;
 
