@@ -52,6 +52,32 @@ public class ReportController {
         return "api/admin/report/pendingList/" + status;
     }
 
+    // 상세 보기 (게시글 & 댓글 별로 맞게 보여줌)
+    @GetMapping("/detail/{id}")
+    public  String detail(@PathVariable long id, @RequestParam long pid, @RequestParam long rid, Model model) {
+        Report report = reportService.findByRid(id);
+
+        ProcessStatus status = report.getStatus();
+        boolean isPostMatch = report.getPost() != null && report.getPost().getId() == pid;
+        boolean isReplyMatch = report.getReply() != null && report.getReply().getId() == rid;
+
+        if (status == ProcessStatus.PENDING) {
+            if (isPostMatch) {
+                model.addAttribute("pendingPost", report);
+            } else if (isReplyMatch) {
+                model.addAttribute("pendingReply", report);
+            }
+        } else if (status == ProcessStatus.COMPLETED) {
+            if (isPostMatch) {
+                model.addAttribute("completedPost", report);
+            } else if (isReplyMatch) {
+                model.addAttribute("completedReply", report);
+            }
+        }
+
+        return "api/admin/report/detail";
+    }
+
     // 신고 완료 리스트(해제 가능) 페이지네이션 - COMPLETED
     @GetMapping("/completedList/{status}")
     @CheckPermission("ADMIN")

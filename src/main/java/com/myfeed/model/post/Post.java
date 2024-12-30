@@ -67,5 +67,4 @@ public class Post extends BaseTimeEntity {
         this.images.add(image);
         image.setPost(this);
     }
-
 }

@@ -62,6 +62,4 @@ public class PostEs extends BaseTimeEntity {
 
     @Field(type = FieldType.Keyword)
     private List<String> imageUrls;
-
-
 }

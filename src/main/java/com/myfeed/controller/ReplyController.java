@@ -1,6 +1,5 @@
 package com.myfeed.controller;
 
-import com.myfeed.model.post.Post;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.report.ReportType;
 import com.myfeed.service.reply.ReplyService;
