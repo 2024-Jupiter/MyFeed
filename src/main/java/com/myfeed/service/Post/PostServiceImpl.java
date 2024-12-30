@@ -5,9 +5,9 @@ import com.myfeed.model.post.Image;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.user.Role;
 import com.myfeed.model.user.User;
-import com.myfeed.repository.PostRepository;
-import com.myfeed.repository.UserRepository;
 import com.myfeed.sync.PostSyncEvent;
+import com.myfeed.repository.jpa.PostRepository;
+import com.myfeed.repository.jpa.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
 @Service
 public class PostServiceImpl implements PostService {
     @Autowired PostRepository postRepository;
@@ -73,7 +72,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<Post> getMyPostList(int page, long uid) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        return postRepository.findByUserUid(uid, pageable);
+        return postRepository.findByUserId(uid, pageable);
     }
 
     // 게시글의 사용자 아이디 가져오기
@@ -117,6 +116,16 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+<<<<<<< HEAD
+=======
+    // 내 게시글 페이지네이션
+    @Override
+    public Page<Post> getMyPostList(int page, long uid) {
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+        return postRepository.findByUserId(uid, pageable);
+    }
+
+>>>>>>> 0b1e490525da3855b672b65c1c128e7ca8a1799e
     // 게시글 수정
     @Override
     public void updatePost(Post post) {
@@ -136,10 +145,10 @@ public class PostServiceImpl implements PostService {
     }
 
     // 좋아요 증가
-    @Override
-    public void incrementLikeCount(long pid) {
+    @Override    public void incrementLikeCount(long pid) {
         postRepository.incrementLikeCount(pid);
     }
+
 
     // 좋아요 감소
     @Override

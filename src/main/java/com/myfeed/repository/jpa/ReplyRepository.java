@@ -1,4 +1,4 @@
-package com.myfeed.repository;
+package com.myfeed.repository.jpa;
 
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.post.Post;

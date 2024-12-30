@@ -6,16 +6,14 @@ import com.myfeed.model.reply.Reply;
 import com.myfeed.model.report.ProcessStatus;
 import com.myfeed.model.report.Report;
 import com.myfeed.model.report.ReportType;
-import com.myfeed.repository.PostRepository;
-import com.myfeed.repository.ReplyRepository;
-import com.myfeed.repository.ReportRepository;
+import com.myfeed.repository.jpa.PostRepository;
+import com.myfeed.repository.jpa.ReplyRepository;
+import com.myfeed.repository.jpa.ReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 @Service
 public class ReportServiceImpl implements ReportService {

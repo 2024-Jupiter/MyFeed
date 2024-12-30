@@ -1,5 +1,6 @@
 package com.myfeed.service.user;
 
+import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
 import org.springframework.data.domain.Page;
 
@@ -12,7 +13,11 @@ public interface UserService {
 
     User findByEmail(String email);
 
-    void updateUser(User user);
+    User findByNickname(String nickname);
+
+    void updateUser(Long id, UpdateDto updateDto);
+
+    void updateUserStatus(Long id, boolean status);
 
     void registerUser(User user);
 
