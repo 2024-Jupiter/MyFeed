@@ -1,13 +1,29 @@
 package com.myfeed.service.user;
 
+import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
+import org.springframework.data.domain.Page;
 
 public interface UserService {
-    User findByUid(String uid);
+    public static final int PAGE_SIZE = 20;
 
-    void updateUser(User user);
+    User findById(Long uid);
+
+    User findByUsername(String username);
+
+    User findByEmail(String email);
+
+    User findByNickname(String nickname);
+
+    void updateUser(Long id, UpdateDto updateDto);
+
+    void updateUserStatus(Long id, boolean status);
 
     void registerUser(User user);
 
-    void deleteUser(String uid);
+    void deleteUser(Long uid);
+
+    void setTempPassword(String email, String tempPassword);
+
+    Page<User> getPagedUser(int page, boolean isActive);
 }

@@ -1,39 +1,56 @@
 package com.myfeed.model.user;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.myfeed.model.base.BaseTimeEntity;
+import com.myfeed.model.post.BlockStatus;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
+@Table(name = "users")
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
-public class User {
+@Builder
+public class User extends BaseTimeEntity {
     @Id
-    private String uid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    private String password;
+    @Column(nullable = false)
+    private String email; // 필수값
 
-    private String uname;
+    @Column(nullable = false)
+    private String password; // 필수값
 
-    private String nickname;
+    @Column(nullable = false)
+    private String username;
 
-    private String email;
+    @Column
+    private String phoneNumber; // 폼 로그인 시 필수값
 
-    @Column(nullable = true)
+    @Column(nullable = false)
+    private String nickname; // 필수값
+
+    @Column
     private String profileImage;
 
-    private String role;
+    @Column(nullable = false)
+    private Role role = Role.USER;
 
+    @Column(nullable = false)
+    private LoginProvider loginProvider;
 
-    public User(String uid, String password, String uname, String nickname, String email, String profileImage) {
-        this.uid = uid;
-        this.password = password;
-        this.uname = uname;
-        this.nickname = nickname;
-        this.email = email;
-        this.profileImage = profileImage;
-        this.role = "ROLE_USER";
-    }
+    @Column(nullable = false, name = "state")
+    private boolean isActive = true; // status
+
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
+    @Column
+    private LocalDateTime deletedAt;
 }

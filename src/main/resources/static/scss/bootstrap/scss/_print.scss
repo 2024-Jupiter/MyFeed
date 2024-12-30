@@ -13,7 +13,7 @@
     *,
     *::before,
     *::after {
-      // Bootstrap specific; comment out `color` and `background`
+      // Bootstrap specific; reply out `color` and `background`
       //color: $black !important; // Black prints faster
       text-shadow: none !important;
       //background: transparent !important;
@@ -26,7 +26,7 @@
       }
     }
 
-    // Bootstrap specific; comment the following selector out
+    // Bootstrap specific; reply the following selector out
     //a[href]::after {
     //  content: " (" attr(href) ")";
     //}
@@ -35,7 +35,7 @@
       content: " (" attr(title) ")";
     }
 
-    // Bootstrap specific; comment the following selector out
+    // Bootstrap specific; reply the following selector out
     //
     // Don't show links that are fragment identifiers,
     // or use the `javascript:` pseudo protocol
