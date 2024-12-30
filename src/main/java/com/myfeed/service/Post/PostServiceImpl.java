@@ -1,24 +1,21 @@
 package com.myfeed.service.Post;
 
 import com.myfeed.converter.PostConverter;
-import com.myfeed.model.base.BaseTimeEntity;
 import com.myfeed.model.post.Category;
 import com.myfeed.model.post.Image;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.post.PostEs;
 import com.myfeed.model.user.Role;
 import com.myfeed.model.user.User;
-import com.myfeed.repository.PostEsRepository;
-import com.myfeed.repository.PostRepository;
-import com.myfeed.repository.UserRepository;
+import com.myfeed.repository.elasticsearch.PostEsRepository;
+import com.myfeed.repository.jpa.PostRepository;
+import com.myfeed.repository.jpa.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -35,7 +32,7 @@ public class PostServiceImpl implements PostService {
     // 게시글의 사용자 아이디 가져오기
     @Override
     public User getByUserUid(long uid) {
-        return postRepository.findByUserUid(uid);
+        return postRepository.findByUserId(uid);
     }
 
     // 게시글 작성 (관리자 만 뉴스 글 작성 가능)
@@ -83,7 +80,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<Post> getMyPostList(int page, long uid) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        return postRepository.findByUserUid(uid, pageable);
+        return postRepository.findByUserId(uid, pageable);
     }
 
     // 게시글 수정
@@ -110,10 +107,10 @@ public class PostServiceImpl implements PostService {
     }
 
     // 좋아요 증가
-    @Override
-    public void incrementLikeCount(long pid) {
+    @Override    public void incrementLikeCount(long pid) {
         postRepository.incrementLikeCount(pid);
     }
+
 
     // 좋아요 감소
     @Override
