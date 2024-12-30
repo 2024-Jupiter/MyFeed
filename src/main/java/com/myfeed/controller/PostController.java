@@ -6,6 +6,7 @@ import com.myfeed.model.post.Image;
 import com.myfeed.model.post.Post;;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.report.ReportType;
+import com.myfeed.model.user.Role;
 import com.myfeed.model.user.User;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.reply.ReplyService;
@@ -33,17 +34,54 @@ public class PostController {
     @Autowired ReplyService replyService;
     @Autowired ReportService reportService;
 
-    // 게시글 작성
-    @GetMapping("/create")
-    public String CreatePostForm() {
-        return "api/post/create";
+    @PostMapping
+    public Post createOrUpdatePost(@PathVariable long uid , @RequestBody Post post) {
+        List<User> userList = postService.getByUserUid(uid);
+        Category category = Category.GENERAL;
+        for (User user: userList) {
+            if (user.getRole().equals(Role.ADMIN)) {
+                category = Category.NEWS;
+            }
+        }
+
+        List<Image> imgaeList = post.getImages();
+        post = Post.builder()
+                .user(post.getUser())
+                .category(category)
+                .title(post.getTitle())
+                .content(post.getContent())
+                .viewCount(0)
+                .likeCount(0)
+                .status(post.getStatus())
+                .images(imgaeList)
+                .build();
+
+        return postService.createOrUpdatePost(post);
     }
-    // 게시글 작성
-    @PostMapping("/create")
-    public String createPostProc(@PathVariable long uid, @RequestParam Category category,
-                                 @RequestParam String title, @RequestParam String content, @RequestParam String imgSrc) {
-        postService.createPost(uid, category, title, content, imgSrc);
-        return "redirect:/api/postEs/list";
+
+    @DeleteMapping("/{id}")
+    public void deletePost(@PathVariable Long id) {
+        postService.deletePost(id);
+    }
+
+    @GetMapping("/{id}")
+    public Post getPostById(@PathVariable Long id) {
+        return postService.findByPid(id);
+    }
+
+    @PatchMapping("/{id}/views")
+    public Post incrementViews(@PathVariable Long id) {
+        return postService.incrementViews(id);
+    }
+
+    @PatchMapping("/{id}/likes")
+    public Post incrementLikes(@PathVariable Long id) {
+        return postService.incrementLikes(id);
+    }
+
+    @PatchMapping("/{id}/unLikes")
+    public Post decrementLikes(@PathVariable Long id) {
+        return postService.decrementLikes(id);
     }
 
     // 내 게시글 페이지네이션
@@ -53,11 +91,7 @@ public class PostController {
         Page<Post> myPostPage = postService.getMyPostList(page, uid);
 
         List<Post> filteredMyList = new ArrayList<>();
-        User user = postService.getByUserUid(uid);
         for (Post post: filteredMyList) {
-            if (user.isDeleted()) {
-                filteredMyList.add(post);
-            }
             if (post.getStatus() == BlockStatus.NORMAL_STATUS) {
                 filteredMyList.add(post);
             } else {
@@ -95,11 +129,11 @@ public class PostController {
         User user = post.getUser();
         List<Image> imgaeList = post.getImages();
 
-        postService.incrementViewCount(pid);
+        postService.incrementViews(pid);
         if ("like".equals(likeAction)) {
-            postService.incrementLikeCount(pid);
+            postService.incrementLikes(pid);
         } else {
-            postService.decrementLikeCount(pid);
+            postService.incrementLikes(pid);
         }
 
         Page<Reply> pagedResult = replyService.getPageByPostContaining(page, post);
@@ -138,6 +172,20 @@ public class PostController {
         model.addAttribute("endPage", endPage);
         model.addAttribute("pageList", pageList);
         return "api/post/detail/" + pid;
+    }
+
+    /*
+    // 게시글 작성
+    @GetMapping("/create")
+    public String CreatePostForm() {
+        return "api/post/create";
+    }
+    // 게시글 작성
+    @PostMapping("/create")
+    public String createPostProc(@PathVariable long uid, @RequestParam Category category,
+                                 @RequestParam String title, @RequestParam String content, @RequestParam String imgSrc) {
+        postService.createPost(uid, category, title, content, imgSrc);
+        return "redirect:/api/postEs/list";
     }
 
     // 게시글 수정
@@ -187,4 +235,5 @@ public class PostController {
         }
         return "redirect:/api/post/detail/" + pid;
     }
+     */
 }
