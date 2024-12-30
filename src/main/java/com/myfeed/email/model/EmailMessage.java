@@ -1,4 +1,4 @@
-package com.myfeed.model.email;
+package com.myfeed.email.model;
 
 import lombok.Builder;
 import lombok.Getter;
