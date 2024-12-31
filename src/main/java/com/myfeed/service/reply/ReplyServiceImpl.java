@@ -20,15 +20,15 @@ public class ReplyServiceImpl implements ReplyService {
 
     // 댓글 가져오기
     @Override
-    public Reply findByRid(long rid) {
-        return replyRepository.findById(rid).orElse(null);
+    public Reply findByReplyId(long id) {
+        return replyRepository.findById(id).orElse(null);
     }
 
     // 댓글 작성
     @Override
-    public Reply createReply(long uid, long pid, String content) {
-        User user = userRepository.findById(uid).orElse(null);
-        Post post = postRepository.findById(pid).orElse(null);
+    public Reply createReply(long userId, long postId, String content) {
+        User user = userRepository.findById(userId).orElse(null);
+        Post post = postRepository.findById(postId).orElse(null);
         Reply reply = Reply.builder()
                 .user(user).post(post).content(content)
                 .build();
@@ -38,9 +38,9 @@ public class ReplyServiceImpl implements ReplyService {
 
     // 게시글 내 댓글 리스트
     @Override
-    public Page<Reply> getPageByPostContaining(int page, Post post) {
+    public Page<Reply> getPagedRepliesByPost(int page, Post post) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        return replyRepository.findByPostContaining(post, pageable);
+        return replyRepository.findPagedRepliesByPost(post, pageable);
     }
 
     // 댓글 수정
@@ -51,7 +51,7 @@ public class ReplyServiceImpl implements ReplyService {
 
     // 댓글 삭제
     @Override
-    public void deleteReply (long cid) {
-         replyRepository.deleteById(cid);
+    public void deleteReply (long id) {
+         replyRepository.deleteById(id);
     }
 }
