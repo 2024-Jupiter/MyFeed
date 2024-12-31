@@ -75,7 +75,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public Page<Post> getMyPostList(int page, long uid) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        return postRepository.findByUserUid(uid, pageable);
+        return postRepository.findByUserId(uid, pageable);
     }
 
     @Transactional

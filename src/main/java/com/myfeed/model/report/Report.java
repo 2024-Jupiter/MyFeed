@@ -39,7 +39,7 @@ public class Report {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private ProcessStatus status = ProcessStatus.RELEASED;
+    private ProcessStatus processStatus = ProcessStatus.RELEASED;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createAt;
