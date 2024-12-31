@@ -130,7 +130,7 @@ document.getElementById('authNumReq').addEventListener('click', sendNumber);
 
 function sendNumber() {
   let phone = document.getElementById('phone').value.trim();
-  const phoneRegex = /^(01[016789]{1})-?[0-9]{3,4}-?[0-9]{4}$/;
+  const phoneReExp = /^(01[016789]{1})-?[0-9]{3,4}-?[0-9]{4}$/;
 
   if (!phone) {
     Swal.fire({
@@ -141,7 +141,7 @@ function sendNumber() {
     return;
   }
 
-  if (phoneRegex.test(phone)) {
+  if (phoneReExp.test(phone)) {
     const cleanedPhoneNum = phone.replace(/-/g, '');
 
     $.ajax({
@@ -192,7 +192,7 @@ document
 
 function isEmailAvailable() {
   let email = document.getElementById('email').value.trim();
-  let regExp =
+  let emailRegExp =
       /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
 
   if (!email) {
@@ -204,7 +204,7 @@ function isEmailAvailable() {
     return;
   }
 
-  if (!regExp.test(email)) {
+  if (!emailRegExp.test(email)) {
     Swal.fire({
       icon: 'warning',
       text: '이메일 형식이 올바르지 않습니다.',
