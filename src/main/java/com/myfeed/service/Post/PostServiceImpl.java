@@ -24,6 +24,7 @@ public class PostServiceImpl implements PostService {
     @Autowired private ApplicationEventPublisher eventPublisher;
 
     @Transactional
+    @Override
     public Post createOrUpdatePost(Post post) {
         Post savedPost = postRepository.save(post);
         eventPublisher.publishEvent(new PostSyncEvent(savedPost.getId(), "CREATE_OR_UPDATE"));
@@ -32,53 +33,51 @@ public class PostServiceImpl implements PostService {
     }
 
     @Transactional
-    public void deletePost(long id) {
+    @Override
+    public void deletePostById(long id) {
         postRepository.deleteById(id);
         eventPublisher.publishEvent(new PostSyncEvent(id, "DELETE"));
     }
 
+    // 조회수 증가 (동시성)
     @Transactional
-    public Post incrementViews(long id) {
-        Post post = postRepository.findById(id).orElse(null);
-        post.setViewCount(post.getViewCount() + 1);
-        return postRepository.save(post);
+    @Override
+    public void incrementPostViewCountById(long id) {
+        postRepository.updateViewCountById(id);
     }
 
+    // 좋아요 증가 (동시성)
     @Transactional
-    public Post incrementLikes(long id) {
-        Post post = postRepository.findById(id).orElse(null);
-        post.setLikeCount(post.getLikeCount() + 1);
-        return postRepository.save(post);
+    @Override
+    public void incrementPostLikeCountById(long id) {
+        postRepository.updateLikeCountById(id);
     }
 
+
+    // 좋아요 감소 (동시성)
     @Transactional
-    public Post decrementLikes(long id) {
-        Post post = postRepository.findById(id).orElse(null);
-        if (post.getLikeCount() > 0) {
-            post.setLikeCount(post.getLikeCount() - 1);
-        } else {
-            post.setLikeCount(0);
-        }
-        return postRepository.save(post);
+    @Override
+    public void decrementPostLikeCountById(long id) {
+        postRepository.decrementLikeCountById(id);
     }
 
     // 게시글 작성
     @Override
-    public Post findByPid(long pid) {
-        return postRepository.findById(pid).orElse(null);
+    public Post findPostById(long id) {
+        return postRepository.findById(id).orElse(null);
     }
 
     // 내 게시글 페이지네이션
     @Override
-    public Page<Post> getMyPostList(int page, long uid) {
+    public Page<Post> getPagedPostsByUserId(int page, long userId) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        return postRepository.findByUserId(uid, pageable);
+        return postRepository.findPagedPostsByUserId(userId, pageable);
     }
 
     // 게시글의 사용자 아이디 가져오기
     @Override
-    public List<User> getByUserUid(long uid) {
-        return postRepository.findByUserUid(uid);
+    public List<User> getUsersById(long uid) {
+        return postRepository.findUsersById(uid);
     }
 
     /*
@@ -132,28 +131,29 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
     }
 
-    // 게시글 삭제
-    @Override
-    public void deletePost(long pid) {
-        postRepository.deleteById(pid);
+    @Transactional
+    public Post incrementPostViewCountById(long id) {
+        Post post = postRepository.findById(id).orElse(null);
+        post.setViewCount(post.getViewCount() + 1);
+        return postRepository.save(post);
     }
 
-    // 조회수 증가
-    @Override
-    public void incrementViewCount(long pid) {
-        postRepository.incrementViewCount(pid);
+    @Transactional
+    public Post incrementPostLikeCountById(long id) {
+        Post post = postRepository.findById(id).orElse(null);
+        post.setLikeCount(post.getLikeCount() + 1);
+        return postRepository.save(post);
     }
 
-    // 좋아요 증가
-    @Override    public void incrementLikeCount(long pid) {
-        postRepository.incrementLikeCount(pid);
-    }
-
-
-    // 좋아요 감소
-    @Override
-    public void decrementLikeCount(long pid) {
-        postRepository.decrementLikeCount(pid);
+    @Transactional
+    public Post decrementPostLikeCountById(long id) {
+        Post post = postRepository.findById(id).orElse(null);
+        if (post.getLikeCount() > 0) {
+            post.setLikeCount(post.getLikeCount() - 1);
+        } else {
+            post.setLikeCount(0);
+        }
+        return postRepository.save(post);
     }
      */
 }

@@ -126,7 +126,7 @@ public class UserController {
             Model model){
         User user = userService.findById(id);
         model.addAttribute("user", user);
-        Page<Post> postList = postService.getMyPostList(page, id);
+        Page<Post> postList = postService.getPagedPostsByUserId(page, id);
         model.addAttribute("postList", postList);
         return "user/detail";
     }

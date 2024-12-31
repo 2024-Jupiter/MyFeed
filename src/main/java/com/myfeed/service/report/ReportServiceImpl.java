@@ -24,31 +24,38 @@ public class ReportServiceImpl implements ReportService {
 
     // 신고 불러오기
     @Override
-    public Report findByRid(long rpId) {
-        return reportRepository.findById(rpId).orElse(null);
+    public Report findByReportId(long id) {
+        return reportRepository.findById(id).orElse(null);
     }
 
-    // 처리 대기 신고 리스트 (차단)
+    // 처리 대기 신고 리스트 (차단 & 해제)
     @Override
-    public Page<Report> getReportByPendingStatus(int page, ProcessStatus status) {
+    public Page<Report> getPagedReportsByStatus(int page, ProcessStatus status) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        return reportRepository.findReportByStatus(pageable, status);
+        return reportRepository.findPagedReportsByStatus(pageable, status);
     }
 
-    // 처리 완료 신고 리스트 (차단 해제)
+    // 신고 게시글 리스트
     @Override
-    public Page<Report> getReportByCompletedStatus(int page, ProcessStatus status) {
+    public Page<Report> getPagedReportsByPost(int page, Post post) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        return reportRepository.findReportByStatus(pageable, status);
+        return reportRepository.findPagedReportsByPost(post, pageable);
+    }
+
+    // 신고 댓글 리스트
+    @Override
+    public Page<Report> getPagedReportsByReply(int page, Reply reply) {
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+        return reportRepository.findPagedReportsByReply(reply, pageable);
     }
 
     // 게시글 신고
     @Override
-    public Report reportPost(ReportType reportType, long pid, String description) {
-        Post post = postRepository.findById(pid).orElse(null);
+    public Report reportPost(ReportType type, long postId, String description) {
+        Post post = postRepository.findById(postId).orElse(null);
 
         Report report = Report.builder()
-                .type(reportType).post(post).description(description).status(ProcessStatus.PENDING)
+                .type(type).post(post).description(description).status(ProcessStatus.PENDING)
                 .build();
 
         return reportRepository.save(report);
@@ -56,11 +63,11 @@ public class ReportServiceImpl implements ReportService {
 
     // 댓글 신고
     @Override
-    public Report reportReply(ReportType reportType, long rid, String description) {
-        Reply reply = replyRepository.findById(rid).orElse(null);
+    public Report reportReply(ReportType type, long replyId, String description) {
+        Reply reply = replyRepository.findById(replyId).orElse(null);
 
         Report report = Report.builder()
-                .type(reportType).reply(reply).description(description).status(ProcessStatus.PENDING)
+                .type(type).reply(reply).description(description).status(ProcessStatus.PENDING)
                 .build();
 
         return reportRepository.save(report);
