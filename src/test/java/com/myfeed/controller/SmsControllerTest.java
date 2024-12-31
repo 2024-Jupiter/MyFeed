@@ -10,6 +10,7 @@ import com.myfeed.jwt.JwtTokenUtil;
 import com.myfeed.model.user.User;
 import com.myfeed.sms.SmsController;
 import com.myfeed.sms.SmsDto;
+import com.myfeed.sms.SmsService;
 import com.nimbusds.jose.shaded.gson.Gson;
 import net.nurigo.sdk.message.model.MessageType;
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
@@ -43,29 +44,38 @@ public class SmsControllerTest {
     @MockBean
     private DefaultMessageService messageService;
 
+    @MockBean
+    private SmsService smsService;
+
     private final Gson gson = new Gson();
 
-//    @DisplayName("이메일 중복확인 성공 - 신규 이메일")
+//    @DisplayName("메세지 전송 성공")
 //    @Test
-//    void emailNotExist() throws Exception {
-//        // given
-//        User user = User.builder()
-//                .email("sarah2316@naver.com").password("password")
-//                .username("혜란")
-//                .nickname("gPfks")
-//                .phoneNumber("1234")
-//                .build();
-//        Mockito.when(userService.findByEmail("sarah2316@naver.com")).thenReturn(user);
+//    void sendMessage_Success() throws Exception {
+//        //given
+//        SmsDto smsDto = SmsDto.builder().phoneNumber("01077052827").build();
 //
+//        SingleMessageSentResponse mockResponse = new SingleMessageSentResponse(
+//                "group123",
+//                "01077052827",
+//                "01077052827",
+//                MessageType.SMS,
+//                "Success",
+//                "KR",
+//                "message123",
+//                "200",
+//                "account123"
+//        );
 //
-//        // when
-//        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/check-email")
-//                        .param("email","sarah1217@naver.com").accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
+//        Mockito.when(messageService.sendOne(any(SingleMessageSendingRequest.class))).thenReturn(mockResponse);
+//
+//        mockMvc.perform(MockMvcRequestBuilders.post("/api/send-sms/send-one")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                .content(gson.toJson(smsDto)))
+//                .andExpect(jsonPath("$.to").value("01077052827"))
 //                .andDo(print());
+//
 //    }
-//
-//
 
     @DisplayName("메세지 전송 성공")
     @Test
@@ -85,15 +95,15 @@ public class SmsControllerTest {
                 "account123"
         );
 
-        Mockito.when(messageService.sendOne(any(SingleMessageSendingRequest.class))).thenReturn(mockResponse);
+        //Mockito.when(messageService.sendOne(any(SingleMessageSendingRequest.class))).thenReturn(mockResponse);
+        Mockito.when(smsService.sendMessage(Mockito.any(SmsDto.class))).thenReturn(mockResponse);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/send-sms/send-one")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users/find-password")
                         .contentType(MediaType.APPLICATION_JSON)
-                .content(gson.toJson(smsDto)))
-                .andExpect(jsonPath("$.to").value("01077052827"))
+                        .content(gson.toJson(smsDto)))
+                .andExpect(status().isOk())
                 .andDo(print());
 
     }
-
 
 }

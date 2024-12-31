@@ -6,9 +6,9 @@ import com.myfeed.model.reply.Reply;
 import com.myfeed.model.report.ProcessStatus;
 import com.myfeed.model.report.Report;
 import com.myfeed.model.report.ReportType;
+import com.myfeed.repository.ReportRepository;
 import com.myfeed.repository.jpa.PostRepository;
 import com.myfeed.repository.jpa.ReplyRepository;
-import com.myfeed.repository.jpa.ReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,7 +17,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportServiceImpl implements ReportService {
-    @Autowired ReportRepository reportRepository;
+    @Autowired
+    ReportRepository reportRepository;
     @Autowired ReplyRepository replyRepository;
     @Autowired PostRepository postRepository;
 
@@ -31,14 +32,14 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Page<Report> getReportByPendingStatus(int page, ProcessStatus status) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        return reportRepository.findReportByPendingStatus(pageable, status);
+        return reportRepository.findReportByStatus(pageable, status);
     }
 
     // 처리 완료 신고 리스트 (차단 해제)
     @Override
     public Page<Report> getReportByCompletedStatus(int page, ProcessStatus status) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        return reportRepository.findReportByCompletedStatus(pageable, status);
+        return reportRepository.findReportByStatus(pageable, status);
     }
 
     // 게시글 신고
