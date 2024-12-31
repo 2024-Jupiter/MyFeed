@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ElasticSearchConfig {
-
     @Value("${spring.elasticsearch.rest.url}")
     private String elasticsearchUrl;
 

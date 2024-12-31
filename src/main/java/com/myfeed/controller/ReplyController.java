@@ -13,62 +13,67 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/api/reply")
 public class ReplyController {
-    @Autowired ReplyService replyService;
-    @Autowired ReportService reportService;
+    @Autowired
+    private ReplyService replyService;
+    @Autowired
+    private ReportService reportService;
 
-    // 댓글 작성
+    // 댓글 작성 폼 (GET 요청으로 폼을 가져옴)
     @GetMapping("/create")
-    public String CreateReplyForm() {
+    public String createReplyForm() {
         return "api/reply/create";
     }
-    // 댓글 작성
+
+    // 댓글 작성 (POST 요청으로 댓글 생성)
     @PostMapping("/create")
-    public String createReplyProc(@PathVariable long uid, @PathVariable long pid, @RequestParam String content) {
-        replyService.createReply(uid, pid, content);
-        return "redirect:/api/post/detail/" + pid;
+    public String createReply(@RequestParam long userId, @RequestParam long postId, @RequestParam String content) {
+        replyService.createReply(userId, postId, content);
+        return "redirect:/api/post/detail/" + postId;
     }
 
-    // 댓글 수정
-    @GetMapping("/update/{rid}")
-    public String updateReplyForm(@PathVariable long rid, Model model) {
-        Reply reply = replyService.findByRid(rid);
+    // 댓글 수정 폼 (GET 요청으로 댓글 수정 폼을 가져옴)
+    @GetMapping("/update/{id}")
+    public String updateReplyForm(@PathVariable long id, Model model) {
+        Reply reply = replyService.findByReplyId(id);
         model.addAttribute("reply", reply);
         return "api/reply/update";
     }
-    // 댓글 수정
-    @PreAuthorize("#user.id == authentication.principal.id")
-    @PostMapping("/update")
-    public String updateReplyProc(@RequestBody Reply reply) {
-        Reply updatedReply = replyService.findByRid(reply.getId());
-        updatedReply.setContent(reply.getContent());
-        replyService.updateReply(updatedReply);
 
-        long pid = updatedReply.getPost().getId();
-        return "redirect:/api/post/detail/" + pid;
+    // 댓글 수정 (PATCH 요청으로 댓글 수정)
+    @PatchMapping("/update/{id}")
+    @PreAuthorize("#user.id == authentication.principal.id")
+    public String updateReply(@PathVariable long id, @RequestParam String content) {
+        Reply reply = replyService.findByReplyId(id);
+        reply.setContent(content);
+        replyService.updateReply(reply);
+
+        long postId = reply.getPost().getId();
+        return "redirect:/api/post/detail/" + postId;
     }
 
-    // 댓글 삭제
+    // 댓글 삭제 (DELETE 요청으로 댓글 삭제)
+    @DeleteMapping("/delete/{id}")
     @PreAuthorize("#user.id == authentication.principal.id")
-    @GetMapping("/delete/{pid}")
-    public String delete(@PathVariable long rid) {
-        replyService.deleteReply(rid);
-        Reply reply = replyService.findByRid(rid);
-        long pid = reply.getPost().getId();
-        return "redirect:/api/post/detail/" + pid;
+    public String deleteReply(@PathVariable long id) {
+        replyService.deleteReply(id);
+        Reply reply = replyService.findByReplyId(id);
+        long postId = reply.getPost().getId();
+        return "redirect:/api/post/detail/" + postId;
     }
 
-    // 신고
-    @GetMapping("/report/{rid}")
-    public String saveReportForm() {
+    // 댓글 신고 폼 (GET 요청으로 신고 폼을 가져옴)
+    @GetMapping("/report")
+    public String reportForm() {
         return "api/report/save";
     }
-    // 신고 (삭제된 사용자는 신고 접수 불가)
+
+    // 댓글 신고 (POST 요청으로 신고 처리)
     @PostMapping("/report")
-    public String saveReportProc(ReportType reportType, @RequestParam long rid,
-                                 @RequestParam(required = false) String description, Model model) {
-        Reply reply = replyService.findByRid(rid);
+    public String reportReply(@RequestParam ReportType type, @RequestParam long replyId,
+                              @RequestParam(required = false) String description, Model model) {
+        Reply reply = replyService.findByReplyId(replyId);
         if (!reply.getUser().isDeleted()) {
-            reportService.reportPost(reportType, rid, description);
+            reportService.reportReply(type, replyId, description);
             model.addAttribute("message", "댓글 신고가 성공적으로 처리되었습니다.");
         } else {
             model.addAttribute("message", "삭제된 사용자입니다.");
@@ -76,3 +81,4 @@ public class ReplyController {
         return "redirect:/api/post/detail/" + reply.getPost().getId();
     }
 }
+

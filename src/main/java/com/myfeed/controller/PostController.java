@@ -6,6 +6,7 @@ import com.myfeed.model.post.Image;
 import com.myfeed.model.post.Post;;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.report.ReportType;
+import com.myfeed.model.user.Role;
 import com.myfeed.model.user.User;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.reply.ReplyService;
@@ -33,31 +34,55 @@ public class PostController {
     @Autowired ReplyService replyService;
     @Autowired ReportService reportService;
 
-    // 게시글 작성
-    @GetMapping("/create")
-    public String CreatePostForm() {
-        return "api/post/create";
+    // 게시글 생성 또는 업데이트 (Elasticsearch 특성: 하나 라도 수정 한다면 전부 새로 만들어짐)
+    @PostMapping("/createOrUpdate")
+    @PreAuthorize("#user.id == authentication.principal.id")
+    public Post createOrUpdatePost(@PathVariable long userId , @RequestBody Post post) {
+        List<User> userList = postService.getUsersById(userId);
+        Category category = Category.GENERAL;
+        for (User user: userList) {
+            if (user.getRole().equals(Role.ADMIN)) {
+                category = Category.NEWS;
+            }
+        }
+
+        List<Image> imgaeList = post.getImages();
+        post = Post.builder()
+                .user(post.getUser())
+                .category(category)
+                .title(post.getTitle())
+                .content(post.getContent())
+                .viewCount(0)
+                .likeCount(0)
+                .status(post.getStatus())
+                .images(imgaeList)
+                .build();
+
+        return postService.createOrUpdatePost(post);
     }
-    // 게시글 작성
-    @PostMapping("/create")
-    public String createPostProc(@PathVariable long uid, @RequestParam Category category,
-                                 @RequestParam String title, @RequestParam String content, @RequestParam String imgSrc) {
-        postService.createPost(uid, category, title, content, imgSrc);
-        return "redirect:/api/postEs/list";
+
+    // 게시글 삭제
+    @DeleteMapping("/{id}")
+    @PreAuthorize("#user.id == authentication.principal.id")
+    public void deletePost(@PathVariable Long id) {
+        postService.deletePostById(id);
+    }
+
+    // 게시글 아이디 가져오기
+    @GetMapping("/{id}")
+    public Post getPostById(@PathVariable Long id) {
+        return postService.findPostById(id);
     }
 
     // 내 게시글 페이지네이션
-    @GetMapping("/myList/{uid}")
-    public  String myList(@RequestParam(name="p", defaultValue = "1") int page,
-                          @PathVariable long uid, HttpSession session, Model model) {
-        Page<Post> myPostPage = postService.getMyPostList(page, uid);
+    @GetMapping("/myPostList/{userId}")
+    @PreAuthorize("#user.id == authentication.principal.id")
+    public  String myPostList(@RequestParam(name="p", defaultValue = "1") int page,
+                          @PathVariable long userId, HttpSession session, Model model) {
+        Page<Post> myPostPage = postService.getPagedPostsByUserId(page, userId);
 
         List<Post> filteredMyList = new ArrayList<>();
-        User user = postService.getByUserUid(uid);
         for (Post post: filteredMyList) {
-            if (user.isDeleted()) {
-                filteredMyList.add(post);
-            }
             if (post.getStatus() == BlockStatus.NORMAL_STATUS) {
                 filteredMyList.add(post);
             } else {
@@ -83,26 +108,29 @@ public class PostController {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("pageList", pageList);
-        return "api/post/myList" + uid;
+        return "api/post/myPostList/" + userId;
     }
 
     // 게시글 상페보기 - 댓글 페이지네이션
     @GetMapping("detail/{pid}")
-    public String detail(@RequestParam(name="p", defaultValue = "1") int page, @PathVariable long pid,
+    public String detail(@RequestParam(name="p", defaultValue = "1") int page, @PathVariable long id,
                          @RequestParam(name = "likeAction", required = false) String likeAction,
                          HttpSession session, Model model) {
-        Post post = postService.findByPid(pid);
+        Post post = postService.findPostById(id);
         User user = post.getUser();
         List<Image> imgaeList = post.getImages();
 
-        postService.incrementViewCount(pid);
+        // 조회수 증가 (동시성)
+        postService.incrementPostViewCountById(id);
         if ("like".equals(likeAction)) {
-            postService.incrementLikeCount(pid);
+            // 좋아요 증가 (동시성)
+            postService.incrementPostLikeCountById(id);
         } else {
-            postService.decrementLikeCount(pid);
+            // 좋아요 감소 (동시성)
+            postService.decrementPostLikeCountById(id);
         }
 
-        Page<Reply> pagedResult = replyService.getPageByPostContaining(page, post);
+        Page<Reply> pagedResult = replyService.getPagedRepliesByPost(page, post);
 
         List<Reply> filteredReplyList = new ArrayList<>();
         for (Reply reply : pagedResult.getContent()) {
@@ -137,7 +165,21 @@ public class PostController {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("pageList", pageList);
-        return "api/post/detail/" + pid;
+        return "api/post/detail/" + id;
+    }
+
+    /*
+    // 게시글 작성
+    @GetMapping("/create")
+    public String CreatePostForm() {
+        return "api/post/create";
+    }
+    // 게시글 작성
+    @PostMapping("/create")
+    public String createPostProc(@PathVariable long uid, @RequestParam Category category,
+                                 @RequestParam String title, @RequestParam String content, @RequestParam String imgSrc) {
+        postService.createPost(uid, category, title, content, imgSrc);
+        return "redirect:/api/postEs/list";
     }
 
     // 게시글 수정
@@ -168,23 +210,25 @@ public class PostController {
         postService.deletePost(pid);
         return "redirect:/api/post/myList";
     }
+     */
 
     // 신고
-    @GetMapping("/report/{pid}")
+    @GetMapping("/report")
     public String saveReportForm() {
         return "api/report/save";
     }
+
     // 신고 (삭제된 사용자는 신고 접수 불가)
     @PostMapping("/report")
-    public String saveReportProc(ReportType reportType, @RequestParam long pid,
+    public String saveReportProc(ReportType type, @RequestParam long postId,
                                  @RequestParam(required = false) String description, Model model) {
-        Post post = postService.findByPid(pid);
+        Post post = postService.findPostById(postId);
         if (!post.getUser().isDeleted()) {
-            reportService.reportPost(reportType, pid, description);
+            reportService.reportPost(type, postId, description);
             model.addAttribute("message", "게시글 신고가 성공적으로 처리되었습니다.");
         } else {
             model.addAttribute("message", "삭제된 사용자입니다.");
         }
-        return "redirect:/api/post/detail/" + pid;
+        return "redirect:/api/post/detail/" + postId;
     }
 }

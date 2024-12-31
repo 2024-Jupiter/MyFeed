@@ -1,4 +1,4 @@
-package com.myfeed.repository;
+package com.myfeed.repository.jpa;
 
 import java.util.Optional;
 
