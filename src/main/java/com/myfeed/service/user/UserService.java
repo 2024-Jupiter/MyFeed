@@ -2,6 +2,7 @@ package com.myfeed.service.user;
 
 import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
+import java.util.List;
 import org.springframework.data.domain.Page;
 
 public interface UserService {
@@ -9,7 +10,9 @@ public interface UserService {
 
     User findById(Long uid);
 
-    User findByUsername(String username);
+    List<User> findByUsernameAndPhoneNumber(String username, String phoneNumber);
+
+    List<User> findByPhoneNumber(String phoneNumber);
 
     User findByEmail(String email);
 

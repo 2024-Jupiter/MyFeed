@@ -5,17 +5,19 @@ import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
 import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
+import com.myfeed.model.user.UserFindIdDto;
+import com.myfeed.model.user.UserFindPasswordDto;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.user.UserService;
+import com.myfeed.sms.SmsService;
+import jakarta.persistence.TupleElement;
 import jakarta.servlet.http.HttpSession;
-import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import javax.crypto.MacSpi;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,6 +38,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class UserController {
     @Autowired UserService userService;
     @Autowired PostService postService;
+    @Autowired SmsService smsService;
 
     // 회원 가입(폼)
     @GetMapping("/register")
@@ -85,11 +88,11 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> checkUserExist(@RequestParam(name="email") String email) {
         Map<String, Object> messagemap = new HashMap<>();
         if (userService.findByEmail(email) != null) {
-            messagemap.put("state", "error");
+            messagemap.put("success", false);
             messagemap.put("message", "이미 회원가입된 이메일입니다.");
             return ResponseEntity.badRequest().body(messagemap);
         }
-        messagemap.put("state", "success");
+        messagemap.put("success", true);
         messagemap.put("message", "이메일("+email+")을 사용할 수 있습니다.");
         return ResponseEntity.ok().body(messagemap);
     }
@@ -100,11 +103,11 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> checkNicknameExist(@RequestParam(name="nickname") String nickname) {
         Map<String, Object> messagemap = new HashMap<>();
         if (userService.findByNickname(nickname) != null) {
-            messagemap.put("state", "error");
+            messagemap.put("success", false);
             messagemap.put("message", "이미 존재하는 닉네임입니다.");
             return ResponseEntity.badRequest().body(messagemap);
         }
-        messagemap.put("state", "success");
+        messagemap.put("success", true);
         messagemap.put("message", "닉네임 " + nickname +"을 사용할 수 있습니다.");
         return ResponseEntity.ok().body(messagemap);
     }
@@ -171,12 +174,57 @@ public class UserController {
     }
 
     //회원 활성/비활성 여부 수정하기
-    @PostMapping("{uid}/status")
+    @PostMapping("/{uid}/status")
     public String updateUserState(@PathVariable Long id,
                                     @RequestParam(name="status") boolean status,
                                     Model model) {
         userService.updateUserStatus(id, status);
         //todo model로 넘겨주는 parameter 추가 예정,,
         return "redirect:/user/list";
+    }
+
+    @PostMapping("/find-password")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> findPassword(@Validated @RequestBody UserFindPasswordDto findPasswordDto) {
+        Map<String, Object> messagemap = new HashMap<>();
+        User user = userService.findByEmail(findPasswordDto.getEmail());
+
+        if (user == null) {
+            messagemap.put("success", false);
+            messagemap.put("message", "아이디가 존재하지 않습니다.");
+            return ResponseEntity.badRequest().body(messagemap);
+        }
+
+        String savedPhoneNumber = user.getPhoneNumber();
+
+        if (!savedPhoneNumber.equals(findPasswordDto.getPhoneNumber())) {
+            messagemap.put("success", false);
+            messagemap.put("message", "휴대폰 번호가 기존 정보와 일치하지 않습니다.");
+            return ResponseEntity.badRequest().body(messagemap);
+        }
+        messagemap.put("success", true);
+        messagemap.put("message", "비밀번호를 변경하세요.");
+        messagemap.put("redirectUrl", "redirect:/change-password"); //TODO
+        return ResponseEntity.ok().body(messagemap);
+    }
+
+    @PostMapping("/find-id")
+    @ResponseBody
+    public ResponseEntity findId(@Validated @RequestBody UserFindIdDto findIdDto) {
+        Map<String, Object> messagemap = new HashMap<>();
+        List<User> users = userService.findByUsernameAndPhoneNumber(findIdDto.getUname(), findIdDto.getPhoneNumber());
+
+        if (users.isEmpty()) {
+            messagemap.put("success", false);
+            messagemap.put("message", "정보가 일치하는 회원이 없습니다.");
+            return ResponseEntity.badRequest().body(messagemap);
+        }
+
+        List<String> emailList = users.stream().map(User::getEmail).toList();
+
+        messagemap.put("success", true);
+        messagemap.put("message", "정보와 일치하는 아이디 목록입니다.");
+        messagemap.put("emailList", emailList);
+        return ResponseEntity.ok().body(messagemap);
     }
 }
