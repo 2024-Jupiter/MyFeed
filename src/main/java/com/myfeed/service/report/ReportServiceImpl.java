@@ -17,7 +17,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ReportServiceImpl implements ReportService {
-    @Autowired ReportRepository reportRepository;
+    @Autowired
+    ReportRepository reportRepository;
     @Autowired ReplyRepository replyRepository;
     @Autowired PostRepository postRepository;
 
@@ -31,14 +32,14 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Page<Report> getReportByPendingStatus(int page, ProcessStatus status) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        return reportRepository.findReportByPendingStatus(pageable, status);
+        return reportRepository.findReportByStatus(pageable, status);
     }
 
     // 처리 완료 신고 리스트 (차단 해제)
     @Override
     public Page<Report> getReportByCompletedStatus(int page, ProcessStatus status) {
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        return reportRepository.findReportByCompletedStatus(pageable, status);
+        return reportRepository.findReportByStatus(pageable, status);
     }
 
     // 게시글 신고
