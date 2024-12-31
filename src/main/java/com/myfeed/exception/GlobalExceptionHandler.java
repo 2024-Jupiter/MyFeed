@@ -1,19 +1,26 @@
-package com.myfeed.exception.user;
+package com.myfeed.exception;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.myfeed.response.ErrorResponse;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ExpectedException.class)
+    protected ErrorResponse handleExpectedException(final ExpectedException exception) {
+        return new ErrorResponse("예외 Enum값");
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new LinkedHashMap<>();
+        Map<String, String> errors = new HashMap<>();
 
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = (error instanceof org.springframework.validation.FieldError)
@@ -23,6 +30,17 @@ public class GlobalExceptionHandler {
         });
 
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(com.myfeed.exception.user.UserNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleUserNotFoundException(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                Map.of(
+                        "error", "User Not Found",
+                        "message", ex.getMessage(),
+                        "status", HttpStatus.NOT_FOUND.value()
+                )
+        );
     }
 }
 
