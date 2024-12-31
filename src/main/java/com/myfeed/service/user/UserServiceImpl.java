@@ -2,7 +2,8 @@ package com.myfeed.service.user;
 
 import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
-import com.myfeed.repository.UserRepository;
+import com.myfeed.repository.jpa.UserRepository;
+
 import java.time.LocalDateTime;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;

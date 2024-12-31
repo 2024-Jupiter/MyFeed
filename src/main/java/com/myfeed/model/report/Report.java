@@ -1,5 +1,6 @@
 package com.myfeed.model.report;
 
+import com.myfeed.model.base.BaseTimeEntity;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.reply.Reply;
 import jakarta.persistence.*;
@@ -16,15 +17,15 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Report {
+public class Report extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "report_type", nullable = false)
-    private ReportType reportType;
+    @Column(name = "type", nullable = false)
+    private ReportType type;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = true)
@@ -39,11 +40,5 @@ public class Report {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private ProcessStatus processStatus = ProcessStatus.RELEASED;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updateAt;
+    private ProcessStatus status = ProcessStatus.RELEASED;
 }

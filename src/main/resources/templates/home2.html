@@ -155,7 +155,7 @@
                     <input type="password" placeholder=" 비밀번호" name="password"/>
                   </div>
                   <div>
-                    <div class="text-wrapper-2" onclick="register()">회원가입&nbsp;</div>
+                    <div class="text-wrapper-2" id="register">회원가입&nbsp;</div>
                     <div class="text-wrapper-3" onclick="find()">아이디/비밀번호 찾기</div>
                   </div>
                 </div>
@@ -197,10 +197,11 @@
 </body>
 
 <script>
-  function register() {
-    // location.href = "/register";
-    Swal.fire("회원가입 페이지로 이동합니다.");
-  }
+
+  const register = document.getElementById("register");
+  register.addEventListener("click", function() {
+    location.href = "/register";
+  });
 
   function find() {
     // location.href = "/find";

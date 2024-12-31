@@ -6,6 +6,8 @@ import com.myfeed.model.user.Role;
 
 import com.myfeed.model.user.User;
 import java.time.LocalDateTime;
+
+import com.myfeed.model.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

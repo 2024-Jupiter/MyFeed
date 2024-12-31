@@ -11,7 +11,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 //    Page<Report> findReportByPendingStatus(Pageable pageable, ProcessStatus status);
 //
 //    Page<Report> findReportByCompletedStatus(Pageable pageable, ProcessStatus status);
-    Page<Report> findReportByProcessStatus(Pageable pageable, ProcessStatus status);
+    Page<Report> findReportByStatus(Pageable pageable, ProcessStatus status);
 
 
 }

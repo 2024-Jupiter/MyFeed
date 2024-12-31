@@ -22,6 +22,7 @@ import java.util.List;
 public class ReportController {
     @Autowired ReportService reportService;
 
+    // 첫 화면 어떻게 할지 정해 지지 않아서 임의로 구현
     @GetMapping("list")
     @CheckPermission("ADMIN")
     public String list(){
@@ -51,6 +52,32 @@ public class ReportController {
         return "api/admin/report/pendingList/" + status;
     }
 
+    // 상세 보기 (게시글 & 댓글 별로 맞게 보여줌)
+    @GetMapping("/detail/{id}")
+    public  String detail(@PathVariable long id, @RequestParam long pid, @RequestParam long rid, Model model) {
+        Report report = reportService.findByRid(id);
+
+        ProcessStatus status = report.getStatus();
+        boolean isPostMatch = report.getPost() != null && report.getPost().getId() == pid;
+        boolean isReplyMatch = report.getReply() != null && report.getReply().getId() == rid;
+
+        if (status == ProcessStatus.PENDING) {
+            if (isPostMatch) {
+                model.addAttribute("pendingPost", report);
+            } else if (isReplyMatch) {
+                model.addAttribute("pendingReply", report);
+            }
+        } else if (status == ProcessStatus.COMPLETED) {
+            if (isPostMatch) {
+                model.addAttribute("completedPost", report);
+            } else if (isReplyMatch) {
+                model.addAttribute("completedReply", report);
+            }
+        }
+
+        return "api/admin/report/detail";
+    }
+
     // 신고 완료 리스트(해제 가능) 페이지네이션 - COMPLETED
     @GetMapping("/completedList/{status}")
     @CheckPermission("ADMIN")
@@ -74,12 +101,15 @@ public class ReportController {
         return "api/admin/report/completedList/" + status;
     }
 
+    // 게시글 차단
     @GetMapping("BlockPost/{pid}")
     @CheckPermission("ADMIN")
     public String BlockPost(@PathVariable long pid, @PathVariable long rpId) {
         reportService.BlockPost(pid, rpId);
         return "redirect:/api/admin/report/postList/" + pid;
     }
+
+    // 게시글 차단 해제
     @GetMapping("unBlockPost/{pid}")
     @CheckPermission("ADMIN")
     public String unBlockPost(@PathVariable long pid, @PathVariable long rpId) {
@@ -87,6 +117,7 @@ public class ReportController {
         return "redirect:/api/admin/report/postList/" + pid;
     }
 
+    // 댓글 차단
     @GetMapping("BlockReply/{rid}")
     @CheckPermission("ADMIN")
     public String BlockReply(@PathVariable long rid, @PathVariable long rpId) {
@@ -94,6 +125,7 @@ public class ReportController {
         return "redirect:/api/admin/report/replyList/" + rid;
     }
 
+    // 댓글 차단 해제
     @GetMapping("unBlockReply/{rid}")
     @CheckPermission("ADMIN")
     public String unBlockReply(@PathVariable long rid, @PathVariable long rpId) {
