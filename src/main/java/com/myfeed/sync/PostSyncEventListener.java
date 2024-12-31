@@ -4,7 +4,6 @@ import com.myfeed.model.post.Image;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.post.PostEs;
 import com.myfeed.model.user.User;
-import com.myfeed.repository.elasticsearch.PostEsRepository;
 import com.myfeed.repository.jpa.PostRepository;
 import com.myfeed.repository.jpa.UserRepository;
 import com.myfeed.service.Post.PostEsService;

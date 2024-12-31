@@ -1,21 +1,25 @@
 package com.myfeed.controller;
 
 import com.myfeed.ascept.CheckPermission;
+import com.myfeed.model.post.Post;
+import com.myfeed.model.reply.Reply;
 import com.myfeed.model.report.ProcessStatus;
 import com.myfeed.model.report.Report;
 import com.myfeed.service.report.ReportService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.myfeed.service.reply.ReplyService.PAGE_SIZE;
 
 @Controller
 @RequestMapping("/api/admin/report")
@@ -23,20 +27,21 @@ public class ReportController {
     @Autowired ReportService reportService;
 
     // 첫 화면 어떻게 할지 정해 지지 않아서 임의로 구현
-    @GetMapping("list")
+    @GetMapping("/list")
     @CheckPermission("ADMIN")
     public String list(){
         return "api/admin/report/list";
     }
 
-    // 신고 대기 리스트(차단 가능) 페이지네이션 - PENDING
-    @GetMapping("/pendingList/{status}")
+    // 신고 게시글 리스트 페이지네이션
+    @GetMapping("/postList/{postId}")
     @CheckPermission("ADMIN")
-    public String pendingList(@RequestParam(name="p", defaultValue = "1") int page,
-                              @RequestParam("status") ProcessStatus status, HttpSession session, Model model) {
-        Page<Report> reportPostPage = reportService.getReportByPendingStatus(page, status);
+    public String postList(@RequestParam(name="p", defaultValue = "1") int page,
+                           @RequestParam Post post, HttpSession session, Model model) {
+        Page<Report> reportPagedPost = reportService.getPagedReportsByPost(page, post);
+        long postId = post.getId();
 
-        int totalPages = reportPostPage.getTotalPages();
+        int totalPages = reportPagedPost.getTotalPages();
         int startPage = (int) Math.ceil((page - 0.5) / reportService.PAGE_SIZE - 1) * reportService.PAGE_SIZE + 1;
         int endPage = Math.min(startPage + reportService.PAGE_SIZE - 1, totalPages);
         List<Integer> pageList = new ArrayList<>();
@@ -44,22 +49,84 @@ public class ReportController {
             pageList.add(i);
 
         session.setAttribute("currentReportPostPage", page);
-        model.addAttribute("reportPostList", reportPostPage.getContent());
+        model.addAttribute("reportPagedPost", reportPagedPost.getContent());
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("pageList", pageList);
-        return "api/admin/report/pendingList/" + status;
+        return "api/admin/report/statusList/" + postId;
+    }
+
+    // 신고 게시글 리스트 페이지네이션
+    @GetMapping("/replyList/{replyId}")
+    @CheckPermission("ADMIN")
+    public String replyList(@RequestParam(name="p", defaultValue = "1") int page,
+                             @RequestParam Reply reply, HttpSession session, Model model) {
+        Page<Report> reportPagedReply = reportService.getPagedReportsByReply(page, reply);
+        long replyId = reply.getId();
+
+        int totalPages = reportPagedReply.getTotalPages();
+        int startPage = (int) Math.ceil((page - 0.5) / reportService.PAGE_SIZE - 1) * reportService.PAGE_SIZE + 1;
+        int endPage = Math.min(startPage + reportService.PAGE_SIZE - 1, totalPages);
+        List<Integer> pageList = new ArrayList<>();
+        for (int i = startPage; i <= endPage; i++)
+            pageList.add(i);
+
+        session.setAttribute("currentReportPostPage", page);
+        model.addAttribute("reportPagedReply", reportPagedReply.getContent());
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+        model.addAttribute("pageList", pageList);
+        return "api/admin/report/statusList/" + replyId;
+    }
+
+    // 신고 상태 리스트(차단 - PENDING & 해제 - COMPLETED 가능) 페이지네이션
+    @GetMapping("/statusList/{status}")
+    @CheckPermission("ADMIN")
+    public String statusList(@RequestParam(name="p", defaultValue = "1") int page,
+                              @RequestParam("status") ProcessStatus status, HttpSession session, Model model) {
+        Page<Report> reportPage = reportService.getPagedReportsByStatus(page, status);
+
+        List<Report> pendingList = new ArrayList<>();
+        List<Report> completedList = new ArrayList<>();
+        for (Report report: reportPage.getContent()) {
+            if (report.getStatus().equals(ProcessStatus.PENDING)) {
+                pendingList.add(report);
+            } else if (report.getStatus().equals(ProcessStatus.COMPLETED)) {
+                completedList.add(report);
+            }
+        }
+
+        int totalPages = reportPage.getTotalPages();
+        int startPage = (int) Math.ceil((page - 0.5) / reportService.PAGE_SIZE - 1) * reportService.PAGE_SIZE + 1;
+        int endPage = Math.min(startPage + reportService.PAGE_SIZE - 1, totalPages);
+        List<Integer> pageList = new ArrayList<>();
+        for (int i = startPage; i <= endPage; i++)
+            pageList.add(i);
+
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
+        Page<Report> pendingPagedResult = new PageImpl<>(pendingList, pageable, reportPage.getTotalElements());
+        Page<Report> completedPagedResult = new PageImpl<>(completedList, pageable, reportPage.getTotalElements());
+
+        session.setAttribute("currentReportPostPage", page);
+        model.addAttribute("pendingList", pendingPagedResult.getContent());
+        model.addAttribute("completedList", completedPagedResult.getContent());
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+        model.addAttribute("pageList", pageList);
+        return "api/admin/report/statusList/" + status;
     }
 
     // 상세 보기 (게시글 & 댓글 별로 맞게 보여줌)
     @GetMapping("/detail/{id}")
-    public  String detail(@PathVariable long id, @RequestParam long pid, @RequestParam long rid, Model model) {
-        Report report = reportService.findByRid(id);
+    public  String detail(@PathVariable long id, @RequestParam long postId, @RequestParam long replyId, Model model) {
+        Report report = reportService.findByReportId(id);
 
         ProcessStatus status = report.getStatus();
-        boolean isPostMatch = report.getPost() != null && report.getPost().getId() == pid;
-        boolean isReplyMatch = report.getReply() != null && report.getReply().getId() == rid;
+        boolean isPostMatch = report.getPost() != null && report.getPost().getId() == postId;
+        boolean isReplyMatch = report.getReply() != null && report.getReply().getId() == replyId;
 
         if (status == ProcessStatus.PENDING) {
             if (isPostMatch) {
@@ -78,58 +145,35 @@ public class ReportController {
         return "api/admin/report/detail";
     }
 
-    // 신고 완료 리스트(해제 가능) 페이지네이션 - COMPLETED
-    @GetMapping("/completedList/{status}")
-    @CheckPermission("ADMIN")
-    public String reportPost(@RequestParam(name="p", defaultValue = "1") int page,
-                             @RequestParam("status") ProcessStatus status, HttpSession session, Model model) {
-        Page<Report> reportPostPage = reportService.getReportByCompletedStatus(page, status);
-
-        int totalPages = reportPostPage.getTotalPages();
-        int startPage = (int) Math.ceil((page - 0.5) / reportService.PAGE_SIZE - 1) * reportService.PAGE_SIZE + 1;
-        int endPage = Math.min(startPage + reportService.PAGE_SIZE - 1, totalPages);
-        List<Integer> pageList = new ArrayList<>();
-        for (int i = startPage; i <= endPage; i++)
-            pageList.add(i);
-
-        session.setAttribute("currentReportPostPage", page);
-        model.addAttribute("reportPostList", reportPostPage.getContent());
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("startPage", startPage);
-        model.addAttribute("endPage", endPage);
-        model.addAttribute("pageList", pageList);
-        return "api/admin/report/completedList/" + status;
-    }
-
     // 게시글 차단
-    @GetMapping("BlockPost/{pid}")
+    @PatchMapping("/blockPost/{postId}/{id}")
     @CheckPermission("ADMIN")
-    public String BlockPost(@PathVariable long pid, @PathVariable long rpId) {
-        reportService.BlockPost(pid, rpId);
-        return "redirect:/api/admin/report/postList/" + pid;
+    public String BlockPost(@PathVariable long postId, @PathVariable long id) {
+        reportService.BlockPost(postId, id);
+        return "redirect:/api/admin/report/postList/" + postId;
     }
 
     // 게시글 차단 해제
-    @GetMapping("unBlockPost/{pid}")
+    @PatchMapping("/unBlockPost/{postId}/{id}")
     @CheckPermission("ADMIN")
-    public String unBlockPost(@PathVariable long pid, @PathVariable long rpId) {
-        reportService.unBlockPost(pid, rpId);
-        return "redirect:/api/admin/report/postList/" + pid;
+    public String unBlockPost(@PathVariable long postId, @PathVariable long id) {
+        reportService.unBlockPost(postId, id);
+        return "redirect:/api/admin/report/postList/" + postId;
     }
 
     // 댓글 차단
-    @GetMapping("BlockReply/{rid}")
+    @PatchMapping("/blockReply/{replyId}/{id}")
     @CheckPermission("ADMIN")
-    public String BlockReply(@PathVariable long rid, @PathVariable long rpId) {
-        reportService.BlockReply(rid, rpId);
-        return "redirect:/api/admin/report/replyList/" + rid;
+    public String BlockReply(@PathVariable long replyId, @PathVariable long id) {
+        reportService.BlockReply(replyId, id);
+        return "redirect:/api/admin/report/replyList/" + replyId;
     }
 
     // 댓글 차단 해제
-    @GetMapping("unBlockReply/{rid}")
+    @PatchMapping("/unBlockReply/{replyId}/{id}")
     @CheckPermission("ADMIN")
-    public String unBlockReply(@PathVariable long rid, @PathVariable long rpId) {
-        reportService.unBlockReply(rid, rpId);
-        return "redirect:/api/admin/report/replyList/" + rid;
+    public String unBlockReply(@PathVariable long replyId, @PathVariable long id) {
+        reportService.unBlockReply(replyId, id);
+        return "redirect:/api/admin/report/replyList/" + replyId;
     }
 }

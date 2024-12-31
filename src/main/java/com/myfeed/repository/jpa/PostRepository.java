@@ -13,21 +13,24 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
     // 내 게시글 페이지네이션
-    Page<Post> findByUserId(long uid, Pageable pageable);
-    List<User> findByUserUid(long uid);
+    Page<Post> findPagedPostsByUserId(long userId, Pageable pageable);
 
-    // 조회수 증가
-    @Modifying
-    @Query("UPDATE Post p SET p.viewCount = p.viewCount + 1 WHERE p.id = :pid")
-    void incrementViewCount(@Param("pid") Long pid);
+    // 게시글의 사용자 아이디 가져오기
+    List<User> findUsersById(long userId);
 
-    // 좋아요 증가
+    // 조회수 증가 (동시성)
     @Modifying
-    @Query("UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.id = :pid")
-    void incrementLikeCount(@Param("pid") Long pid);
+    @Query("UPDATE Post p SET p.viewCount = p.viewCount + 1 WHERE p.id = :id")
+    void updateViewCountById(@Param("id") Long id);
 
-    // 좋아요 감소
+    // 좋아요 증가 (동시성)
     @Modifying
-    @Query("UPDATE Post p SET p.likeCount = p.likeCount - 1 WHERE p.id = :pid AND p.likeCount > 0")
-    void decrementLikeCount(@Param("pid") Long pid);
+    @Query("UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.id = :id")
+    void updateLikeCountById(@Param("id") Long id);
+
+    // 좋아요 감소 (동시성)
+    @Modifying
+    @Query("UPDATE Post p SET p.likeCount = p.likeCount - 1 WHERE p.id = :id AND p.likeCount > 0")
+    void decrementLikeCountById(@Param("id") Long id);
+
 }
