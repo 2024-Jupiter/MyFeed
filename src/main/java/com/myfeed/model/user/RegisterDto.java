@@ -31,7 +31,7 @@ public class RegisterDto {
     private String nickname;
 
     @NotBlank(message = "전화번호를 입력하세요.")
-    @Size(min = 4, max = 4, message = "전화번호 4자리를 입력하세요")
+    @Size(min = 11, max = 11, message = "전화번호 11자리를 입력하세요")
     private String phoneNumber;
 
     private String profileImage;
