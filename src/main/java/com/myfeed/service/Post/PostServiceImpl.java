@@ -4,7 +4,7 @@ import com.myfeed.converter.PostConverter;
 import com.myfeed.model.post.Category;
 import com.myfeed.model.post.Image;
 import com.myfeed.model.post.Post;
-import com.myfeed.model.post.PostEs;
+import com.myfeed.model.elastic.post.PostEs;
 import com.myfeed.model.user.Role;
 import com.myfeed.model.user.User;
 import com.myfeed.repository.PostEsRepository;

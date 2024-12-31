@@ -1,7 +1,7 @@
 package com.myfeed.service.Post;
 
-import com.myfeed.model.post.PostEsDto;
-import com.myfeed.model.post.PostEs;
+import com.myfeed.model.elastic.post.PostEsDto;
+import com.myfeed.model.elastic.post.PostEs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;

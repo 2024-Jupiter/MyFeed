@@ -1,11 +1,9 @@
-package com.myfeed.model.post;
+package com.myfeed.model.elastic.post;
 
-import com.myfeed.model.BaseTimeEntity;
+import com.myfeed.model.post.BlockStatus;
+import com.myfeed.model.post.PostCategory;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -14,14 +12,13 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
+@Getter
 @Document(indexName = "posts")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PostEs extends BaseTimeEntity {
+public class PostEs {
     @Id
     @Column(name = "id", nullable = false)
     private String id;
@@ -64,5 +61,10 @@ public class PostEs extends BaseTimeEntity {
     @Field(type = FieldType.Keyword)
     private List<String> imageUrls;
 
+    @Field(type = FieldType.Date)
+    private LocalDateTime createAt;
+
+    @Field(type = FieldType.Date)
+    private LocalDateTime updateAt;
 
 }

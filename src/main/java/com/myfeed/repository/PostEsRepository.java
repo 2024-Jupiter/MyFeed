@@ -1,6 +1,6 @@
 package com.myfeed.repository;
 
-import com.myfeed.model.post.PostEs;
+import com.myfeed.model.elastic.post.PostEs;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;

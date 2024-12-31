@@ -1,5 +1,6 @@
 package com.myfeed.converter;
 
+import com.myfeed.model.elastic.post.PostEs;
 import com.myfeed.model.post.*;
 import com.myfeed.model.reply.Reply;
 
