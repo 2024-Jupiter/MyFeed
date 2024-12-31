@@ -66,7 +66,7 @@ class UserControllerTest {
 
         // when
         final ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/user/register")
+                MockMvcRequestBuilders.post("/api/users/register")
                         .content(gson.toJson(registerDto))
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
@@ -90,7 +90,7 @@ class UserControllerTest {
 
         // when
         final ResultActions resultActions = mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/user/register")
+                        MockMvcRequestBuilders.post("/api/users/register")
                                 .content(gson.toJson(registerDto))
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
@@ -113,7 +113,7 @@ class UserControllerTest {
 
         // when
         final ResultActions resultActions = mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/user/register")
+                        MockMvcRequestBuilders.post("/api/users/register")
                                 .content(gson.toJson(registerDto))
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
@@ -137,7 +137,7 @@ class UserControllerTest {
 
         // when
         final ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/user/register")
+                MockMvcRequestBuilders.post("/api/users/register")
                         .content(gson.toJson(registerDto))
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk())
@@ -160,7 +160,7 @@ class UserControllerTest {
 
         // when
         final ResultActions resultActions = mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/user/register")
+                        MockMvcRequestBuilders.post("/api/users/register")
                                 .content(gson.toJson(registerDto))
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
@@ -183,7 +183,7 @@ class UserControllerTest {
 
         // when
         final ResultActions resultActions = mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/user/register")
+                        MockMvcRequestBuilders.post("/api/users/register")
                                 .content(gson.toJson(registerDto))
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
@@ -206,7 +206,7 @@ class UserControllerTest {
 
         // when
         final ResultActions resultActions = mockMvc.perform(
-                        MockMvcRequestBuilders.post("/api/user/register")
+                        MockMvcRequestBuilders.post("/api/users/register")
                                 .content(gson.toJson(registerDto))
                                 .contentType(MediaType.APPLICATION_JSON)
                 ).andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException))
@@ -229,7 +229,7 @@ class UserControllerTest {
 
 
         // when
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/check-email")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/check-email")
                 .param("email","sarah2316@naver.com").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andDo(print());
@@ -248,7 +248,7 @@ class UserControllerTest {
 
 
         // when
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/check-email")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/check-email")
                         .param("email","sarah1217@naver.com").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -268,7 +268,7 @@ class UserControllerTest {
         Mockito.doNothing().when(userService).deleteUser(uid);
 
         // when
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/1"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/1"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/home"))
                 .andDo(print());
