@@ -1,6 +1,5 @@
 package com.myfeed.sms;
 
-import com.myfeed.exception.user.UserNotFoundException;
 import com.myfeed.service.user.UserService;
 import java.util.Random;
 import lombok.extern.slf4j.Slf4j;
