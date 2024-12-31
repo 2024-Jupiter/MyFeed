@@ -25,29 +25,29 @@ public class SecurityConfig {
         http.csrf(auth -> auth.disable())       // CSRF 방어 기능 비활성화
                 .headers(x -> x.frameOptions(y -> y.disable()))     // H2-console
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/user/register", "/api/board/**","/api/user/**", "/view/home" ).permitAll()
+                        .requestMatchers("/api/users/register", "/api/board/**","/api/users/**", "/view/home" ).permitAll()
                         .requestMatchers("/api/admin/users/*/status", "/api/admin/users", "/api/admin/boards/report", "/api/admin/boards/**").hasAuthority(String.valueOf(Role.ADMIN))
                         .anyRequest().authenticated()
                 )
                 .formLogin(auth -> auth
-                        .loginPage("/api/user/login") // template return url
-                        .loginProcessingUrl("/api/user/login")  // post 엔드포인트
+                        .loginPage("/api/users/login") // template return url
+                        .loginProcessingUrl("/api/users/login")  // post 엔드포인트
                         .usernameParameter("email")
                         .passwordParameter("pwd")
-                        .defaultSuccessUrl("/api/user/loginSuccess", true)
+                        .defaultSuccessUrl("/api/users/loginSuccess", true)
                         .failureHandler(failureHandler)
                         .permitAll()
                 )
                 .logout(auth -> auth
-                        .logoutUrl("/user/logout")
+                        .logoutUrl("/users/logout")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
-                        .logoutSuccessUrl("/user/login")
+                        .logoutSuccessUrl("/users/login")
                 )
                 .oauth2Login(auth -> auth
-                        .loginPage("/user/login")
+                        .loginPage("/users/login")
                         .userInfoEndpoint(user -> user.userService(myOAuth2UserService))
-                        .defaultSuccessUrl("/user/loginSuccess", true)
+                        .defaultSuccessUrl("/users/loginSuccess", true)
                         .failureHandler(failureHandler)
                 )
         ;

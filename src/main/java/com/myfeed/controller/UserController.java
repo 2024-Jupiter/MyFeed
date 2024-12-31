@@ -3,8 +3,11 @@ package com.myfeed.controller;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
+import com.myfeed.model.user.Role;
+import com.myfeed.model.user.TempDto;
 import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
+import com.myfeed.model.user.UserChangePasswordDto;
 import com.myfeed.model.user.UserFindIdDto;
 import com.myfeed.model.user.UserFindPasswordDto;
 import com.myfeed.service.Post.PostService;
@@ -18,6 +21,7 @@ import java.util.Map;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,7 +38,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 //todo return 전체 조율 후 수정 필요
 @Controller
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserController {
     @Autowired UserService userService;
     @Autowired PostService postService;
@@ -43,12 +47,12 @@ public class UserController {
     // 회원 가입(폼)
     @GetMapping("/register")
     public String registerForm(){
-        return "user/register";
+        return "users/register";
     }
 
     @PostMapping("/register")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> registerProc(@Validated @RequestBody RegisterDto registerDto){
+    public TempDto registerProc(@Validated @RequestBody RegisterDto registerDto){
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
         User user = User.builder()
@@ -57,16 +61,17 @@ public class UserController {
                 .profileImage(registerDto.getProfileImage())
                 .phoneNumber(registerDto.getPhoneNumber())
                 .loginProvider(LoginProvider.FORM)
+                .role(Role.USER)
                 .build();
         userService.registerUser(user);
         messagemap.put("success","회원가입 되었습니다.");
         messagemap.put("redirectUrl","/home");
-        return ResponseEntity.ok(messagemap);
+        return new TempDto("임시");
     }
 
     @GetMapping("/update/{uid}")
     public String update() {
-        return "user/update";
+        return "users/update";
     }
 
     // 사용자 정보 수정
@@ -128,15 +133,15 @@ public class UserController {
         model.addAttribute("user", user);
         Page<Post> postList = postService.getPagedPostsByUserId(page, id);
         model.addAttribute("postList", postList);
-        return "user/detail";
+        return "users/detail";
     }
 
     // 로그인
     @GetMapping("/login")
     @ResponseBody
-    public String loginForm() {
-        return "<h1>hello<h1>";
-        //return "user/login"
+    public Boolean loginForm() {
+        return true;
+        //return "users/login"
     }
 
     // 로그인 성공 시
@@ -170,7 +175,7 @@ public class UserController {
         model.addAttribute("pagedUsers", pagedUsers);
         model.addAttribute("status", status);
         model.addAttribute("currentUserPage", page);
-        return "user/list";
+        return "users/list";
     }
 
     //회원 활성/비활성 여부 수정하기
@@ -180,7 +185,7 @@ public class UserController {
                                     Model model) {
         userService.updateUserStatus(id, status);
         //todo model로 넘겨주는 parameter 추가 예정,,
-        return "redirect:/user/list";
+        return "redirect:/users/list";
     }
 
     @PostMapping("/find-password")
@@ -192,7 +197,7 @@ public class UserController {
         if (user == null) {
             messagemap.put("success", false);
             messagemap.put("message", "아이디가 존재하지 않습니다.");
-            return ResponseEntity.badRequest().body(messagemap);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(messagemap);
         }
 
         String savedPhoneNumber = user.getPhoneNumber();
@@ -200,11 +205,23 @@ public class UserController {
         if (!savedPhoneNumber.equals(findPasswordDto.getPhoneNumber())) {
             messagemap.put("success", false);
             messagemap.put("message", "휴대폰 번호가 기존 정보와 일치하지 않습니다.");
-            return ResponseEntity.badRequest().body(messagemap);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(messagemap);
         }
         messagemap.put("success", true);
         messagemap.put("message", "비밀번호를 변경하세요.");
-        messagemap.put("redirectUrl", "redirect:/change-password"); //TODO
+        messagemap.put("redirectUrl", "redirect:/api/users/change-password");
+        return ResponseEntity.ok().body(messagemap);
+    }
+
+    @PostMapping("/change-password")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> changePassword(@Validated @RequestBody UserChangePasswordDto changePasswordDto) {
+        Map<String, Object> messagemap = new HashMap<>();
+
+        messagemap.put("success", true);
+        messagemap.put("message", "비밀번호가 변경되었습니다.");
+        messagemap.put("redirectUrl", "redirect:/api/users/home");
+
         return ResponseEntity.ok().body(messagemap);
     }
 
