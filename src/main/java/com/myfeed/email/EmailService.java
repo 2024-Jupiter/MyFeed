@@ -1,7 +1,7 @@
 package com.myfeed.email;
 
 import com.myfeed.email.model.EmailMessage;
-import com.myfeed.exception.user.UserNotFoundException;
+import com.myfeed.exception.UserNotFoundException;
 import com.myfeed.service.user.UserService;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Random;
