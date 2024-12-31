@@ -66,7 +66,7 @@ public class UserController {
         userService.registerUser(user);
         messagemap.put("success","회원가입 되었습니다.");
         messagemap.put("redirectUrl","/home");
-        return new TempDto();
+        return new TempDto("임시");
     }
 
     @GetMapping("/update/{uid}")
@@ -139,8 +139,8 @@ public class UserController {
     // 로그인
     @GetMapping("/login")
     @ResponseBody
-    public String loginForm() {
-        return "<h1>HHello<h1>";
+    public Boolean loginForm() {
+        return true;
         //return "users/login"
     }
 
