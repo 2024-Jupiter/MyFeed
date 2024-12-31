@@ -1,4 +1,4 @@
-package com.myfeed.repository;
+package com.myfeed.repository.elasticsearch;
 
 import com.myfeed.model.post.PostEs;
 import org.springframework.data.domain.Page;
