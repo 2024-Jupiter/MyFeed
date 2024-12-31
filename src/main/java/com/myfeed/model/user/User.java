@@ -40,7 +40,7 @@ public class User extends BaseTimeEntity {
     private String profileImage;
 
     @Column(nullable = false)
-    private Role role = Role.USER;
+    private Role role;
 
     @Column(nullable = false)
     private LoginProvider loginProvider;

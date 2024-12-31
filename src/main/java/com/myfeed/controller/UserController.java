@@ -3,6 +3,8 @@ package com.myfeed.controller;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
+import com.myfeed.model.user.Role;
+import com.myfeed.model.user.TempDto;
 import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
 import com.myfeed.model.user.UserFindIdDto;
@@ -48,7 +50,7 @@ public class UserController {
 
     @PostMapping("/register")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> registerProc(@Validated @RequestBody RegisterDto registerDto){
+    public TempDto registerProc(@Validated @RequestBody RegisterDto registerDto){
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
         User user = User.builder()
@@ -57,11 +59,12 @@ public class UserController {
                 .profileImage(registerDto.getProfileImage())
                 .phoneNumber(registerDto.getPhoneNumber())
                 .loginProvider(LoginProvider.FORM)
+                .role(Role.USER)
                 .build();
         userService.registerUser(user);
         messagemap.put("success","회원가입 되었습니다.");
         messagemap.put("redirectUrl","/home");
-        return ResponseEntity.ok(messagemap);
+        return new TempDto();
     }
 
     @GetMapping("/update/{uid}")

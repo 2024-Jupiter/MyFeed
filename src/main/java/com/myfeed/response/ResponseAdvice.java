@@ -21,6 +21,7 @@ public class ResponseAdvice implements ResponseBodyAdvice<Object> {
 		if(body instanceof ErrorResponse) {
 			return ApiResponse.error(((ErrorResponse)body).getErrorCode());
 		} else {
+			System.out.println("-------------------" + body);
 			return ApiResponse.success(body);
 		}
 	}
