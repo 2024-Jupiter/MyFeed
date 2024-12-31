@@ -3,18 +3,19 @@ package com.myfeed.controller;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
-import com.myfeed.model.user.Role;
+import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import javax.crypto.MacSpi;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+//todo return 전체 조율 후 수정 필요
 @Controller
 @RequestMapping("/api/user")
 public class UserController {
@@ -45,41 +47,84 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> registerProc(@Validated @RequestBody RegisterDto registerDto){
         Map<String, Object> messagemap = new HashMap<>();
-        // todo
-        //전화번호 3 부분으로 쪼개기
-        // pwd, pwd2 동일 검증 로직
-        // pwd 조건 만족하는지 검증 로직 만들기
-        // 유효한 이메일, 휴대전화 인증 로직
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
         User user = User.builder()
                 .email(registerDto.getEmail()).password(hashedPwd)
                 .username(registerDto.getUname()).nickname(registerDto.getNickname())
-                .role(Role.USER).isActive(true)
                 .profileImage(registerDto.getProfileImage())
                 .phoneNumber(registerDto.getPhoneNumber())
                 .loginProvider(LoginProvider.FORM)
                 .build();
         userService.registerUser(user);
-
+        messagemap.put("success","회원가입 되었습니다.");
+        messagemap.put("redirectUrl","/home");
         return ResponseEntity.ok(messagemap);
+    }
+
+    @GetMapping("/update/{uid}")
+    public String update() {
+        return "user/update";
+    }
+
+    // 사용자 정보 수정
+    @PostMapping("/{uid}") // 변경 가능 필드(비밀번호, 실명, 닉네임, 프로필사진)
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateProc(@PathVariable Long id,
+            @Validated @RequestBody UpdateDto updateDto) {
+        Map<String, Object> messagemap = new HashMap<>();
+        userService.updateUser(id, updateDto);
+        messagemap.put("success","회원정보가 수정되었습니다.");
+        String redirectUrl = "/"+id+"/detail";
+        messagemap.put("redirectUrl",redirectUrl);
+        return ResponseEntity.ok(messagemap);
+    }
+
+    // 이메일 중복확인
+    @GetMapping("/check-email")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkUserExist(@RequestParam(name="email") String email) {
+        Map<String, Object> messagemap = new HashMap<>();
+        if (userService.findByEmail(email) != null) {
+            messagemap.put("state", "error");
+            messagemap.put("message", "이미 회원가입된 이메일입니다.");
+            return ResponseEntity.badRequest().body(messagemap);
+        }
+        messagemap.put("state", "success");
+        messagemap.put("message", "이메일("+email+")을 사용할 수 있습니다.");
+        return ResponseEntity.ok().body(messagemap);
+    }
+
+    // 닉네임 중복확인
+    @GetMapping("/check-nickname")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkNicknameExist(@RequestParam(name="nickname") String nickname) {
+        Map<String, Object> messagemap = new HashMap<>();
+        if (userService.findByNickname(nickname) != null) {
+            messagemap.put("state", "error");
+            messagemap.put("message", "이미 존재하는 닉네임입니다.");
+            return ResponseEntity.badRequest().body(messagemap);
+        }
+        messagemap.put("state", "success");
+        messagemap.put("message", "닉네임 " + nickname +"을 사용할 수 있습니다.");
+        return ResponseEntity.ok().body(messagemap);
     }
 
     // 회원 탈퇴
     @GetMapping("/{id}")
     public String delete(@PathVariable Long id) {
-        User user = userService.findById(id);
-        user.setDeleted(true);
-        user.setDeletedAt(LocalDateTime.now());
-        return "redirect:/user/list";
+        userService.deleteUser(id); //soft delete
+        return "redirect:/home";
     }
 
     // 회원정보 상세보기
-    @GetMapping("/detail/{id}")
-    public String detail(@PathVariable Long id, Model model){
+    @GetMapping("/{id}/detail")
+    public String detail(@PathVariable Long id,
+            @RequestParam(name="p", defaultValue = "1") int page,
+            Model model){
         User user = userService.findById(id);
         model.addAttribute("user", user);
-        //List<Post> postList = postService.getMyPostList(id);
-        //model.addAttribute("postList", postList);
+        Page<Post> postList = postService.getMyPostList(page, id);
+        model.addAttribute("postList", postList);
         return "user/detail";
     }
 
@@ -110,46 +155,28 @@ public class UserController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/board/list;";
-    }
-
-    // 사용자 정보 수정
-    @PostMapping("/update")
-    public String updateProc(String email, String pwd,String pwd2, String username, String nickname, String profileImage) {
-        User user = userService.findByEmail(email);
-        if (pwd.equals(pwd2) && pwd.length()>=4){
-            String hashedPwd = BCrypt.hashpw(pwd, BCrypt.gensalt());
-            user.setPassword(hashedPwd);
-        }
-        user.setUsername(username);
-        user.setNickname(nickname);
-        user.setProfileImage(profileImage);
-        userService.updateUser(user);
         return "redirect:/board/list";
     }
 
     // 활성/비활성 회원 목록 가져오기
     @GetMapping("/list")
     public String list(@RequestParam(name="p", defaultValue = "1") int page,
-                        @RequestParam(name="active", defaultValue = "true") boolean active,
+                        @RequestParam(name="status", defaultValue = "true") boolean status,
                         Model model) {
-        Page<User> pagedUsers = userService.getPagedUser(page, active);
+        Page<User> pagedUsers = userService.getPagedUser(page, status);
         model.addAttribute("pagedUsers", pagedUsers);
-        model.addAttribute("isActive", active);
+        model.addAttribute("status", status);
         model.addAttribute("currentUserPage", page);
         return "user/list";
     }
 
     //회원 활성/비활성 여부 수정하기
-    @PostMapping("/status/{uid}")
+    @PostMapping("{uid}/status")
     public String updateUserState(@PathVariable Long id,
-                                    @RequestParam(name="active") boolean active,
+                                    @RequestParam(name="status") boolean status,
                                     Model model) {
-        User user = userService.findById(id);
-        if (user.isActive() != active) {
-            user.setActive(active);
-            userService.updateUser(user);
-        }
+        userService.updateUserStatus(id, status);
+        //todo model로 넘겨주는 parameter 추가 예정,,
         return "redirect:/user/list";
     }
 }

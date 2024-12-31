@@ -1,7 +1,11 @@
 package com.myfeed.service.user;
 
+import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
-import com.myfeed.repository.UserRepository;
+import com.myfeed.repository.jpa.UserRepository;
+
+import java.time.LocalDateTime;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +23,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUsername(String uname) { // todo
+    public User findByUsername(String uname) {
         return userRepository.findByUsername(uname).orElse(null);
     }
 
@@ -29,13 +33,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User findByNickname(String nickname) {return userRepository.findByNickname(nickname).orElse(null);
+    }
+
+    @Override
     public void registerUser(User user) {
         userRepository.save(user);
     }
 
     @Override
-    public void updateUser(User user) {
+    public void updateUser(Long id, UpdateDto updateDto) {
+        User user = findById(id);
+        String hashedPwd = BCrypt.hashpw(updateDto.getPwd(), BCrypt.gensalt());
+        user.setPassword(hashedPwd);
+        user.setUsername(updateDto.getUname());
+        user.setNickname(updateDto.getNickname());
+        user.setProfileImage(updateDto.getProfileImage());
         userRepository.save(user);
+    }
+
+    @Override
+    public void updateUserStatus(Long id, boolean status) {
+        User user = findById(id);
+        if (user.isActive() != status) {
+            user.setActive(status);
+            userRepository.save(user);
+        }
     }
 
     @Override
@@ -48,8 +71,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(Long uid) {
-        userRepository.deleteById(uid);
+    public void deleteUser(Long uid) { // soft delete
+        User user = findById(uid);
+        user.setDeleted(true);
+        user.setDeletedAt(LocalDateTime.now());
+        userRepository.save(user);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.myfeed.model.reply;
 
+import com.myfeed.model.base.BaseTimeEntity;
 import com.myfeed.model.post.BlockStatus;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.user.User;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Reply {
+public class Reply extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -33,12 +34,6 @@ public class Reply {
 
     @Column(name = "content", nullable = false)
     private String content;
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updateAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

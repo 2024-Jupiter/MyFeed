@@ -1,10 +1,9 @@
 package com.myfeed.model.elastic.post;
 
 import com.myfeed.model.post.BlockStatus;
-import com.myfeed.model.post.PostCategory;
+import com.myfeed.model.post.Category;
 import jakarta.persistence.*;
 import lombok.*;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -41,8 +40,8 @@ public class PostEs {
     private String content;
 
     @Field(type = FieldType.Keyword)
-    private PostCategory category;
-
+    private Category category;
+    
     @Field(type = FieldType.Integer)
     private int viewCount;
 
