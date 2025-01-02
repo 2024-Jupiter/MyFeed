@@ -4,6 +4,7 @@ import com.myfeed.model.post.Post;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.report.ProcessStatus;
 import com.myfeed.model.report.Report;
+import com.myfeed.model.report.ReportDto;
 import com.myfeed.model.report.ReportType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,32 +15,35 @@ public interface ReportService {
     public static final int PAGE_SIZE = 10;
 
     // 신고 불러 오기
-    Report findByReportId(long id);
+    Report findByReportId(Long id);
 
-    // 처리 대기 신고 리스트 (차단 & 해제)
-    Page<Report> getPagedReportsByStatus(int page, ProcessStatus status);
-
-    // 신고 게시글 리스트
+    // 신고 게시글 페이지 네이션 (동시성)
     Page<Report> getPagedReportsByPost(int page, Post post);
 
-    // 신고 댓글 리스트
+    // 게시글 신고 조회
+    List<Report> getReportsByPost(Long postId);
+
+    // 신고 댓글 페이지 네이션 (동시성)
     Page<Report> getPagedReportsByReply(int page, Reply reply);
 
+    // 댓글 신고 조회
+    List<Report> getReportsByReply(Long replyId);
+
     // 게시글 신고
-    Report reportPost(ReportType type, long postId, String description);
+    Report reportPost(Long postId, ReportDto reportDto);
 
     // 댓글 신고
-    Report reportReply(ReportType type, long replyId, String description);
+    Report reportReply(Long replyId, ReportDto reportDto);
 
     // 게시글 차단
-    void BlockPost(long postId, long id);
+    void BlockPost(Long id, Long postId);
 
     // 게시글 해제
-    void unBlockPost(long postId, long id);
+    void unBlockPost(Long id, Long postId);
 
     // 댓글 차단
-    void BlockReply(long replyId, long id);
+    void BlockReply(Long id, Long replyId);
 
     // 댓긍 해제
-    void unBlockReply(long replyId, long id);
+    void unBlockReply(Long id, Long replyId);
 }

@@ -13,7 +13,6 @@ import com.myfeed.model.user.UserFindPasswordDto;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.user.UserService;
 import com.myfeed.sms.SmsService;
-import jakarta.persistence.TupleElement;
 import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
@@ -124,14 +123,15 @@ public class UserController {
         return "redirect:/home";
     }
 
-    // 회원정보 상세보기
+
+    // 회원정보 상세보기 -> post에서 진행
     @GetMapping("/{id}/detail")
     public String detail(@PathVariable Long id,
             @RequestParam(name="p", defaultValue = "1") int page,
             Model model){
         User user = userService.findById(id);
         model.addAttribute("user", user);
-        Page<Post> postList = postService.getPagedPostsByUserId(page, id);
+        Page<Post> postList = postService.getPagedPostsByUserId(page, user);
         model.addAttribute("postList", postList);
         return "users/detail";
     }
