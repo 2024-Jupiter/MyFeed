@@ -27,8 +27,7 @@ public class SecurityConfig {
         http.csrf(auth -> auth.disable())       // CSRF 방어 기능 비활성화
                 .headers(x -> x.frameOptions(y -> y.disable()))     // H2-console
                 .authorizeHttpRequests(requests -> requests
-                        //register @validated 예외 발생 시 loginPage("/api/users/custom-login")로 넘어가는(권한 요청하는) 문제
-                        .requestMatchers("/api/users/find-id" ,"/api/users/find-password" ,"/api/users/check-email","/api/users/check-nickname", "/api/users/custom-login","/api/users/register", "/api/board/**","/api/users/*/detail", "/api/users/*" , "/view/home" ).permitAll()
+                        .requestMatchers("/api/users/find-id","/api/users/find-password","/api/users/check-email","/api/users/check-nickname", "/api/users/custom-login","/api/users/register", "/api/board/**","/api/users/*/detail", "/api/users/*", "/view/home", "/img/**" ).permitAll()
                         .requestMatchers("/api/admin/users/*/status", "/api/admin/users", "/api/admin/boards/report", "/api/admin/boards/**").hasAuthority(String.valueOf(Role.ADMIN))
                         .anyRequest().authenticated()
                 )

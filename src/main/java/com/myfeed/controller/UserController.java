@@ -43,23 +43,21 @@ public class UserController {
     @Autowired PostService postService;
 
     // 로그인
+    // @ResponseBody //
     @GetMapping("/custom-login")
-    @ResponseBody
-    public Map<String, Object> loginForm() {
+    public String loginForm() {
         Map<String, Object> messagemap = new HashMap<>();
-        messagemap.put("message", "로그인이 필요합니다.");
-        return messagemap;
-        //return "users/home"
+        return "home";
     }
 
     // 회원 가입(폼)
     @GetMapping("/register")
     public String registerForm(){
-        return "users/register";
+        return "register";
     }
 
     @PostMapping("/register")
-    @ResponseBody //
+    @ResponseBody
     public Map<String, Object> registerProc(@Validated @RequestBody RegisterDto registerDto){
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
@@ -101,7 +99,7 @@ public class UserController {
 
     // 사용자 정보 수정
     @PostMapping("/{uid}") // 변경 가능 필드(비밀번호, 실명, 닉네임, 프로필사진)
-    @ResponseBody //
+    @ResponseBody
     public Map<String, Object> updateProc(@PathVariable("uid") Long id,
             @Validated @RequestBody UpdateDto updateDto) {
         Map<String, Object> messagemap = new HashMap<>();
@@ -193,6 +191,10 @@ public class UserController {
 
         if (user == null) {
             throw new CustomException("404", "아이디가 존재하지 않습니다.");
+        }
+
+        if (user.getLoginProvider() != LoginProvider.FORM) {
+            throw new CustomException("403", "소셜 로그인으로 시도하세요.");
         }
 
         String savedPhoneNumber = user.getPhoneNumber();
