@@ -17,7 +17,6 @@ import org.springframework.data.elasticsearch.config.EnableElasticsearchAuditing
 @Configuration
 @EnableElasticsearchAuditing
 public class ElasticSearchConfig {
-
     @Value("${spring.elasticsearch.rest.url}")
     private String elasticsearchUrl;
 

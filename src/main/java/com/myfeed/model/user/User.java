@@ -39,16 +39,23 @@ public class User extends BaseTimeEntity {
     @Column
     private String profileImage;
 
+    //@Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'USER'")
     @Column(nullable = false)
-    private Role role = Role.USER;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private LoginProvider loginProvider;
 
-    @Column(nullable = false, name = "state")
+    //@Column(nullable = false, name = "status")
+    @Column(nullable = false, name = "status", columnDefinition = "TINYINT(1)")
+    @Builder.Default
     private boolean isActive = true; // status
 
-    @Column(nullable = false)
+    //@Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
+    @Builder.Default
     private boolean isDeleted = false;
 
     @Column

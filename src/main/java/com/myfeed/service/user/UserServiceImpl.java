@@ -5,6 +5,7 @@ import com.myfeed.model.user.User;
 import com.myfeed.repository.jpa.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,8 +24,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUsername(String uname) {
-        return userRepository.findByUsername(uname).orElse(null);
+    public List<User> findByUsernameAndPhoneNumber(String username, String phoneNumber) {
+        return userRepository.findByUsernameAndPhoneNumber(username, phoneNumber);
+    }
+
+    @Override
+    public List<User> findByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber);
     }
 
     @Override

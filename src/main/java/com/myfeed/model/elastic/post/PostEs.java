@@ -17,6 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Setter
 public class PostEs {
     @Id
     @Column(name = "id", nullable = false)
@@ -50,12 +51,6 @@ public class PostEs {
 
     @Field(type = FieldType.Keyword)
     private BlockStatus blockStatus;
-
-    @Field(type = FieldType.Date)
-    private LocalDateTime blockAt;
-
-    @Field(type = FieldType.Date)
-    private LocalDateTime unBlockAt;
 
     @Field(type = FieldType.Keyword)
     private List<String> imageUrls;

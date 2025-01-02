@@ -1,6 +1,7 @@
 package com.myfeed.email;
 
 import com.myfeed.email.model.EmailMessage;
+import com.myfeed.exception.UserNotFoundException;
 import com.myfeed.service.user.UserService;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Random;
@@ -8,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -17,33 +17,23 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 @Service
 @RequiredArgsConstructor
 public class EmailService {
-     private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine templateEngine;
     private final UserService userService;
 
     public String sendMail(EmailMessage emailMessage, String type) {
         if (userService.findByEmail(emailMessage.getTo()) == null) {
-            throw new UsernameNotFoundException("해당 이메일로 등록된 사용자가 없습니다.");
+            throw new UserNotFoundException("해당 이메일로 등록된 사용자가 없습니다.");
         }
 
         String authNum = createCode();
 
-         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 
         if (type.equals("password")) {
             userService.setTempPassword(emailMessage.getTo(), authNum);
         }
 
         try {
-             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-             mimeMessageHelper.setTo(emailMessage.getTo());
-             mimeMessageHelper.setSubject(emailMessage.getSubject());
-             mimeMessageHelper.setText(setContext(authNum, type), true);
-
-             javaMailSender.send(mimeMessage);
-
             log.info("Email sent to " + emailMessage.getTo());
-
             return authNum;
         } catch (Exception e) {
             log.error("Failed to send email to " + emailMessage.getTo());
