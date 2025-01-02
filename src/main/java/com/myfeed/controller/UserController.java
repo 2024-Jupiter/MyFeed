@@ -58,7 +58,7 @@ public class UserController {
 
     @PostMapping("/register")
     @ResponseBody
-    public Map<String, Object> registerProc(@Validated @RequestBody RegisterDto registerDto){
+    public Map<String, Object> registerProc(@Validated RegisterDto registerDto){ // @RequestBody
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
         User user = User.builder()
@@ -116,7 +116,7 @@ public class UserController {
     public Map<String, Object> checkUserExist(@RequestParam(name="email") String email) {
         Map<String, Object> messagemap = new HashMap<>();
         if (userService.findByEmail(email) != null) {
-            throw new CustomException("409", "이미 회원가입된 이메일입니다.");
+            throw new CustomException("409", "이미 사용 중인 이메일입니다.");
         }
         messagemap.put("message", "이메일("+email+")을 사용할 수 있습니다.");
         return messagemap;
@@ -128,7 +128,7 @@ public class UserController {
     public Map<String, Object> checkNicknameExist(@RequestParam(name="nickname") String nickname) {
         Map<String, Object> messagemap = new HashMap<>();
         if (userService.findByNickname(nickname) != null) {
-            throw new CustomException("409", "이미 존재하는 닉네임입니다.");
+            throw new CustomException("409", "이미 사용 중인 닉네임입니다.");
         }
         messagemap.put("message", "닉네임 " + nickname +"을 사용할 수 있습니다.");
         return messagemap;
@@ -138,7 +138,7 @@ public class UserController {
     @GetMapping("/{id}")
     public String delete(@PathVariable Long id) {
         userService.deleteUser(id); //soft delete
-        return "redirect:/home";
+        return "redirect:/custom-login";
     }
 
     // 로그인 성공 시
@@ -146,8 +146,10 @@ public class UserController {
     public String loginSuccess(HttpSession session, Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
+        System.out.println("--------이멜"+email+"------------------");
         User user = userService.findByEmail(email);
-
+        System.out.println("---------아이디"+user.getId());
+        System.out.println("---------이메일"+user.getEmail());
         session.setAttribute("sessId", user.getId());
         String msg = user.getNickname() + "님 환영합니다.";
         model.addAttribute("msg", msg);

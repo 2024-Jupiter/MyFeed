@@ -30,7 +30,7 @@ public class AuthenticationController {
         final UserDetails userDetails = myUserDetailsService
                 .loadUserByUsername(authenticationRequest.getUsername());
 
-        final String jwt = jwtTokenUtil.generateToken(userDetails.getUsername());
+        final String jwt = jwtTokenUtil.generateToken(userDetails.getUsername()); // email가져오기
 
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
