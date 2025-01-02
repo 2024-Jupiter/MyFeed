@@ -15,10 +15,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
+    @Autowired private AuthenticationSuccessHandler authSuccessHandler;
     @Autowired private AuthenticationFailureHandler failureHandler;
     @Autowired private MyOAuth2UserService myOAuth2UserService;
     @Autowired private JwtRequestFilter jwtRequestFilter;
@@ -37,15 +39,16 @@ public class SecurityConfig {
                         .loginProcessingUrl("/api/users/login")  // post 엔드포인트
                         .usernameParameter("email")
                         .passwordParameter("pwd")
-                        .defaultSuccessUrl("/api/users/loginSuccess", false)
+                        //.defaultSuccessUrl("/api/users/loginSuccess", false)
+                        .successHandler(authSuccessHandler)
                         .failureHandler(failureHandler)
                         .permitAll()
                 )
                 .logout(auth -> auth
-                        .logoutUrl("/users/logout")
-                        .invalidateHttpSession(true)
+                        .logoutUrl("/api/users/logout")
+                        //.invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
-                        .logoutSuccessUrl("/users/login")
+                        .logoutSuccessUrl("/api/users/custom-login")
                 )
                 .oauth2Login(auth -> auth
                         .loginPage("/users/login")

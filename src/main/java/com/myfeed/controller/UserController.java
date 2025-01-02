@@ -42,6 +42,14 @@ public class UserController {
     @Autowired UserService userService;
     @Autowired PostService postService;
 
+    @GetMapping("/test")
+    @ResponseBody
+    public Map<String, Object> loginTest() {
+        Map<String, Object> messagemap = new HashMap<>();
+        messagemap.put("message", "로그인 완료");
+        return messagemap;
+    }
+
     // 로그인
     // @ResponseBody //
     @GetMapping("/custom-login")
@@ -146,7 +154,6 @@ public class UserController {
     public String loginSuccess(HttpSession session, Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        System.out.println("--------이멜"+email+"------------------");
         User user = userService.findByEmail(email);
         System.out.println("---------아이디"+user.getId());
         System.out.println("---------이메일"+user.getEmail());
