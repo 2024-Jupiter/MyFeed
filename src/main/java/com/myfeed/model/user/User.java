@@ -42,8 +42,7 @@ public class User extends BaseTimeEntity {
     //@Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'USER'")
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private Role role = Role.USER;
+    private Role role;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

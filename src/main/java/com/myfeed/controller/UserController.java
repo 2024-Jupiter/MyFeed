@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-//todo return 전체 조율 후 수정 필요
+
 @Controller
 @RequestMapping("/api/users")
 public class UserController {
@@ -52,7 +52,7 @@ public class UserController {
 
     @PostMapping("/register")
     @ResponseBody
-    public TempDto registerProc(@Validated @RequestBody RegisterDto registerDto){
+    public Map<String, Object> registerProc(@Validated @RequestBody RegisterDto registerDto){
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
         User user = User.builder()
@@ -64,9 +64,9 @@ public class UserController {
                 .role(Role.USER)
                 .build();
         userService.registerUser(user);
-        messagemap.put("success","회원가입 되었습니다.");
+        messagemap.put("message","회원가입 되었습니다.");
         messagemap.put("redirectUrl","/home");
-        return new TempDto("임시");
+        return messagemap;
     }
 
     @GetMapping("/update/{uid}")
@@ -81,7 +81,7 @@ public class UserController {
             @Validated @RequestBody UpdateDto updateDto) {
         Map<String, Object> messagemap = new HashMap<>();
         userService.updateUser(id, updateDto);
-        messagemap.put("success","회원정보가 수정되었습니다.");
+        messagemap.put("message","회원정보가 수정되었습니다.");
         String redirectUrl = "/"+id+"/detail";
         messagemap.put("redirectUrl",redirectUrl);
         return ResponseEntity.ok(messagemap);
@@ -137,15 +137,17 @@ public class UserController {
     }
 
     // 로그인
-    @GetMapping("/login")
+    @GetMapping("/custom-login")
     @ResponseBody
-    public Boolean loginForm() {
-        return true;
-        //return "users/login"
+    public Map<String, Object> loginForm() {
+        Map<String, Object> messagemap = new HashMap<>();
+        messagemap.put("message", "로그인이 필요합니다.");
+        return messagemap;
+        //return "users/home"
     }
 
     // 로그인 성공 시
-    @GetMapping("/loginSuccess")
+    @GetMapping("/loginSuccess") // json return, home으로 redirect,
     public String loginSuccess(HttpSession session, Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -153,10 +155,8 @@ public class UserController {
 
         session.setAttribute("sessId", user.getId());
         String msg = user.getNickname() + "님 환영합니다.";
-        String url = "/";
         model.addAttribute("msg", msg);
-        model.addAttribute("url", url); 
-        return "common/alertMsg";
+        return "home";
     }
 
     // 로그아웃

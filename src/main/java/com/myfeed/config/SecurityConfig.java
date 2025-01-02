@@ -25,16 +25,17 @@ public class SecurityConfig {
         http.csrf(auth -> auth.disable())       // CSRF 방어 기능 비활성화
                 .headers(x -> x.frameOptions(y -> y.disable()))     // H2-console
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/users/register", "/api/board/**","/api/users/**", "/view/home" ).permitAll()
+                        //register @validated 예외 발생 시 loginPage("/api/users/custom-login")로 넘어가는(권한 요청하는) 문제
+                        .requestMatchers("/api/users/custom-login","/api/users/register", "/api/board/**","/api/users/**", "/view/home", "/css/**", "/img/**", "/js/**", "/lib/**", "/scss/**" ).permitAll()
                         .requestMatchers("/api/admin/users/*/status", "/api/admin/users", "/api/admin/boards/report", "/api/admin/boards/**").hasAuthority(String.valueOf(Role.ADMIN))
                         .anyRequest().authenticated()
                 )
                 .formLogin(auth -> auth
-                        .loginPage("/api/users/login") // template return url
+                        .loginPage("/api/users/custom-login") // template return url
                         .loginProcessingUrl("/api/users/login")  // post 엔드포인트
                         .usernameParameter("email")
                         .passwordParameter("pwd")
-                        .defaultSuccessUrl("/api/users/loginSuccess", true)
+                        .defaultSuccessUrl("/api/users/loginSuccess", false)
                         .failureHandler(failureHandler)
                         .permitAll()
                 )
