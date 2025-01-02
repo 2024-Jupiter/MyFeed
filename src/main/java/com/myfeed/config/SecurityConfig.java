@@ -5,11 +5,13 @@ import com.myfeed.jwt.JwtRequestFilter;
 import com.myfeed.model.user.Role;
 import com.myfeed.service.user.MyOAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -26,12 +28,12 @@ public class SecurityConfig {
                 .headers(x -> x.frameOptions(y -> y.disable()))     // H2-console
                 .authorizeHttpRequests(requests -> requests
                         //register @validated 예외 발생 시 loginPage("/api/users/custom-login")로 넘어가는(권한 요청하는) 문제
-                        .requestMatchers("/api/users/custom-login","/api/users/register", "/api/board/**","/api/users/**", "/view/home", "/css/**", "/img/**", "/js/**", "/lib/**", "/scss/**" ).permitAll()
+                        .requestMatchers("/api/users/find-id" ,"/api/users/find-password" ,"/api/users/check-email","/api/users/check-nickname", "/api/users/custom-login","/api/users/register", "/api/board/**","/api/users/*/detail", "/api/users/*" , "/view/home" ).permitAll()
                         .requestMatchers("/api/admin/users/*/status", "/api/admin/users", "/api/admin/boards/report", "/api/admin/boards/**").hasAuthority(String.valueOf(Role.ADMIN))
                         .anyRequest().authenticated()
                 )
                 .formLogin(auth -> auth
-                        .loginPage("/api/users/custom-login") // template return url
+                        .loginPage("/api/users/custom-login") // template return url users/loginPage
                         .loginProcessingUrl("/api/users/login")  // post 엔드포인트
                         .usernameParameter("email")
                         .passwordParameter("pwd")
@@ -63,5 +65,11 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public WebSecurityCustomizer configure() {
+        return (web -> web.ignoring()
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()));
     }
 }

@@ -22,7 +22,6 @@ public class GlobalExceptionHandler {
         return new ErrorResponse("예외 Enum값");
     }
 
-    //@ResponseBody
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ErrorResponse handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -32,11 +31,9 @@ public class GlobalExceptionHandler {
                     : error.getObjectName();
             errors.put(fieldName, error.getDefaultMessage());
         });
-        //return errors;
         System.out.println(errors);
-        System.out.println(errors.getClass());
         // {registerDto=비밀번호가 일치하지 않습니다., email=이메일 형식이 올바르지 않습니다.}
-        return new ErrorResponse("회원가입문제");
+        return new ErrorResponse("형식문제");
     }
 
     @ExceptionHandler(UserNotFoundException.class)
@@ -50,7 +47,14 @@ public class GlobalExceptionHandler {
 //        );
 
         return new ErrorResponse(HttpStatus.NOT_FOUND.toString());
+    }
 
+    @ExceptionHandler(CustomException.class)
+    public ErrorResponse handleCustomException(CustomException ex) {
+        String message = ex.getMessage();
+        String errorCode = ex.getErrorCode();
+
+        return new ErrorResponse(errorCode);
     }
 }
 

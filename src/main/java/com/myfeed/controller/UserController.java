@@ -1,10 +1,10 @@
 package com.myfeed.controller;
 
+import com.myfeed.exception.CustomException;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
 import com.myfeed.model.user.Role;
-import com.myfeed.model.user.TempDto;
 import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
 import com.myfeed.model.user.UserChangePasswordDto;
@@ -12,9 +12,8 @@ import com.myfeed.model.user.UserFindIdDto;
 import com.myfeed.model.user.UserFindPasswordDto;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.user.UserService;
-import com.myfeed.sms.SmsService;
-import jakarta.persistence.TupleElement;
 import jakarta.servlet.http.HttpSession;
+import jakarta.websocket.server.PathParam;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class UserController {
     @Autowired UserService userService;
     @Autowired PostService postService;
-    @Autowired SmsService smsService;
+
+    // 로그인
+    @GetMapping("/custom-login")
+    @ResponseBody
+    public Map<String, Object> loginForm() {
+        Map<String, Object> messagemap = new HashMap<>();
+        messagemap.put("message", "로그인이 필요합니다.");
+        return messagemap;
+        //return "users/home"
+    }
 
     // 회원 가입(폼)
     @GetMapping("/register")
@@ -51,7 +59,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    @ResponseBody
+    @ResponseBody //
     public Map<String, Object> registerProc(@Validated @RequestBody RegisterDto registerDto){
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
@@ -70,58 +78,10 @@ public class UserController {
     }
 
     @GetMapping("/update/{uid}")
-    public String update() {
+    public String update(@PathParam("uid") Long id, Model model) {
+        User user = userService.findById(id);
+        model.addAttribute(user);
         return "users/update";
-    }
-
-    // 사용자 정보 수정
-    @PostMapping("/{uid}") // 변경 가능 필드(비밀번호, 실명, 닉네임, 프로필사진)
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> updateProc(@PathVariable Long id,
-            @Validated @RequestBody UpdateDto updateDto) {
-        Map<String, Object> messagemap = new HashMap<>();
-        userService.updateUser(id, updateDto);
-        messagemap.put("message","회원정보가 수정되었습니다.");
-        String redirectUrl = "/"+id+"/detail";
-        messagemap.put("redirectUrl",redirectUrl);
-        return ResponseEntity.ok(messagemap);
-    }
-
-    // 이메일 중복확인
-    @GetMapping("/check-email")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> checkUserExist(@RequestParam(name="email") String email) {
-        Map<String, Object> messagemap = new HashMap<>();
-        if (userService.findByEmail(email) != null) {
-            messagemap.put("success", false);
-            messagemap.put("message", "이미 회원가입된 이메일입니다.");
-            return ResponseEntity.badRequest().body(messagemap);
-        }
-        messagemap.put("success", true);
-        messagemap.put("message", "이메일("+email+")을 사용할 수 있습니다.");
-        return ResponseEntity.ok().body(messagemap);
-    }
-
-    // 닉네임 중복확인
-    @GetMapping("/check-nickname")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> checkNicknameExist(@RequestParam(name="nickname") String nickname) {
-        Map<String, Object> messagemap = new HashMap<>();
-        if (userService.findByNickname(nickname) != null) {
-            messagemap.put("success", false);
-            messagemap.put("message", "이미 존재하는 닉네임입니다.");
-            return ResponseEntity.badRequest().body(messagemap);
-        }
-        messagemap.put("success", true);
-        messagemap.put("message", "닉네임 " + nickname +"을 사용할 수 있습니다.");
-        return ResponseEntity.ok().body(messagemap);
-    }
-
-    // 회원 탈퇴
-    @GetMapping("/{id}")
-    public String delete(@PathVariable Long id) {
-        userService.deleteUser(id); //soft delete
-        return "redirect:/home";
     }
 
     // 회원정보 상세보기
@@ -129,21 +89,58 @@ public class UserController {
     public String detail(@PathVariable Long id,
             @RequestParam(name="p", defaultValue = "1") int page,
             Model model){
+        Map<String, Object> messagemap = new HashMap<>();
+
         User user = userService.findById(id);
         model.addAttribute("user", user);
         Page<Post> postList = postService.getPagedPostsByUserId(page, id);
         model.addAttribute("postList", postList);
+
         return "users/detail";
     }
 
-    // 로그인
-    @GetMapping("/custom-login")
-    @ResponseBody
-    public Map<String, Object> loginForm() {
+    // 사용자 정보 수정
+    @PostMapping("/{uid}") // 변경 가능 필드(비밀번호, 실명, 닉네임, 프로필사진)
+    @ResponseBody //
+    public Map<String, Object> updateProc(@PathVariable("uid") Long id,
+            @Validated @RequestBody UpdateDto updateDto) {
         Map<String, Object> messagemap = new HashMap<>();
-        messagemap.put("message", "로그인이 필요합니다.");
+        userService.updateUser(id, updateDto);
+        messagemap.put("message","회원정보가 수정되었습니다.");
+        String redirectUrl = "/"+id+"/detail";
+        messagemap.put("redirectUrl",redirectUrl);
         return messagemap;
-        //return "users/home"
+    }
+
+    // 이메일 중복확인
+    @GetMapping("/check-email")
+    @ResponseBody //
+    public Map<String, Object> checkUserExist(@RequestParam(name="email") String email) {
+        Map<String, Object> messagemap = new HashMap<>();
+        if (userService.findByEmail(email) != null) {
+            throw new CustomException("409", "이미 회원가입된 이메일입니다.");
+        }
+        messagemap.put("message", "이메일("+email+")을 사용할 수 있습니다.");
+        return messagemap;
+    }
+
+    // 닉네임 중복확인
+    @GetMapping("/check-nickname")
+    @ResponseBody //
+    public Map<String, Object> checkNicknameExist(@RequestParam(name="nickname") String nickname) {
+        Map<String, Object> messagemap = new HashMap<>();
+        if (userService.findByNickname(nickname) != null) {
+            throw new CustomException("409", "이미 존재하는 닉네임입니다.");
+        }
+        messagemap.put("message", "닉네임 " + nickname +"을 사용할 수 있습니다.");
+        return messagemap;
+    }
+
+    // 회원 탈퇴
+    @GetMapping("/{id}")
+    public String delete(@PathVariable Long id) {
+        userService.deleteUser(id); //soft delete
+        return "redirect:/home";
     }
 
     // 로그인 성공 시
@@ -189,59 +186,49 @@ public class UserController {
     }
 
     @PostMapping("/find-password")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> findPassword(@Validated @RequestBody UserFindPasswordDto findPasswordDto) {
+    @ResponseBody //
+    public Map<String, Object> findPassword(@Validated @RequestBody UserFindPasswordDto findPasswordDto) {
         Map<String, Object> messagemap = new HashMap<>();
         User user = userService.findByEmail(findPasswordDto.getEmail());
 
         if (user == null) {
-            messagemap.put("success", false);
-            messagemap.put("message", "아이디가 존재하지 않습니다.");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(messagemap);
+            throw new CustomException("404", "아이디가 존재하지 않습니다.");
         }
 
         String savedPhoneNumber = user.getPhoneNumber();
 
         if (!savedPhoneNumber.equals(findPasswordDto.getPhoneNumber())) {
-            messagemap.put("success", false);
-            messagemap.put("message", "휴대폰 번호가 기존 정보와 일치하지 않습니다.");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(messagemap);
+            throw new CustomException("403", "휴대폰 번호가 기존 정보와 일치하지 않습니다.");
         }
-        messagemap.put("success", true);
         messagemap.put("message", "비밀번호를 변경하세요.");
         messagemap.put("redirectUrl", "redirect:/api/users/change-password");
-        return ResponseEntity.ok().body(messagemap);
+        return messagemap;
     }
 
     @PostMapping("/change-password")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> changePassword(@Validated @RequestBody UserChangePasswordDto changePasswordDto) {
+    @ResponseBody //
+    public Map<String, Object> changePassword(@Validated @RequestBody UserChangePasswordDto changePasswordDto) {
         Map<String, Object> messagemap = new HashMap<>();
 
-        messagemap.put("success", true);
         messagemap.put("message", "비밀번호가 변경되었습니다.");
         messagemap.put("redirectUrl", "redirect:/api/users/home");
-
-        return ResponseEntity.ok().body(messagemap);
+        return messagemap;
     }
 
     @PostMapping("/find-id")
-    @ResponseBody
-    public ResponseEntity findId(@Validated @RequestBody UserFindIdDto findIdDto) {
+    @ResponseBody //
+    public Map<String, Object> findId(@Validated @RequestBody UserFindIdDto findIdDto) {
         Map<String, Object> messagemap = new HashMap<>();
         List<User> users = userService.findByUsernameAndPhoneNumber(findIdDto.getUname(), findIdDto.getPhoneNumber());
 
         if (users.isEmpty()) {
-            messagemap.put("success", false);
-            messagemap.put("message", "정보가 일치하는 회원이 없습니다.");
-            return ResponseEntity.badRequest().body(messagemap);
+            throw new CustomException("404", "정보와 일치하는 회원이 존재하지 않습니다.");
         }
 
         List<String> emailList = users.stream().map(User::getEmail).toList();
 
-        messagemap.put("success", true);
         messagemap.put("message", "정보와 일치하는 아이디 목록입니다.");
         messagemap.put("emailList", emailList);
-        return ResponseEntity.ok().body(messagemap);
+        return messagemap;
     }
 }
