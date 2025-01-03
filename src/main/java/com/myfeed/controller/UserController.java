@@ -2,6 +2,7 @@
 package com.myfeed.controller;
 
 import com.myfeed.exception.CustomException;
+import com.myfeed.exception.ExpectedException;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
@@ -11,6 +12,7 @@ import com.myfeed.model.user.User;
 import com.myfeed.model.user.UserChangePasswordDto;
 import com.myfeed.model.user.UserFindIdDto;
 import com.myfeed.model.user.UserFindPasswordDto;
+import com.myfeed.response.ErrorCode;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -64,6 +66,9 @@ public class UserController {
     public Map<String, Object> registerProc(@Validated @RequestBody RegisterDto registerDto){
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
+        if (registerDto.getEmail().equals("asd@naver.com")) {
+            throw new ExpectedException(ErrorCode.USER_NOT_FOUND);
+        }
         User user = User.builder()
                 .email(registerDto.getEmail()).password(hashedPwd)
                 .username(registerDto.getUname()).nickname(registerDto.getNickname())
