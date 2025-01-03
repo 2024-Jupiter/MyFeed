@@ -1,6 +1,8 @@
+
 package com.myfeed.controller;
 
 import com.myfeed.exception.CustomException;
+import com.myfeed.exception.ExpectedException;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
@@ -10,6 +12,7 @@ import com.myfeed.model.user.User;
 import com.myfeed.model.user.UserChangePasswordDto;
 import com.myfeed.model.user.UserFindIdDto;
 import com.myfeed.model.user.UserFindPasswordDto;
+import com.myfeed.response.ErrorCode;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
@@ -20,8 +23,6 @@ import java.util.Map;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -42,27 +43,36 @@ public class UserController {
     @Autowired UserService userService;
     @Autowired PostService postService;
 
-    // 로그인
-    @GetMapping("/custom-login")
+    @GetMapping("/test")
     @ResponseBody
-    public Map<String, Object> loginForm() {
+    public Map<String, Object> loginTest() {
         Map<String, Object> messagemap = new HashMap<>();
-        messagemap.put("message", "로그인이 필요합니다.");
+        messagemap.put("message", "로그인 완료");
         return messagemap;
-        //return "users/home"
+    }
+
+    // 로그인
+    // @ResponseBody //
+    @GetMapping("/custom-login")
+    public String loginForm() {
+        Map<String, Object> messagemap = new HashMap<>();
+        return "home";
     }
 
     // 회원 가입(폼)
     @GetMapping("/register")
     public String registerForm(){
-        return "users/register";
+        return "register";
     }
 
     @PostMapping("/register")
-    @ResponseBody //
-    public Map<String, Object> registerProc(@Validated @RequestBody RegisterDto registerDto){
+    @ResponseBody
+    public Map<String, Object> registerProc(@Validated @RequestBody RegisterDto registerDto){ // @RequestBody
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
+        if (registerDto.getEmail().equals("asd@naver.com")) {
+            throw new ExpectedException(ErrorCode.USER_NOT_FOUND);
+        }
         User user = User.builder()
                 .email(registerDto.getEmail()).password(hashedPwd)
                 .username(registerDto.getUname()).nickname(registerDto.getNickname())
@@ -87,13 +97,13 @@ public class UserController {
     // 회원정보 상세보기
     @GetMapping("/{id}/detail")
     public String detail(@PathVariable Long id,
-            @RequestParam(name="p", defaultValue = "1") int page,
-            Model model){
+                         @RequestParam(name="p", defaultValue = "1") int page,
+                         Model model){
         Map<String, Object> messagemap = new HashMap<>();
 
         User user = userService.findById(id);
         model.addAttribute("user", user);
-        Page<Post> postList = postService.getPagedPostsByUserId(page, id);
+        Page<Post> postList = postService.getPagedPostsByUserId(page, user);
         model.addAttribute("postList", postList);
 
         return "users/detail";
@@ -101,9 +111,9 @@ public class UserController {
 
     // 사용자 정보 수정
     @PostMapping("/{uid}") // 변경 가능 필드(비밀번호, 실명, 닉네임, 프로필사진)
-    @ResponseBody //
+    @ResponseBody
     public Map<String, Object> updateProc(@PathVariable("uid") Long id,
-            @Validated @RequestBody UpdateDto updateDto) {
+                                          @Validated @RequestBody UpdateDto updateDto) {
         Map<String, Object> messagemap = new HashMap<>();
         userService.updateUser(id, updateDto);
         messagemap.put("message","회원정보가 수정되었습니다.");
@@ -118,7 +128,7 @@ public class UserController {
     public Map<String, Object> checkUserExist(@RequestParam(name="email") String email) {
         Map<String, Object> messagemap = new HashMap<>();
         if (userService.findByEmail(email) != null) {
-            throw new CustomException("409", "이미 회원가입된 이메일입니다.");
+            throw new CustomException("409", "이미 사용 중인 이메일입니다.");
         }
         messagemap.put("message", "이메일("+email+")을 사용할 수 있습니다.");
         return messagemap;
@@ -130,7 +140,7 @@ public class UserController {
     public Map<String, Object> checkNicknameExist(@RequestParam(name="nickname") String nickname) {
         Map<String, Object> messagemap = new HashMap<>();
         if (userService.findByNickname(nickname) != null) {
-            throw new CustomException("409", "이미 존재하는 닉네임입니다.");
+            throw new CustomException("409", "이미 사용 중인 닉네임입니다.");
         }
         messagemap.put("message", "닉네임 " + nickname +"을 사용할 수 있습니다.");
         return messagemap;
@@ -140,7 +150,7 @@ public class UserController {
     @GetMapping("/{id}")
     public String delete(@PathVariable Long id) {
         userService.deleteUser(id); //soft delete
-        return "redirect:/home";
+        return "redirect:/custom-login";
     }
 
     // 로그인 성공 시
@@ -149,7 +159,8 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         User user = userService.findByEmail(email);
-
+        System.out.println("---------아이디"+user.getId());
+        System.out.println("---------이메일"+user.getEmail());
         session.setAttribute("sessId", user.getId());
         String msg = user.getNickname() + "님 환영합니다.";
         model.addAttribute("msg", msg);
@@ -158,16 +169,15 @@ public class UserController {
 
     // 로그아웃
     @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
+    public String logout() {
         return "redirect:/board/list";
     }
 
     // 활성/비활성 회원 목록 가져오기
     @GetMapping("/list")
     public String list(@RequestParam(name="p", defaultValue = "1") int page,
-                        @RequestParam(name="status", defaultValue = "true") boolean status,
-                        Model model) {
+                       @RequestParam(name="status", defaultValue = "true") boolean status,
+                       Model model) {
         Page<User> pagedUsers = userService.getPagedUser(page, status);
         model.addAttribute("pagedUsers", pagedUsers);
         model.addAttribute("status", status);
@@ -178,8 +188,8 @@ public class UserController {
     //회원 활성/비활성 여부 수정하기
     @PostMapping("/{uid}/status")
     public String updateUserState(@PathVariable Long id,
-                                    @RequestParam(name="status") boolean status,
-                                    Model model) {
+                                  @RequestParam(name="status") boolean status,
+                                  Model model) {
         userService.updateUserStatus(id, status);
         //todo model로 넘겨주는 parameter 추가 예정,,
         return "redirect:/users/list";
@@ -193,6 +203,10 @@ public class UserController {
 
         if (user == null) {
             throw new CustomException("404", "아이디가 존재하지 않습니다.");
+        }
+
+        if (user.getLoginProvider() != LoginProvider.FORM) {
+            throw new CustomException("403", "소셜 로그인으로 시도하세요.");
         }
 
         String savedPhoneNumber = user.getPhoneNumber();
