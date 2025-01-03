@@ -24,8 +24,6 @@ public class PostConverter {
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikeCount())
                 .blockStatus(post.getStatus())
-                .blockAt(post.getStatus() == BlockStatus.BLOCK_STATUS ? post.getUpdatedAt() : null)
-                .unBlockAt(post.getStatus() == BlockStatus.NORMAL_STATUS ? post.getUpdatedAt() : null)
                 .imageUrls(post.getImages().stream()
                         .map(Image::getImageSrc)
                         .collect(Collectors.toList()))

@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8"/>
   <title>목성_프로젝트</title>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <meta content="Free HTML Templates" name="keywords" />
-  <meta content="Free HTML Templates" name="description" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="Free HTML Templates" name="keywords"/>
+  <meta content="Free HTML Templates" name="description"/>
 
   <!-- Favicon -->
-<!--  <link th:href="@{/img/favicon.ico}" rel="icon" />-->
+  <!--  <link th:href="@{/img/favicon.ico}" rel="icon" />-->
 
   <!-- Google Web Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet">
 
   <!-- Font Awesome -->
   <link
@@ -22,10 +24,12 @@
   />
 
   <!-- Libraries Stylesheet -->
-  <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet" />
+  <link href="/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet"/>
 
   <!-- Customized Bootstrap Stylesheet -->
-  <link th:href="@{/css/style.css}" rel="stylesheet" />
+
+  <link href="/css/style.css" rel="stylesheet"/>
+
 </head>
 
 <body>
@@ -40,7 +44,8 @@
   <div class="col-lg-3 d-none d-lg-block">
     <a href="#" class="text-decoration-none">
       <h1 class="m-0 display-5 font-weight-semi-bold">
-        <span class="text-primary font-weight-bold border px-3 mr-2" style="padding-top: 5px;">E</span>
+        <span class="text-primary font-weight-bold border px-3 mr-2"
+              style="padding-top: 5px;">E</span>
         타이틀
       </h1>
     </a>
@@ -94,16 +99,19 @@
 
 <!-- Categories Start -->
 <div class="container-fluid pt-5">
-  <div class="row" style="justify-content: space-between; flex-wrap: nowrap; margin: auto; width: 70%;">
+  <div class="row"
+       style="justify-content: space-between; flex-wrap: nowrap; margin: auto; width: 70%;">
     <div class="col-9 mb-3" style="border: 1px black solid;">
     </div>
     <div class="col-3 mb-3">
-      <form th:action="@{/login}" method="post">
+      <form action="/api/users/login" method="post">
         <div>
-          <input type="text" class="form-control" name="uId" placeholder="아이디">
+          <input type="email" class="form-control" name="email" autoComplete="off"
+                 placeholder="아이디">
         </div>
         <div>
-          <input type="password" class="form-control" name="password" placeholder="비밀번호">
+          <input type="password" class="form-control" name="pwd" autoComplete="off"
+                 placeholder="비밀번호">
         </div>
         <button type="submit" class="btn btn-secondary" style="width: 100%;">로그인</button>
       </form>
@@ -112,7 +120,8 @@
 </div>
 
 <div class="container-fluid pt-5">
-  <div class="row" style="justify-content: space-between; flex-wrap: nowrap; margin: auto; width: 70%;">
+  <div class="row"
+       style="justify-content: space-between; flex-wrap: nowrap; margin: auto; width: 70%;">
     <div class="col-12 mb-3" style="border: 1px black solid; height: 200px;">
       <div class="col-9" style="margin-top: 2%;">
         <form th:action="@{/reply}" method="post">
@@ -126,11 +135,12 @@
 
 
 <div class="container-fluid pt-5">
-  <div class="row" style="justify-content: space-between; flex-wrap: nowrap; margin: auto; width: 70%;">
+  <div class="row"
+       style="justify-content: space-between; flex-wrap: nowrap; margin: auto; width: 70%;">
     <div class="col-12 mb-3" style="border: 1px black solid; height: 100%;">
-      <form th:action="@{/register}" method="post" style="margin: 1%;" >
+      <form th:action="@{/register}" method="post" style="margin: 1%;">
         <input type="text" class="form-control" name="uid" placeholder="아이디" required>
-        <input type="password" class="form-control" name="password" placeholder="비밀번호" required>
+        <input type="password" autoComplete="off"  class="form-control" name="password" placeholder="비밀번호" required>
         <input type="text" class="form-control" name="uname" placeholder="이름" required>
         <input type="text" class="form-control" name="nickname" placeholder="닉네임" required>
         <input type="email" class="form-control" name="email" placeholder="이메일" required>
@@ -143,12 +153,13 @@
 
 
 <!-- JavaScript Libraries -->
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-<script th:src="@{/lib/easing/easing.min.js}"></script>
-<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" type="application/javascript"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"
+        type="application/javascript"></script>
+<script src="/lib/easing/easing.min.js" type="application/javascript"></script>
+<script src="/lib/owlcarousel/owl.carousel.min.js" type="application/javascript"></script>
 
 <!-- Template Javascript -->
-<script th:src="@{/js/main.js}"></script>
+<!--<script src="/js/main.js" type="application/javascript"></script>-->
 </body>
 </html>

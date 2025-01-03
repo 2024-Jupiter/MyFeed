@@ -8,26 +8,32 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.myfeed.jwt.JwtRequestFilter;
 import com.myfeed.jwt.JwtTokenUtil;
 import com.myfeed.model.user.User;
+import com.myfeed.service.user.UserService;
 import com.myfeed.sms.SmsController;
-import com.myfeed.sms.SmsDto;
+import com.myfeed.sms.SmsRequestDto;
+import com.myfeed.sms.SmsResponseDto;
+import com.myfeed.sms.SmsService;
 import com.nimbusds.jose.shaded.gson.Gson;
+import java.util.ArrayList;
+import java.util.List;
 import net.nurigo.sdk.message.model.MessageType;
-import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.response.SingleMessageSentResponse;
 import net.nurigo.sdk.message.service.DefaultMessageService;
-import net.nurigo.sdk.message.service.MessageService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-@WebMvcTest(SmsController.class)
+//@WebMvcTest(SmsController.class)
+@SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 public class SmsControllerTest {
 
@@ -43,36 +49,33 @@ public class SmsControllerTest {
     @MockBean
     private DefaultMessageService messageService;
 
-    private final Gson gson = new Gson();
+    // @MockBean
+    @Autowired
+    private SmsService smsService;
 
-//    @DisplayName("이메일 중복확인 성공 - 신규 이메일")
-//    @Test
-//    void emailNotExist() throws Exception {
-//        // given
-//        User user = User.builder()
-//                .email("sarah2316@naver.com").password("password")
-//                .username("혜란")
-//                .nickname("gPfks")
-//                .phoneNumber("1234")
-//                .build();
-//        Mockito.when(userService.findByEmail("sarah2316@naver.com")).thenReturn(user);
-//
-//
-//        // when
-//        mockMvc.perform(MockMvcRequestBuilders.get("/api/user/check-email")
-//                        .param("email","sarah1217@naver.com").accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andDo(print());
-//    }
-//
-//
+    @MockBean
+    private UserService userService;
+
+    private final Gson gson = new Gson();
 
     @DisplayName("메세지 전송 성공")
     @Test
     void sendMessage_Success() throws Exception {
         //given
-        SmsDto smsDto = SmsDto.builder().phoneNumber("01077052827").build();
+        User user = User.builder()
+                .email("sarah2316@naver.com").password("password")
+                .username("혜란")
+                .nickname("gPfks")
+                .phoneNumber("1234")
+                .build();
+        List<User> users = new ArrayList<>();
+        users.add(user);
 
+        SmsRequestDto smsRequestDto = new SmsRequestDto();
+        smsRequestDto.setPhoneNumber("01077052827");
+        String authCode = "123123";
+        SmsResponseDto smsResponseDto = new SmsResponseDto();
+        smsResponseDto.setAuthCode(authCode);
         SingleMessageSentResponse mockResponse = new SingleMessageSentResponse(
                 "group123",
                 "01077052827",
@@ -85,12 +88,47 @@ public class SmsControllerTest {
                 "account123"
         );
 
-        Mockito.when(messageService.sendOne(any(SingleMessageSendingRequest.class))).thenReturn(mockResponse);
+        Mockito.when(userService.findByPhoneNumber(smsRequestDto.getPhoneNumber())).thenReturn(users);
+        //Mockito.when(smsService.sendMessage(any(SmsRequestDto.class))).thenReturn("123123");
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/send-sms/send-one")
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/send-sms/send-authcode")
                         .contentType(MediaType.APPLICATION_JSON)
-                .content(gson.toJson(smsDto)))
-                .andExpect(jsonPath("$.to").value("01077052827"))
+                        .content(gson.toJson(smsRequestDto)))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+    }
+
+    @DisplayName("메세지 전송 실패 - 해당 번호 사용자 없음")
+    @Test
+    void sendMessage_Failure() throws Exception {
+        //given
+        List<User> users = new ArrayList<>();
+
+
+        SmsRequestDto smsRequestDto = new SmsRequestDto();
+        smsRequestDto.setPhoneNumber("01012345678");
+
+        SingleMessageSentResponse mockResponse = new SingleMessageSentResponse(
+                "group123",
+                "01012345678",
+                "01077052827",
+                MessageType.SMS,
+                "Success",
+                "KR",
+                "message123",
+                "200",
+                "account123"
+        );
+
+        Mockito.when(userService.findByPhoneNumber(smsRequestDto.getPhoneNumber())).thenReturn(users);
+        //Mockito.when(smsService.sendMessage(any(SmsRequestDto.class))).thenReturn("123123");
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/send-sms/send-authcode")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(gson.toJson(smsRequestDto)))
+                .andExpect(status().isNotFound())
                 .andDo(print());
 
     }

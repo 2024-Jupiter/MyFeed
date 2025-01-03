@@ -1,17 +1,15 @@
 package com.myfeed.sms;
 
+import co.elastic.clients.elasticsearch.watcher.ScheduleTriggerEvent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Builder.Default;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-public class SmsDto {
-    private String phoneNumber;
+public class SmsResponseDto {
+    private String authCode;
 }

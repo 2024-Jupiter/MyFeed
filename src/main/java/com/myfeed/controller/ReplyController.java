@@ -1,78 +1,141 @@
 package com.myfeed.controller;
 
+import com.myfeed.model.post.BlockStatus;
+import com.myfeed.model.post.Post;
 import com.myfeed.model.reply.Reply;
-import com.myfeed.model.report.ReportType;
+import com.myfeed.model.reply.ReplyDetailDto;
+import com.myfeed.model.reply.ReplyDto;
+import com.myfeed.service.Post.PostService;
 import com.myfeed.service.reply.ReplyService;
-import com.myfeed.service.report.ReportService;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Controller
-@RequestMapping("/api/reply")
+@RequestMapping("/api/replies")
 public class ReplyController {
-    @Autowired ReplyService replyService;
-    @Autowired ReportService reportService;
+    @Autowired
+    private ReplyService replyService;
+    @Autowired
+    private PostService postService;
 
-    // 댓글 작성
+    // 댓글 작성 폼 (GET 요청 으로 폼을 가져옴)
     @GetMapping("/create")
-    public String CreateReplyForm() {
-        return "api/reply/create";
+    public String createReplyForm() {
+        return "api/replies/create";
     }
-    // 댓글 작성
+
+    // 댓글 작성 (POST 요청)
+    @ResponseBody
     @PostMapping("/create")
-    public String createReplyProc(@PathVariable long uid, @PathVariable long pid, @RequestParam String content) {
-        replyService.createReply(uid, pid, content);
-        return "redirect:/api/post/detail/" + pid;
+    public ResponseEntity<Map<String, Object>> createReply(@RequestParam Long userId,
+                                                           @RequestParam Long postId,
+                                                           @Valid @RequestBody ReplyDto replyDto) {
+        Reply reply = replyService.createReply(userId, postId, replyDto);
+        Map<String, Object> response = new HashMap<>();
+
+        String redirectUrl = "/api/posts/detail/" + postId;
+        response.put("redirectUrl",redirectUrl);
+        response.put("success", true);
+        response.put("message", "댓글이 작성 되었습니다.");
+        response.put("data", reply);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 게시글 내의 댓글 페이지 네이션 (동시성)
+    @ResponseBody
+    @GetMapping("/posts/detail/{postId}")
+    public ResponseEntity<Map<String, Object>> getRepliesByPost(@PathVariable Long postId,
+                                                                @RequestParam(name = "p", defaultValue = "1") int page,
+                                                                HttpSession session) {
+        Post post = postService.findPostById(postId);
+        Page<Reply> replies = replyService.getPagedRepliesByPost(page, post);
+        Map<String, Object> response = new HashMap<>();
+
+        replies.getContent().forEach(reply -> {
+            if (reply.getStatus() == BlockStatus.BLOCK_STATUS) {
+                reply.setContent("차단된 댓글 입니다.");
+            }
+        });
+
+        replies.getContent().forEach(reply -> {
+            if (reply.getStatus() == BlockStatus.BLOCK_STATUS) {
+                reply.setContent("차단된 댓글 입니다.");
+            }
+        });
+
+        List<ReplyDetailDto> replyDetailDto = replies.getContent().stream()
+                .map(ReplyDetailDto::new)
+                .toList();
+
+        int totalPages = replies.getTotalPages();
+        int startPage = (int) Math.ceil((page - 0.5) / replyService.PAGE_SIZE - 1) * replyService.PAGE_SIZE + 1;
+        int endPage = Math.min(startPage + replyService.PAGE_SIZE - 1, totalPages);
+        List<Integer> pageList = new ArrayList<>();
+        for (int i = startPage; i <= endPage; i++) {
+            pageList.add(i);
+        }
+
+        session.setAttribute("currentPostPage", page);
+        String redirectUrl = "/api/posts/detail/" + post.getId();
+        response.put("redirectUrl",redirectUrl);
+        response.put("success", true);
+        response.put("message", "게시글 내의 댓글들");
+        response.put("data", replyDetailDto);
+        response.put("totalPages", totalPages);
+        response.put("startPage", startPage);
+        response.put("endPage", endPage);
+        response.put("pageList", pageList);
+
+        return ResponseEntity.ok(response);
     }
 
     // 댓글 수정
-    @GetMapping("/update/{rid}")
-    public String updateReplyForm(@PathVariable long rid, Model model) {
-        Reply reply = replyService.findByRid(rid);
-        model.addAttribute("reply", reply);
-        return "api/reply/update";
-    }
-    // 댓글 수정
+    @ResponseBody
+    @PatchMapping("/{id}")
     @PreAuthorize("#user.id == authentication.principal.id")
-    @PostMapping("/update")
-    public String updateReplyProc(@RequestBody Reply reply) {
-        Reply updatedReply = replyService.findByRid(reply.getId());
-        updatedReply.setContent(reply.getContent());
-        replyService.updateReply(updatedReply);
+    public ResponseEntity<Map<String, Object>> updateReply(@PathVariable Long id,
+                                                           @Valid @RequestBody ReplyDto replyDto) {
+        Reply reply = replyService.findByReplyId(id);
+        replyService.updateReply(id, replyDto);
+        Map<String, Object> response = new HashMap<>();
 
-        long pid = updatedReply.getPost().getId();
-        return "redirect:/api/post/detail/" + pid;
+        String redirectUrl = "/api/posts/detail/" + reply.getPost().getId();
+        response.put("redirectUrl", redirectUrl);
+        response.put("success", true);
+        response.put("message", "댓글이 수정 되었습니다.");
+        response.put("data", reply);
+
+        return ResponseEntity.ok(response);
     }
 
     // 댓글 삭제
+    @ResponseBody
+    @DeleteMapping("/{id}")
     @PreAuthorize("#user.id == authentication.principal.id")
-    @GetMapping("/delete/{pid}")
-    public String delete(@PathVariable long rid) {
-        replyService.deleteReply(rid);
-        Reply reply = replyService.findByRid(rid);
-        long pid = reply.getPost().getId();
-        return "redirect:/api/post/detail/" + pid;
-    }
+    public ResponseEntity<Map<String, Object>> deleteReply(@PathVariable Long id) {
+        Reply reply = replyService.findByReplyId(id);
+        replyService.deleteReply(id);
+        Map<String, Object> response = new HashMap<>();
 
-    // 신고
-    @GetMapping("/report/{rid}")
-    public String saveReportForm() {
-        return "api/report/save";
-    }
-    // 신고 (삭제된 사용자는 신고 접수 불가)
-    @PostMapping("/report")
-    public String saveReportProc(ReportType reportType, @RequestParam long rid,
-                                 @RequestParam(required = false) String description, Model model) {
-        Reply reply = replyService.findByRid(rid);
-        if (!reply.getUser().isDeleted()) {
-            reportService.reportPost(reportType, rid, description);
-            model.addAttribute("message", "댓글 신고가 성공적으로 처리되었습니다.");
-        } else {
-            model.addAttribute("message", "삭제된 사용자입니다.");
-        }
-        return "redirect:/api/post/detail/" + reply.getPost().getId();
+        String redirectUrl = "/api/posts/detail/" + reply.getPost().getId();
+        response.put("redirectUrl", redirectUrl);
+        response.put("success", true);
+        response.put("message", "댓글이 삭제 되었습니다.");
+        response.put("data", reply);
+
+        return ResponseEntity.ok(response);
     }
 }
+

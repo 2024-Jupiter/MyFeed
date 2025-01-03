@@ -1,135 +1,246 @@
 package com.myfeed.controller;
 
-import com.myfeed.ascept.CheckPermission;
+import com.myfeed.model.post.Post;
+import com.myfeed.model.post.PostReportDto;
+import com.myfeed.model.reply.Reply;
+import com.myfeed.model.reply.ReplyReportDto;
 import com.myfeed.model.report.ProcessStatus;
 import com.myfeed.model.report.Report;
+import com.myfeed.model.report.ReportDetailDto;
+import com.myfeed.model.report.ReportDto;
+import com.myfeed.service.Post.PostService;
+import com.myfeed.service.reply.ReplyService;
 import com.myfeed.service.report.ReportService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/api/admin/report")
+@Validated
+@RequestMapping("/api/admin/reports")
 public class ReportController {
     @Autowired ReportService reportService;
+    @Autowired
+    private ReplyService replyService;
+    @Autowired
+    private PostService postService;
 
-    // 첫 화면 어떻게 할지 정해 지지 않아서 임의로 구현
-    @GetMapping("list")
-    @CheckPermission("ADMIN")
-    public String list(){
-        return "api/admin/report/list";
+    // 게시글 신고 폼 (GET 요청 으로 폼을 가져옴)
+    @GetMapping("/posts/{postId}/form")
+    public String reportPostForm(@PathVariable Long postId) {
+        return "api/admin/reports/reportPost";
     }
 
-    // 신고 대기 리스트(차단 가능) 페이지네이션 - PENDING
-    @GetMapping("/pendingList/{status}")
-    @CheckPermission("ADMIN")
-    public String pendingList(@RequestParam(name="p", defaultValue = "1") int page,
-                              @RequestParam("status") ProcessStatus status, HttpSession session, Model model) {
-        Page<Report> reportPostPage = reportService.getReportByPendingStatus(page, status);
+    // 게시글 신고
+    @ResponseBody
+    @PostMapping("/posts/{postId}")
+    public ResponseEntity<Map<String, Object>> reportPost(@PathVariable Long postId,
+                                                          @Valid @RequestBody ReportDto reportDto) {
+        Report report = reportService.reportPost(postId, reportDto);
+        Map<String, Object> response = new HashMap<>();
 
-        int totalPages = reportPostPage.getTotalPages();
-        int startPage = (int) Math.ceil((page - 0.5) / reportService.PAGE_SIZE - 1) * reportService.PAGE_SIZE + 1;
-        int endPage = Math.min(startPage + reportService.PAGE_SIZE - 1, totalPages);
-        List<Integer> pageList = new ArrayList<>();
-        for (int i = startPage; i <= endPage; i++)
-            pageList.add(i);
+        String redirectUrl = "/api/posts/detail/" + postId;
+        response.put("redirectUrl",redirectUrl);
+        response.put("success", true);
+        response.put("message", "게시글이 신고 되었습니다.");
+        response.put("data", report);
 
-        session.setAttribute("currentReportPostPage", page);
-        model.addAttribute("reportPostList", reportPostPage.getContent());
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("startPage", startPage);
-        model.addAttribute("endPage", endPage);
-        model.addAttribute("pageList", pageList);
-        return "api/admin/report/pendingList/" + status;
+        return ResponseEntity.ok(response);
     }
 
-    // 상세 보기 (게시글 & 댓글 별로 맞게 보여줌)
-    @GetMapping("/detail/{id}")
-    public  String detail(@PathVariable long id, @RequestParam long pid, @RequestParam long rid, Model model) {
-        Report report = reportService.findByRid(id);
+    // 댓글 신고 폼 (GET 요청 으로 폼을 가져옴)
+    @GetMapping("/replies/{replyId}/form")
+    public String reportReplyForm(@PathVariable Long replyId) {
+        return "api/admin/reports/reportReply";
+    }
 
-        ProcessStatus status = report.getStatus();
-        boolean isPostMatch = report.getPost() != null && report.getPost().getId() == pid;
-        boolean isReplyMatch = report.getReply() != null && report.getReply().getId() == rid;
+    // 댓글 신고
+    @ResponseBody
+    @PostMapping("/replies/{replyId}")
+    public ResponseEntity<Map<String, Object>> reportReply(@PathVariable Long replyId,
+                                                           @Valid @RequestBody ReportDto reportDto) {
+        Report report = reportService.reportReply(replyId, reportDto);
+        Map<String, Object> response = new HashMap<>();
 
-        if (status == ProcessStatus.PENDING) {
-            if (isPostMatch) {
-                model.addAttribute("pendingPost", report);
-            } else if (isReplyMatch) {
-                model.addAttribute("pendingReply", report);
-            }
-        } else if (status == ProcessStatus.COMPLETED) {
-            if (isPostMatch) {
-                model.addAttribute("completedPost", report);
-            } else if (isReplyMatch) {
-                model.addAttribute("completedReply", report);
-            }
+        String redirectUrl = "/api/posts/detail/" + report.getPost().getId();
+        response.put("redirectUrl",redirectUrl);
+        response.put("success", true);
+        response.put("message", "댓글이 신고 되었습니다.");
+        response.put("data", report);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 신고 게시글 리스트 페이지 네이션 (동시성)
+    @ResponseBody
+    @GetMapping("/posts/{postId}")
+    public ResponseEntity<Map<String, Object>> getReportsByPost(@PathVariable Long postId,
+                                                         @RequestParam(name="p", defaultValue = "1") int page,
+                                                         @Valid @RequestParam(name="status", required = false) String status,
+                                                         HttpSession session) {
+        Post post = postService.findPostById(postId);
+        Page<Report> reports = reportService.getPagedReportsByPost(page, post);
+        Map<String, Object> response = new HashMap<>();
+
+        if (status != null) {
+            ProcessStatus processStatus = ProcessStatus.valueOf(status.toUpperCase());
+
+            List<Report> filteredReports = reports.stream()
+                    .filter(report -> report.getStatus() == processStatus)
+                    .collect(Collectors.toList());
+
+            reports = new PageImpl<>(filteredReports, reports.getPageable(), filteredReports.size());
         }
 
-        return "api/admin/report/detail";
+        int totalPages = reports.getTotalPages();
+        int startPage = (int) Math.ceil((page - 0.5) / postService.PAGE_SIZE - 1) * postService.PAGE_SIZE + 1;
+        int endPage = Math.min(startPage + postService.PAGE_SIZE - 1, totalPages);
+        List<Integer> pageList = new ArrayList<>();
+        for (int i = startPage; i <= endPage; i++) {
+            pageList.add(i);
+        }
+
+        session.setAttribute("currentPostPage", page);
+        response.put("success", true);
+        response.put("message", "신고 게시글 리스트");
+        response.put("data", reports.getContent());
+        response.put("totalPages", totalPages);
+        response.put("startPage", startPage);
+        response.put("endPage", endPage);
+        response.put("pageList", pageList);
+
+        return ResponseEntity.ok(response);
     }
 
-    // 신고 완료 리스트(해제 가능) 페이지네이션 - COMPLETED
-    @GetMapping("/completedList/{status}")
-    @CheckPermission("ADMIN")
-    public String reportPost(@RequestParam(name="p", defaultValue = "1") int page,
-                             @RequestParam("status") ProcessStatus status, HttpSession session, Model model) {
-        Page<Report> reportPostPage = reportService.getReportByCompletedStatus(page, status);
+    // 게시글 신고 내역 상세 보기
+    @ResponseBody
+    @GetMapping("/posts/{postId}/detail")
+    public ResponseEntity<Map<String, Object>> getPostDetail(@PathVariable Long postId) {
+        Post post = postService.findPostById(postId);
+        PostReportDto postReportDto = new PostReportDto(post);
 
-        int totalPages = reportPostPage.getTotalPages();
-        int startPage = (int) Math.ceil((page - 0.5) / reportService.PAGE_SIZE - 1) * reportService.PAGE_SIZE + 1;
-        int endPage = Math.min(startPage + reportService.PAGE_SIZE - 1, totalPages);
+        List<Report> reports = reportService.getReportsByPost(postId);
+        List<ReportDetailDto> reportDetailDto = reports.stream()
+                .map(ReportDetailDto::new)
+                .toList();
+
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "게시글 상세 조회");
+        response.put("post", postReportDto);
+        response.put("reports", reportDetailDto);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 신고 댓글 리스트 페이지 네이션 (동시성)
+    @ResponseBody
+    @GetMapping("/replies/{replyId}")
+    public ResponseEntity<Map<String, Object>> getReportsByReply( @PathVariable Long replyId,
+                                                           @RequestParam(name="p", defaultValue = "1") int page,
+                                                           @Valid @RequestParam(name="status", required = false) String status,
+                                                           HttpSession session) {
+        Reply reply = replyService.findByReplyId(replyId);
+        Page<Report> reports = reportService.getPagedReportsByReply(page, reply);
+        Map<String, Object> response = new HashMap<>();
+
+        if (status != null) {
+            ProcessStatus processStatus = ProcessStatus.valueOf(status.toUpperCase());
+
+            List<Report> filteredReports = reports.stream()
+                    .filter(report -> report.getStatus() == processStatus)
+                    .collect(Collectors.toList());
+
+            reports = new PageImpl<>(filteredReports, reports.getPageable(), filteredReports.size());
+        }
+
+        int totalPages = reports.getTotalPages();
+        int startPage = (int) Math.ceil((page - 0.5) / replyService.PAGE_SIZE - 1) * replyService.PAGE_SIZE + 1;
+        int endPage = Math.min(startPage + replyService.PAGE_SIZE - 1, totalPages);
         List<Integer> pageList = new ArrayList<>();
-        for (int i = startPage; i <= endPage; i++)
+        for (int i = startPage; i <= endPage; i++) {
             pageList.add(i);
+        }
 
-        session.setAttribute("currentReportPostPage", page);
-        model.addAttribute("reportPostList", reportPostPage.getContent());
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("startPage", startPage);
-        model.addAttribute("endPage", endPage);
-        model.addAttribute("pageList", pageList);
-        return "api/admin/report/completedList/" + status;
+        session.setAttribute("currentPostPage", page);
+        response.put("success", true);
+        response.put("message", "신고 댓글 리스트");
+        response.put("data", reports.getContent());
+        response.put("totalPages", totalPages);
+        response.put("startPage", startPage);
+        response.put("endPage", endPage);
+        response.put("pageList", pageList);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 댓글 신고 내역 상세 보기
+    @ResponseBody
+    @GetMapping("/replies/{replyId}/detail")
+    public ResponseEntity<Map<String, Object>> getReplyDetail(@PathVariable Long replyId) {
+        Reply reply = replyService.findByReplyId(replyId);
+        ReplyReportDto reportDto = new ReplyReportDto(reply);
+
+        List<Report> reports = reportService.getReportsByReply(replyId);
+        List<ReportDetailDto> reportDetailDto = reports.stream()
+                .map(ReportDetailDto::new)
+                .toList();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "댓글 상세 조회");
+        response.put("reply", reportDto);
+        response.put("reports", reportDetailDto);
+
+        return ResponseEntity.ok(response);
     }
 
     // 게시글 차단
-    @GetMapping("BlockPost/{pid}")
-    @CheckPermission("ADMIN")
-    public String BlockPost(@PathVariable long pid, @PathVariable long rpId) {
-        reportService.BlockPost(pid, rpId);
-        return "redirect:/api/admin/report/postList/" + pid;
+    @ResponseBody
+    @PostMapping("/posts/{postId}/block")
+    public ResponseEntity<Map<String, String>> blockPost(@PathVariable Long postId,
+                                                         @RequestParam Long reportId) {
+        reportService.BlockPost(reportId, postId);
+        return ResponseEntity.ok(Map.of("message", "게시글이 차단 되었습니다."));
     }
 
     // 게시글 차단 해제
-    @GetMapping("unBlockPost/{pid}")
-    @CheckPermission("ADMIN")
-    public String unBlockPost(@PathVariable long pid, @PathVariable long rpId) {
-        reportService.unBlockPost(pid, rpId);
-        return "redirect:/api/admin/report/postList/" + pid;
+    @ResponseBody
+    @PostMapping("/posts/{postId}/unblock")
+    public ResponseEntity<Map<String, String>> unblockPost(@PathVariable Long postId,
+                                                           @RequestParam Long reportId) {
+        reportService.unBlockPost(reportId, postId);
+        return ResponseEntity.ok(Map.of("message", "게시글 차단이 해제 되었습니다."));
     }
 
     // 댓글 차단
-    @GetMapping("BlockReply/{rid}")
-    @CheckPermission("ADMIN")
-    public String BlockReply(@PathVariable long rid, @PathVariable long rpId) {
-        reportService.BlockReply(rid, rpId);
-        return "redirect:/api/admin/report/replyList/" + rid;
+    @ResponseBody
+    @PostMapping("/replies/{replyId}/block")
+    public ResponseEntity<Map<String, String>> blockReply(@PathVariable Long replyId,
+                                                          @RequestParam Long reportId) {
+        reportService.BlockReply(reportId, replyId);
+        return ResponseEntity.ok(Map.of("message", "댓글이 차단 되었습니다."));
     }
 
     // 댓글 차단 해제
-    @GetMapping("unBlockReply/{rid}")
-    @CheckPermission("ADMIN")
-    public String unBlockReply(@PathVariable long rid, @PathVariable long rpId) {
-        reportService.unBlockReply(rid, rpId);
-        return "redirect:/api/admin/report/replyList/" + rid;
+    @ResponseBody
+    @PostMapping("/replies/{replyId}/unblock")
+    public ResponseEntity<Map<String, String>> unblockReply(@PathVariable Long replyId,
+                                                            @RequestParam Long reportId) {
+        reportService.unBlockReply(reportId, replyId);
+        return ResponseEntity.ok(Map.of("message", "댓글 차단이 해제 되었습니다."));
     }
 }

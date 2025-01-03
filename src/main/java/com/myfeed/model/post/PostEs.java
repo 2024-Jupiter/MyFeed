@@ -12,7 +12,6 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Document(indexName = "posts")
@@ -53,12 +52,6 @@ public class PostEs extends BaseTimeEntity {
 
     @Field(type = FieldType.Keyword)
     private BlockStatus blockStatus;
-
-    @Field(type = FieldType.Date)
-    private LocalDateTime blockAt;
-
-    @Field(type = FieldType.Date)
-    private LocalDateTime unBlockAt;
 
     @Field(type = FieldType.Keyword)
     private List<String> imageUrls;
