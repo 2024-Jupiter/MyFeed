@@ -1,8 +1,6 @@
 package com.myfeed.service.reply;
 
-import com.myfeed.exception.PostBlockedException;
-import com.myfeed.exception.ReplyBlockedException;
-import com.myfeed.exception.UserDeletedException;
+import com.myfeed.exception.ExpectedException;
 import com.myfeed.model.post.BlockStatus;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.post.Post;
@@ -11,13 +9,12 @@ import com.myfeed.model.user.User;
 import com.myfeed.repository.jpa.ReplyRepository;
 import com.myfeed.repository.jpa.PostRepository;
 import com.myfeed.repository.jpa.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.myfeed.response.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ReplyServiceImpl implements ReplyService {
@@ -28,17 +25,17 @@ public class ReplyServiceImpl implements ReplyService {
     // 댓글 가져 오기
     @Override
     public Reply findByReplyId(Long id) {
-        return replyRepository.findById(id).orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다."));
+        return replyRepository.findById(id).orElseThrow(() -> new ExpectedException(ErrorCode.POST_NOT_FOUND));
     }
 
     // 댓글 작성
     @Override
     public Reply createReply(Long userId, Long postId, ReplyDto replyDto) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        Post post = postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ExpectedException(ErrorCode.USER_NOT_FOUND));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new ExpectedException(ErrorCode.USER_NOT_FOUND));
 
         if (post.getStatus() == BlockStatus.BLOCK_STATUS) {
-            throw new PostBlockedException("차단된 게시글 입니다.");
+            throw new ExpectedException(ErrorCode.REPLY_BLOCKED);
         }
 
         Reply reply = Reply.builder()
@@ -58,10 +55,10 @@ public class ReplyServiceImpl implements ReplyService {
 
         for (Reply reply : replies) {
             if (reply.getStatus() == BlockStatus.BLOCK_STATUS) {
-                throw new ReplyBlockedException("차단된 댓글이 포함 되어 있습니다.");
+                throw new ExpectedException(ErrorCode.INCLUDED_BLOCK_REPLY);
             }
             if (reply.getUser() == null || reply.getUser().isDeleted()) {
-                throw new UserDeletedException("삭제된 사용자의 댓글이 포함 되어 있습니다.");
+                throw new ExpectedException(ErrorCode.INCLUDED_DELETED_USER_IN_REPLY);
             }
         }
 
@@ -78,10 +75,10 @@ public class ReplyServiceImpl implements ReplyService {
         Reply reply = findByReplyId(id);
 
         if (reply.getPost().getStatus() == BlockStatus.BLOCK_STATUS) {
-            throw new PostBlockedException("차단된 게시글 입니다.");
+            throw new ExpectedException(ErrorCode.POST_BLOCKED);
         }
         if (reply.getStatus() == BlockStatus.BLOCK_STATUS) {
-            throw new PostBlockedException("차단된 댓글 입니다.");
+            throw new ExpectedException(ErrorCode.REPLY_BLOCKED);
         }
 
         reply.setContent(replyDto.getContent());
