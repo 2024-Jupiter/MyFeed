@@ -66,7 +66,7 @@ public class UserController {
 
     @PostMapping("/register")
     @ResponseBody
-    public Map<String, Object> registerProc(@Validated RegisterDto registerDto){ // @RequestBody
+    public Map<String, Object> registerProc(@Validated @RequestBody RegisterDto registerDto){ // @RequestBody
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
         User user = User.builder()
