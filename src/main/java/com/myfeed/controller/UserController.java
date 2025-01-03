@@ -41,25 +41,31 @@ public class UserController {
     @Autowired UserService userService;
     @Autowired PostService postService;
 
-    // 로그인
-    @GetMapping("/custom-login")
+    @GetMapping("/test")
     @ResponseBody
-    public Map<String, Object> loginForm() {
+    public Map<String, Object> loginTest() {
         Map<String, Object> messagemap = new HashMap<>();
-        messagemap.put("message", "로그인이 필요합니다.");
+        messagemap.put("message", "로그인 완료");
         return messagemap;
-        //return "users/home"
+    }
+
+    // 로그인
+    // @ResponseBody //
+    @GetMapping("/custom-login")
+    public String loginForm() {
+        Map<String, Object> messagemap = new HashMap<>();
+        return "home";
     }
 
     // 회원 가입(폼)
     @GetMapping("/register")
     public String registerForm(){
-        return "users/register";
+        return "register";
     }
 
     @PostMapping("/register")
-    @ResponseBody //
-    public Map<String, Object> registerProc(@Validated @RequestBody RegisterDto registerDto){
+    @ResponseBody
+    public Map<String, Object> registerProc(@Validated @RequestBody RegisterDto registerDto){ // @RequestBody
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
         User user = User.builder()
@@ -100,7 +106,7 @@ public class UserController {
 
     // 사용자 정보 수정
     @PostMapping("/{uid}") // 변경 가능 필드(비밀번호, 실명, 닉네임, 프로필사진)
-    @ResponseBody //
+    @ResponseBody
     public Map<String, Object> updateProc(@PathVariable("uid") Long id,
                                           @Validated @RequestBody UpdateDto updateDto) {
         Map<String, Object> messagemap = new HashMap<>();
@@ -117,7 +123,7 @@ public class UserController {
     public Map<String, Object> checkUserExist(@RequestParam(name="email") String email) {
         Map<String, Object> messagemap = new HashMap<>();
         if (userService.findByEmail(email) != null) {
-            throw new CustomException("409", "이미 회원가입된 이메일입니다.");
+            throw new CustomException("409", "이미 사용 중인 이메일입니다.");
         }
         messagemap.put("message", "이메일("+email+")을 사용할 수 있습니다.");
         return messagemap;
@@ -129,7 +135,7 @@ public class UserController {
     public Map<String, Object> checkNicknameExist(@RequestParam(name="nickname") String nickname) {
         Map<String, Object> messagemap = new HashMap<>();
         if (userService.findByNickname(nickname) != null) {
-            throw new CustomException("409", "이미 존재하는 닉네임입니다.");
+            throw new CustomException("409", "이미 사용 중인 닉네임입니다.");
         }
         messagemap.put("message", "닉네임 " + nickname +"을 사용할 수 있습니다.");
         return messagemap;
@@ -139,7 +145,7 @@ public class UserController {
     @GetMapping("/{id}")
     public String delete(@PathVariable Long id) {
         userService.deleteUser(id); //soft delete
-        return "redirect:/home";
+        return "redirect:/custom-login";
     }
 
     // 로그인 성공 시
@@ -148,7 +154,8 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         User user = userService.findByEmail(email);
-
+        System.out.println("---------아이디"+user.getId());
+        System.out.println("---------이메일"+user.getEmail());
         session.setAttribute("sessId", user.getId());
         String msg = user.getNickname() + "님 환영합니다.";
         model.addAttribute("msg", msg);
@@ -157,8 +164,7 @@ public class UserController {
 
     // 로그아웃
     @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
+    public String logout() {
         return "redirect:/board/list";
     }
 
@@ -192,6 +198,10 @@ public class UserController {
 
         if (user == null) {
             throw new CustomException("404", "아이디가 존재하지 않습니다.");
+        }
+
+        if (user.getLoginProvider() != LoginProvider.FORM) {
+            throw new CustomException("403", "소셜 로그인으로 시도하세요.");
         }
 
         String savedPhoneNumber = user.getPhoneNumber();
