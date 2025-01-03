@@ -38,6 +38,7 @@ public class ReplyController {
     // 댓글 작성 (POST 요청)
     @ResponseBody
     @PostMapping("/create")
+    //@PreAuthorize("#user.id == authentication.principal.id")
     public ResponseEntity<Map<String, Object>> createReply(@RequestParam Long userId,
                                                            @RequestParam Long postId,
                                                            @Valid @RequestBody ReplyDto replyDto) {
@@ -104,7 +105,7 @@ public class ReplyController {
     // 댓글 수정
     @ResponseBody
     @PatchMapping("/{id}")
-    @PreAuthorize("#user.id == authentication.principal.id")
+    //@PreAuthorize("#user.id == authentication.principal.id")
     public ResponseEntity<Map<String, Object>> updateReply(@PathVariable Long id,
                                                            @Valid @RequestBody ReplyDto replyDto) {
         Reply reply = replyService.findByReplyId(id);
@@ -123,7 +124,7 @@ public class ReplyController {
     // 댓글 삭제
     @ResponseBody
     @DeleteMapping("/{id}")
-    @PreAuthorize("#user.id == authentication.principal.id")
+    //@PreAuthorize("#user.id == authentication.principal.id")
     public ResponseEntity<Map<String, Object>> deleteReply(@PathVariable Long id) {
         Reply reply = replyService.findByReplyId(id);
         replyService.deleteReply(id);

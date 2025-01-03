@@ -50,7 +50,7 @@ public class ReplyServiceImpl implements ReplyService {
     // 게시글 내의 댓글 리스트 (동시성)
     @Override
     public Page<Reply> getPagedRepliesByPost(int page, Post post) {
-        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("createdDate").descending());
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("updatedAt").descending());
         Page<Reply> replies = replyRepository.findPagedRepliesByPost(post, pageable);
 
         for (Reply reply : replies) {

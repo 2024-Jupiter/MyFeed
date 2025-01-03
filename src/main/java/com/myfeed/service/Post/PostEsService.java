@@ -30,7 +30,6 @@ public class PostEsService {
     @Async
     public void deleteFromElasticsearch(String id) {
         postEsRepository.deleteById(id);
-        System.out.println("Deleted from Elasticsearch: ID=" + id);
     }
 
     // 차단된 게시글 차단 처리 & 삭제된 유저 게시글 안 보이게

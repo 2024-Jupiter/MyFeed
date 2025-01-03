@@ -36,7 +36,7 @@ public class ReportServiceImpl implements ReportService {
     // 신고 게시글 리스트 (동시성)
     @Override
     public Page<Report> getPagedReportsByPost(int page, Post post) {
-        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("createdDate").descending());
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("updatedAt").descending());
         Page<Report> reports = reportRepository.findPagedReportsByPost(post, pageable);
 
         for (Report report: reports) {
@@ -76,7 +76,7 @@ public class ReportServiceImpl implements ReportService {
     // 신고 댓글 리스트 (동시성)
     @Override
     public Page<Report> getPagedReportsByReply(int page, Reply reply) {
-        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("createdDate").descending());
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("updatedAt").descending());
         Page<Report> reports = reportRepository.findPagedReportsByReply(reply, pageable);
 
         for (Report report: reports) {

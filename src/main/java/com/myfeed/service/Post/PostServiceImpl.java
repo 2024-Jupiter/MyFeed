@@ -40,7 +40,8 @@ public class PostServiceImpl implements PostService {
 
         Post post = Post.builder()
                 .user(user).title(postDto.getTitle()).content(postDto.getContent())
-                .category(postDto.getCategory())
+                .category(postDto.getCategory()).status(BlockStatus.NORMAL_STATUS)
+                .viewCount(0).likeCount(0)
                 .build();
 
         if (!postDto.getImages().isEmpty()) {
@@ -121,7 +122,7 @@ public class PostServiceImpl implements PostService {
     // 내 게시글 페이지 네이션
     @Override
     public Page<Post> getPagedPostsByUserId(int page,User user) {
-        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("createdDate").descending());
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("updatedAt").descending());
         Page<Post> posts = postRepository.findPagedPostsByUserId(user, pageable);
 
         for (Post post : posts) {

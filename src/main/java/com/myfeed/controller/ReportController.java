@@ -212,8 +212,8 @@ public class ReportController {
     @ResponseBody
     @PostMapping("/posts/{postId}/block")
     public ResponseEntity<Map<String, String>> blockPost(@PathVariable Long postId,
-                                                         @RequestParam Long reportId) {
-        reportService.BlockPost(reportId, postId);
+                                                         @RequestParam Long id) {
+        reportService.BlockPost(id, postId);
         return ResponseEntity.ok(Map.of("message", "게시글이 차단 되었습니다."));
     }
 
@@ -221,8 +221,8 @@ public class ReportController {
     @ResponseBody
     @PostMapping("/posts/{postId}/unblock")
     public ResponseEntity<Map<String, String>> unblockPost(@PathVariable Long postId,
-                                                           @RequestParam Long reportId) {
-        reportService.unBlockPost(reportId, postId);
+                                                           @RequestParam Long id) {
+        reportService.unBlockPost(id, postId);
         return ResponseEntity.ok(Map.of("message", "게시글 차단이 해제 되었습니다."));
     }
 
@@ -230,8 +230,8 @@ public class ReportController {
     @ResponseBody
     @PostMapping("/replies/{replyId}/block")
     public ResponseEntity<Map<String, String>> blockReply(@PathVariable Long replyId,
-                                                          @RequestParam Long reportId) {
-        reportService.BlockReply(reportId, replyId);
+                                                          @RequestParam Long id) {
+        reportService.BlockReply(id, replyId);
         return ResponseEntity.ok(Map.of("message", "댓글이 차단 되었습니다."));
     }
 
@@ -239,8 +239,8 @@ public class ReportController {
     @ResponseBody
     @PostMapping("/replies/{replyId}/unblock")
     public ResponseEntity<Map<String, String>> unblockReply(@PathVariable Long replyId,
-                                                            @RequestParam Long reportId) {
-        reportService.unBlockReply(reportId, replyId);
+                                                            @RequestParam Long id) {
+        reportService.unBlockReply(id, replyId);
         return ResponseEntity.ok(Map.of("message", "댓글 차단이 해제 되었습니다."));
     }
 }
