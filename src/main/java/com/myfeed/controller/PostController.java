@@ -4,36 +4,24 @@ import com.myfeed.model.post.*;
 ;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.reply.ReplyDetailDto;
-import com.myfeed.model.reply.ReplyDto;
-import com.myfeed.model.report.ReportDto;
-import com.myfeed.model.report.ReportType;
-import com.myfeed.model.user.Role;
 import com.myfeed.model.user.User;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.reply.ReplyService;
-import com.myfeed.service.report.ReportService;
 import com.myfeed.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import static com.myfeed.service.reply.ReplyService.PAGE_SIZE;
 
 @Controller
 @RequestMapping("/api/posts")
@@ -103,7 +91,7 @@ public class PostController {
 
     // 게시글 상세 보기(댓글 페이지 네이션 & 조회수 증가 & 좋아요 기능)
     @ResponseBody
-    @GetMapping("detail/{postId}")
+    @GetMapping("detail/{id}")
     public ResponseEntity<Map<String, Object>> detail(@RequestParam(name="p", defaultValue = "1") int page, @PathVariable long id,
                                                       @RequestParam(name = "likeAction", required = false) String likeAction,
                                                       HttpSession session) {
@@ -225,7 +213,7 @@ public class PostController {
 
     // 게시글 좋아요 감소
     @ResponseBody
-    @PostMapping("/{id}/unLike")
+    @PostMapping("/{id}/unlike")
     public ResponseEntity<Map<String, Object>> decrementPostLikeCount(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {

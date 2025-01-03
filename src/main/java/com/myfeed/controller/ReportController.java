@@ -124,7 +124,7 @@ public class ReportController {
         return ResponseEntity.ok(response);
     }
 
-    // 게시글 신고 내역 조회
+    // 게시글 신고 내역 상세 보기
     @ResponseBody
     @GetMapping("/posts/{postId}/detail")
     public ResponseEntity<Map<String, Object>> getPostDetail(@PathVariable Long postId) {
@@ -187,7 +187,7 @@ public class ReportController {
         return ResponseEntity.ok(response);
     }
 
-    // 댓글 신고 내역 조회
+    // 댓글 신고 내역 상세 보기
     @ResponseBody
     @GetMapping("/replies/{replyId}/detail")
     public ResponseEntity<Map<String, Object>> getReplyDetail(@PathVariable Long replyId) {
