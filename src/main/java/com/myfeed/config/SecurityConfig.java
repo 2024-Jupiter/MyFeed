@@ -30,7 +30,8 @@ public class SecurityConfig {
         http.csrf(auth -> auth.disable())       // CSRF 방어 기능 비활성화
                 .headers(x -> x.frameOptions(y -> y.disable()))     // H2-console
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/users/find-id","/api/users/find-password","/api/users/check-email","/api/users/check-nickname", "/api/users/custom-login","/api/users/register", "/api/board/**","/api/users/*/detail", "/api/users/*", "/view/home", "/img/**" ).permitAll()
+                        .requestMatchers("/api/users/find-id","/api/users/find-password","/api/users/check-email","/api/users/check-nickname", "/api/users/custom-login","/api/users/register", "/api/board/**","/api/users/*/detail", "/api/users/*", "/view/home").permitAll()
+                        .requestMatchers("/css/**","/js/**","/lib/**","/scss/**", "/img/**" ).permitAll()
                         .requestMatchers("/api/admin/users/*/status", "/api/admin/users", "/api/admin/boards/report", "/api/admin/boards/**").hasAuthority(String.valueOf(Role.ADMIN))
                         .anyRequest().authenticated()
                 )
@@ -51,9 +52,9 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/api/users/custom-login")
                 )
                 .oauth2Login(auth -> auth
-                        .loginPage("/users/login")
+                        //.loginPage("/users/login")
                         .userInfoEndpoint(user -> user.userService(myOAuth2UserService))
-                        .defaultSuccessUrl("/users/loginSuccess", true)
+                        .successHandler(authSuccessHandler)
                         .failureHandler(failureHandler)
                 )
                 .sessionManagement(session -> session
@@ -71,11 +72,5 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    @Bean
-    public WebSecurityCustomizer configure() {
-        return (web -> web.ignoring()
-                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()));
     }
 }
