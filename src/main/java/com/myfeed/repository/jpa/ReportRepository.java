@@ -7,22 +7,22 @@ import com.myfeed.model.report.Report;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
-    // 신고 상태 리스트 (차단 & 해제)
-    Page<Report> findPagedReportsByStatus(Pageable pageable, ProcessStatus status);
-
-    // 신고 게시글 리스트
+    // 신고 게시글 페이지 네이션 (동시성)
+    @Query("SELECT p FROM Post p WHERE p.user.isDeleted = false")
     Page<Report> findPagedReportsByPost(Post post, Pageable pageable);
 
-    // 신고 댓글 리스트
+    // 게시글 신고 내역 조회
+    List<Report> findReportByPostId(Long postId);
+
+    // 신고 댓글 페이지 네이션 (동시성)
+    @Query("SELECT r FROM Reply r WHERE r.user.isDeleted = false")
     Page<Report> findPagedReportsByReply(Reply reply, Pageable pageable);
 
-    /*
-    // 처리 대기 신고 리스트 (차단)
-    Page<Report> findReportByPendingStatus(Pageable pageable, ProcessStatus status);
-
-    // 처리 완료 신고 리스트 (차단 해제)
-    Page<Report> findReportByCompletedStatus(Pageable pageable, ProcessStatus status);
-     */
+    // 댓글 신고 내역 조회
+    List<Report> findReportByReplyId(Long replyId);
 }

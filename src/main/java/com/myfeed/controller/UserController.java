@@ -1,3 +1,4 @@
+
 package com.myfeed.controller;
 
 import com.myfeed.exception.CustomException;
@@ -93,13 +94,13 @@ public class UserController {
     // 회원정보 상세보기
     @GetMapping("/{id}/detail")
     public String detail(@PathVariable Long id,
-            @RequestParam(name="p", defaultValue = "1") int page,
-            Model model){
+                         @RequestParam(name="p", defaultValue = "1") int page,
+                         Model model){
         Map<String, Object> messagemap = new HashMap<>();
 
         User user = userService.findById(id);
         model.addAttribute("user", user);
-        Page<Post> postList = postService.getPagedPostsByUserId(page, id);
+        Page<Post> postList = postService.getPagedPostsByUserId(page, user);
         model.addAttribute("postList", postList);
 
         return "users/detail";
@@ -109,7 +110,7 @@ public class UserController {
     @PostMapping("/{uid}") // 변경 가능 필드(비밀번호, 실명, 닉네임, 프로필사진)
     @ResponseBody
     public Map<String, Object> updateProc(@PathVariable("uid") Long id,
-            @Validated @RequestBody UpdateDto updateDto) {
+                                          @Validated @RequestBody UpdateDto updateDto) {
         Map<String, Object> messagemap = new HashMap<>();
         userService.updateUser(id, updateDto);
         messagemap.put("message","회원정보가 수정되었습니다.");
@@ -172,8 +173,8 @@ public class UserController {
     // 활성/비활성 회원 목록 가져오기
     @GetMapping("/list")
     public String list(@RequestParam(name="p", defaultValue = "1") int page,
-                        @RequestParam(name="status", defaultValue = "true") boolean status,
-                        Model model) {
+                       @RequestParam(name="status", defaultValue = "true") boolean status,
+                       Model model) {
         Page<User> pagedUsers = userService.getPagedUser(page, status);
         model.addAttribute("pagedUsers", pagedUsers);
         model.addAttribute("status", status);
@@ -184,8 +185,8 @@ public class UserController {
     //회원 활성/비활성 여부 수정하기
     @PostMapping("/{uid}/status")
     public String updateUserState(@PathVariable Long id,
-                                    @RequestParam(name="status") boolean status,
-                                    Model model) {
+                                  @RequestParam(name="status") boolean status,
+                                  Model model) {
         userService.updateUserStatus(id, status);
         //todo model로 넘겨주는 parameter 추가 예정,,
         return "redirect:/users/list";
