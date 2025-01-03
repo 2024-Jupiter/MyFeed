@@ -15,6 +15,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RequestMapping("/api/postEs")
+@RequestMapping("/api/search")
 public class PostEsController {
+
+    @Autowired
+    private PostEsService postEsService;
+
+    @GetMapping()
+    public String search(@RequestParam(name = "q") String query,
+                         @RequestParam(name = "p", defaultValue = "1") int page,
+                         Model model) {
+        Page<Post> posts = postEsService.searchQuery(query,page);
+        model.addAttribute("posts", posts);
+        return "search";
+    }
+
 }

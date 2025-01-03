@@ -30,8 +30,8 @@ public class PostSyncEventListener {
             PostEs postEs = new PostEs();
             postEs.setId(String.valueOf(post.getId()));
             postEs.setUserId(String.valueOf(user.getId()));
-            postEs.setUserNickName(user.getNickname());
-            postEs.setUserStatus(String.valueOf(user.isActive()));
+            postEs.setUserName(user.getNickname());
+            postEs.setUserStatus(user.isActive());
             postEs.setTitle(post.getTitle());
             postEs.setContent(postEs.getContent());
             postEs.setCategory(post.getCategory());

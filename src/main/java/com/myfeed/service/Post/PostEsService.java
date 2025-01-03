@@ -14,6 +14,7 @@ import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -77,5 +78,11 @@ public class PostEsService {
                 field, keyword
         );
         return new StringQuery(queryString);
+    }
+
+    // 게시글 검색
+    public Page<Post> searchQuery(String query, int page) {
+        Page<PostEs> result = postEsRepository.findByTitleOrContent(query, query, PageRequest.of(page - 1, PAGE_SIZE));
+
     }
 }

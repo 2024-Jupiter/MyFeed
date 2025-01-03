@@ -28,10 +28,10 @@ public class PostEs {
     private String userId;
 
     @Field(type = FieldType.Keyword)
-    private String userNickName;
+    private String userName;
 
-    @Field(type = FieldType.Keyword)
-    private String userStatus;
+    @Field(type = FieldType.Boolean)
+    private boolean userStatus;
 
     // 게시글 정보
     @Field(type = FieldType.Text)

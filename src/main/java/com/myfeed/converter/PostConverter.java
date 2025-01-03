@@ -5,9 +5,6 @@ import com.myfeed.model.post.*;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.user.User;
 
-import com.myfeed.model.user.User;
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +14,7 @@ public class PostConverter {
         return PostEs.builder()
                 .id(String.valueOf(post.getId()))
                 .userId(String.valueOf(post.getUser().getId()))
-                .userNickName(post.getUser().getNickname())
+                .userName(post.getUser().getNickname())
                 .userStatus(post.getUser().isDeleted() ? "DELETED" : "ACTIVE")
                 .title(post.getTitle())
                 .content(post.getContent())
