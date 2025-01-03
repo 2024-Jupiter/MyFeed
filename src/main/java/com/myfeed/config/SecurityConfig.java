@@ -32,12 +32,8 @@ public class SecurityConfig {
         http.csrf(auth -> auth.disable())       // CSRF 방어 기능 비활성화
                 .headers(x -> x.frameOptions(y -> y.disable()))     // H2-console
                 .authorizeHttpRequests(requests -> requests
-<<<<<<< HEAD
-                        .requestMatchers("/api/users/find-id" ,"/api/users/find-password" ,"/api/users/check-email","/api/users/check-nickname", "/api/users/custom-login","/api/users/register", "/api/replies/**", "/api/posts/**", "/api/postEs/**", "/api/users/**", "/api/users/*/detail", "/view/home", "/api/admin/reports/posts/{postId}", "/api/admin/reports/replies/{replyId}").permitAll()
-=======
                         .requestMatchers("/api/users/find-id" ,"/api/users/find-password" ,"/api/users/check-email","/api/users/check-nickname", "/api/users/custom-login","/api/users/register", "/api/replies/**", "/api/posts/**", "/api/postEs/**", "/api/users/*/detail", "/api/users/**", "/view/home", "/api/admin/reports/posts/{postId}", "/api/admin/reports/replies/{replyId}").permitAll()
                         .requestMatchers("/css/**","/js/**","/lib/**","/scss/**", "/img/**" ).permitAll()
->>>>>>> dc8ce72889974ff00c0e3ba8824ec80eaae7ba5b
                         .requestMatchers("/api/admin/users/*/status", "/api/admin/users", "/api/admin/reports/**", "/posts/**?category=NEWS").hasAuthority(String.valueOf(Role.ADMIN))
                         .anyRequest().authenticated()
                 )
