@@ -20,13 +20,13 @@ public interface ReportService {
     // 신고 게시글 페이지 네이션 (동시성)
     Page<Report> getPagedReportsByPost(int page, Post post);
 
-    // 게시글 신고 조회
+    // 게시글 신고 상세 보기
     List<Report> getReportsByPost(Long postId);
 
     // 신고 댓글 페이지 네이션 (동시성)
     Page<Report> getPagedReportsByReply(int page, Reply reply);
 
-    // 댓글 신고 조회
+    // 댓글 신고 상세 보기
     List<Report> getReportsByReply(Long replyId);
 
     // 게시글 신고

@@ -56,7 +56,7 @@ public class ReportServiceImpl implements ReportService {
         return new PageImpl<>(filteredReports, pageable, reports.getTotalElements());
     }
 
-    // 게시글 신고 내역 조회
+    // 게시글 신고 내역 상세 보기
     @Override
     public List<Report> getReportsByPost(Long postId) {
         List<Report> reports = reportRepository.findReportByPostId(postId);
@@ -96,7 +96,7 @@ public class ReportServiceImpl implements ReportService {
         return new PageImpl<>(filteredReports, pageable, reports.getTotalElements());
     }
 
-    // 댓글 신고 내역 조회
+    // 댓글 신고 내역 상세 보기
     @Override
     public List<Report> getReportsByReply(Long replyId) {
         List<Report> reports = reportRepository.findReportByReplyId(replyId);

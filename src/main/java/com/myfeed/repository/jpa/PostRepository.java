@@ -16,7 +16,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT p FROM Post p WHERE p.user.isDeleted = false")
     Page<Post> findPagedPostsByUserId(User user, Pageable pageable);
 
-    // 게시글의 사용자 아이디 가져오기
+    // 게시글의 사용자 아이디 가져 오기
     List<User> findUsersById(Long userId);
 
     // 조회수 증가 (동시성)
