@@ -21,13 +21,13 @@ public class ApiResponse<T> {
 
 	private final String errorCode;
 
-	// private String errorMessage;
+	private final String errorMessage;
 
 	public static <T> ApiResponse<T> success(T data) {
-		return new ApiResponse<>("success", data, null);
+		return new ApiResponse<>("success", data, null, null);
 	}
 
-	public static <T> ApiResponse<?> error(String errorCode) {
-		return new ApiResponse<>("error", null, errorCode);
+	public static <T> ApiResponse<?> error(String errorCode, String errorMessage) {
+		return new ApiResponse<>("error", null, errorCode, errorMessage);
 	}
 }

@@ -19,9 +19,9 @@ public class ResponseAdvice implements ResponseBodyAdvice<Object> {
 	@Override
 	public Object beforeBodyWrite(Object body, MethodParameter returnType, MediaType selectedContentType, Class<? extends HttpMessageConverter<?>> selectedConverterType, ServerHttpRequest request, ServerHttpResponse response) {
 		if(body instanceof ErrorResponse) {
-			return ApiResponse.error(((ErrorResponse)body).getErrorCode());
+			ErrorResponse errorResponse = (ErrorResponse) body;
+			return ApiResponse.error(errorResponse.getErrorCode(), errorResponse.getErrorMessage());
 		} else {
-			System.out.println("-------------------" + body);
 			return ApiResponse.success(body);
 		}
 	}
