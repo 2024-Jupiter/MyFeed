@@ -17,7 +17,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 
 @Configuration
 public class SecurityConfig {
@@ -28,14 +27,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
-        requestCache.setMatchingRequestParameterName("null");
-
         http.csrf(auth -> auth.disable())       // CSRF 방어 기능 비활성화
                 .headers(x -> x.frameOptions(y -> y.disable()))     // H2-console
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/login","/api/users/find-id","/api/users/find-password","/api/users/check-email","/api/users/check-nickname", "/api/users/custom-login","/api/users/register", "/api/board/**","/api/users/*/detail", "/api/users/*", "/view/home").permitAll()
+                        .requestMatchers("/login", "/api/users/find-id" ,"/api/users/find-password" ,"/api/users/check-email","/api/users/check-nickname", "/api/users/custom-login","/api/users/register", "/api/replies/**", "/api/posts/**", "/api/postEs/**", "/api/users/*/detail", "/api/users/*", "/view/home", "/api/admin/reports/posts/{postId}", "/api/admin/reports/replies/{replyId}").permitAll()
                         .requestMatchers("/login/oauth2/code/google","auth/google/callback","/auth/kakao/callback", "/login/oauth2/code/**").permitAll()
                         .requestMatchers("/css/**","/js/**","/lib/**","/scss/**", "/img/**" ).permitAll()
                         .requestMatchers("/api/admin/users/*/status", "/api/admin/users", "/api/admin/boards/report", "/api/admin/boards/**").hasAuthority(String.valueOf(Role.ADMIN))

@@ -28,23 +28,18 @@
   />
 
   <!-- Libraries Stylesheet -->
-  <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet"/>
+  <link href="/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet"/>
 
   <!--Sweet Alert2-->
   <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.10/dist/sweetalert2.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.10/dist/sweetalert2.min.js"></script>
-
-
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.10/dist/sweetalert2.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.10/dist/sweetalert2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.10/dist/sweetalert2.min.js" type="application/javascript"></script>
 
 
   <!-- Customized Bootstrap Stylesheet -->
-  <link href="css/style.css" rel="stylesheet"/>
-  <link rel="stylesheet" href="css/globals.css"/>
-  <link rel="stylesheet" href="css/register.css"/>
+  <link href="/css/style.css" rel="stylesheet" type="text/css"/>
+  <link rel="stylesheet" href="/css/globals.css" type="text/css"/>
+  <link rel="stylesheet" href="/css/register.css" type="text/css"/>
 
 </head>
 
@@ -53,8 +48,8 @@
 <div class="container-fluid pt-5">
   <div class="row align-items-center py-3 px-xl-5">
     <div class="col-lg-4" style="margin-left: 15%">
-      <a href="index.html">
-        <img src="img/logo.png" style="margin-left: 5%; width: 40%"/>
+      <a href="#">
+        <img src="/img/logo.png" style="margin-left: 5%; width: 40%" alt="logo"/>
       </a>
     </div>
   </div>
@@ -63,7 +58,6 @@
 <!-- Topbar End -->
 
 <div class="container-fluid pt-1">
-  <!-- <div class="container"> -->
   <div
       class="row"
       style="
@@ -79,14 +73,15 @@
       <div class="mb-8">
         <h4 class="font-weight-semi-bold mb-5"
             style="font-size: 20px; text-align: center; color: darkgray;">SIGN-UP</h4>
-        <form th:action="@{/register}" method="post" style="color: black; font-weight: 400;">
+        <form action="/api/users/register" id="registerForm" method="post" style="color: black; font-weight: 400;" onsubmit="return false">
           <div class="row">
             <div class="col-md-7 form-group">
               <label>이메일</label>
               <div class="check-group">
                 <input class="form-control" type="email" id="email" name="email"
                        placeholder="사용하실 이메일을 입력해 주세요." required>
-                <button class="btn btn-info" id="btnCheckEmail" type="button" style="padding: 0;">
+                <button class="btn btn-info" id="checkEmailBtn" type="button" style="padding: 0;"
+                        data-available="false">
                   중복확인
                 </button>
               </div>
@@ -105,8 +100,7 @@
             <div class="col-md-7 form-group">
               <label>이름</label>
               <input class="form-control" name="uname" type="text" placeholder="성함을 입력해 주세요."
-                     pattern="[가-힣a-zA-Z]+" required
-                     oninvalid="this.setCustomValidity('한글 또는 영문만 입력해 주세요.')"
+                      required
               >
             </div>
             <div class="col-md-7 form-group">
@@ -114,8 +108,8 @@
               <div class="check-group">
                 <input class="form-control" name="nickname" id="nickname" type="text"
                        placeholder="사용하실 닉네임을 입력해 주세요." required>
-                <button class="btn btn-info" id="btnCheckNickname" type="button"
-                        style="padding: 0;">중복확인
+                <button class="btn btn-info" id="checkNicknameBtn" type="button"
+                        style="padding: 0;" data-available="false">중복확인
                 </button>
               </div>
             </div>
@@ -143,33 +137,29 @@
                      placeholder="프로필 이미지를 등록해 주세요."
                      style="padding-top: 0.5rem;">
             </div>
-        </form>
+
         <div class="col-md-7 form-group pt-3">
-          <button type="submit" class="btn btn-info" style="width: 100%;">회원가입</button>
+          <button type="submit" id="formSubmit" class="btn btn-info" style="width: 100%;">회원가입</button>
         </div>
+        </form>
       </div>
-    </div>
+  </div>
 
     <!-- Categories End -->
 
     <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" type="application/javascript"></script>
     <script
-        src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-    <script src="lib/easing/easing.min.js"></script>
-    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
-
-    <!-- Contact Javascript File -->
-    <script src="mail/jqBootstrapValidation.min.js"></script>
-    <script src="mail/contact.js"></script>
+        src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js" type="application/javascript"></script>
+    <script src="/lib/easing/easing.min.js" type="application/javascript"></script>
+    <script src="/lib/owlcarousel/owl.carousel.min.js" type="application/javascript"></script>
 
 
     <!-- Template Javascript -->
-    <script src="js/main.js"></script>
+    <script src="/js/main.js" type="application/javascript"></script>
 </body>
 
 <script>
-
 
 
 </script>

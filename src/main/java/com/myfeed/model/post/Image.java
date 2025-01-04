@@ -16,7 +16,7 @@ public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
