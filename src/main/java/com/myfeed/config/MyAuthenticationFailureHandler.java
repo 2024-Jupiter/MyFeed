@@ -16,17 +16,17 @@ import org.springframework.stereotype.Component;
 public class MyAuthenticationFailureHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        String url = "/api/user/login";
+        String url = "/api/users/custom-login";
         String errorMsg;
 
         if (exception instanceof BadCredentialsException) {
             errorMsg = "아이디 또는 비밀번호가 틀렸습니다.";
         } else if (exception instanceof UsernameNotFoundException) {
             errorMsg = "존재하지 않는 아이디입니다.";
-            url = "/api/user/register";
+            url = "/api/users/register";
         } else if (exception instanceof DisabledException) {
-            errorMsg = "비활성화된 회원입니다.";
-            url = "/api/user/register";
+            errorMsg = "비활성화된 회원입니다. 관리자에게 문의하세요";
+            url = "/api/users/home";
         } else {
             errorMsg = "로그인 중 오류가 발생했습니다. 다시 시도해주세요.";
         }

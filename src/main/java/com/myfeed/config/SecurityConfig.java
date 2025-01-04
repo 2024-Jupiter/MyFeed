@@ -5,17 +5,22 @@ import com.myfeed.jwt.JwtRequestFilter;
 import com.myfeed.model.user.Role;
 import com.myfeed.service.user.MyOAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
+    @Autowired private AuthenticationSuccessHandler authSuccessHandler;
     @Autowired private AuthenticationFailureHandler failureHandler;
     @Autowired private MyOAuth2UserService myOAuth2UserService;
     @Autowired private JwtRequestFilter jwtRequestFilter;
@@ -25,32 +30,37 @@ public class SecurityConfig {
         http.csrf(auth -> auth.disable())       // CSRF 방어 기능 비활성화
                 .headers(x -> x.frameOptions(y -> y.disable()))     // H2-console
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/user/register", "/api/board/**","/api/user/**", "/view/home" ).permitAll()
+                        .requestMatchers("/login", "/api/users/find-id" ,"/api/users/find-password" ,"/api/users/check-email","/api/users/check-nickname", "/api/users/custom-login","/api/users/register", "/api/replies/**", "/api/posts/**", "/api/postEs/**", "/api/users/*/detail", "/api/users/*", "/view/home", "/api/admin/reports/posts/{postId}", "/api/admin/reports/replies/{replyId}").permitAll()
+                        .requestMatchers("/login/oauth2/code/google","auth/google/callback","/auth/kakao/callback", "/login/oauth2/code/**").permitAll()
+                        .requestMatchers("/css/**","/js/**","/lib/**","/scss/**", "/img/**" ).permitAll()
                         .requestMatchers("/api/admin/users/*/status", "/api/admin/users", "/api/admin/boards/report", "/api/admin/boards/**").hasAuthority(String.valueOf(Role.ADMIN))
                         .anyRequest().authenticated()
                 )
                 .formLogin(auth -> auth
-                        .loginPage("/api/user/login") // template return url
-                        .loginProcessingUrl("/api/user/login")  // post 엔드포인트
+                        .loginPage("/api/users/custom-login") // template return url users/loginPage
+                        .loginProcessingUrl("/api/users/custom-login")  // post 엔드포인트
                         .usernameParameter("email")
                         .passwordParameter("pwd")
-                        .defaultSuccessUrl("/api/user/loginSuccess", true)
+                        //.defaultSuccessUrl("/api/users/loginSuccess", false)
+                        .successHandler(authSuccessHandler)
                         .failureHandler(failureHandler)
                         .permitAll()
                 )
                 .logout(auth -> auth
-                        .logoutUrl("/user/logout")
-                        .invalidateHttpSession(true)
+                        .logoutUrl("/api/users/logout")
+                        //.invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
-                        .logoutSuccessUrl("/user/login")
+                        .logoutSuccessUrl("/api/users/custom-login")
                 )
                 .oauth2Login(auth -> auth
-                        .loginPage("/user/login")
                         .userInfoEndpoint(user -> user.userService(myOAuth2UserService))
-                        .defaultSuccessUrl("/user/loginSuccess", true)
+                        .successHandler(authSuccessHandler)
                         .failureHandler(failureHandler)
                 )
-        ;
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                ); // 세션 비활성화
+
         // JwtRequestFilter 추가
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 

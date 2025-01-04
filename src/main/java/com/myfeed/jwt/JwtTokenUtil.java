@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenUtil {
-    private String SECRET_KEY = "like_lion_advanced_backend";       // 서버에서만 알고 있는 비밀키
+    private String SECRET_KEY = "BESP2JupiterELASTICSEARCHPROJECTWOWOWOWOWOWOWOWOWOWOWO";       // 서버에서만 알고 있는 비밀키
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJwt(token).getBody();
@@ -60,9 +60,9 @@ public class JwtTokenUtil {
     }
 
     // 토큰 생성
-    public String generateToken(String username) {
+    public String generateToken(String useremail) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
+        return createToken(claims, useremail);
     }
 
     // 토큰 유효성 검사

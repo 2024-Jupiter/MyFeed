@@ -1,4 +1,5 @@
 package com.myfeed.model.post;
+
 import com.myfeed.model.base.BaseTimeEntity;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.user.User;
@@ -8,7 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class Post extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -36,7 +36,7 @@ public class Post extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
-    private Category category = Category.GENERAL;
+    private Category category;
 
     @Column(name = "title", nullable = false)
     private String title;

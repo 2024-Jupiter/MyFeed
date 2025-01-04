@@ -1,22 +1,28 @@
+
 package com.myfeed.controller;
 
+import com.myfeed.exception.CustomException;
+import com.myfeed.exception.ExpectedException;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
+import com.myfeed.model.user.Role;
 import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
+import com.myfeed.model.user.UserChangePasswordDto;
+import com.myfeed.model.user.UserFindIdDto;
+import com.myfeed.model.user.UserFindPasswordDto;
+import com.myfeed.response.ErrorCode;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
-import java.time.LocalDateTime;
+import jakarta.websocket.server.PathParam;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import javax.crypto.MacSpi;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -30,153 +36,215 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-//todo return 전체 조율 후 수정 필요
+
 @Controller
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserController {
     @Autowired UserService userService;
     @Autowired PostService postService;
 
+    @GetMapping("/test")
+    @ResponseBody
+    public Map<String, Object> loginTest() {
+        Map<String, Object> messagemap = new HashMap<>();
+        messagemap.put("message", "로그인 완료");
+        return messagemap;
+    }
+
+    // 로그인
+    // @ResponseBody //
+    @GetMapping("/custom-login")
+    public String loginForm() {
+        Map<String, Object> messagemap = new HashMap<>();
+        return "redirect:/home";
+    }
+
     // 회원 가입(폼)
     @GetMapping("/register")
     public String registerForm(){
-        return "user/register";
+        return "register";
     }
 
     @PostMapping("/register")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> registerProc(@Validated @RequestBody RegisterDto registerDto){
+    public String registerProc(@Validated RegisterDto registerDto, Model model){ // @RequestBody
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
+        if (registerDto.getEmail().equals("asd@naver.com")) {
+            throw new ExpectedException(ErrorCode.USER_NOT_FOUND);
+        }
         User user = User.builder()
                 .email(registerDto.getEmail()).password(hashedPwd)
                 .username(registerDto.getUname()).nickname(registerDto.getNickname())
                 .profileImage(registerDto.getProfileImage())
                 .phoneNumber(registerDto.getPhoneNumber())
                 .loginProvider(LoginProvider.FORM)
+                .role(Role.USER)
                 .build();
         userService.registerUser(user);
-        messagemap.put("success","회원가입 되었습니다.");
-        messagemap.put("redirectUrl","/home");
-        return ResponseEntity.ok(messagemap);
+
+        model.addAttribute("msg", "회원가입 되었습니다.");
+        model.addAttribute("url", "/home");
+        return "common/alertMsg";
     }
 
     @GetMapping("/update/{uid}")
-    public String update() {
-        return "user/update";
+    public String update(@PathParam("uid") Long id, Model model) {
+        User user = userService.findById(id);
+        model.addAttribute(user);
+        return "users/update";
+    }
+
+    // 회원정보 상세보기
+    @GetMapping("/{id}/detail")
+    public String detail(@PathVariable Long id,
+                         @RequestParam(name="p", defaultValue = "1") int page,
+                         Model model){
+        Map<String, Object> messagemap = new HashMap<>();
+
+        User user = userService.findById(id);
+        model.addAttribute("user", user);
+        Page<Post> postList = postService.getPagedPostsByUserId(page, user);
+        model.addAttribute("postList", postList);
+
+        return "users/detail";
     }
 
     // 사용자 정보 수정
     @PostMapping("/{uid}") // 변경 가능 필드(비밀번호, 실명, 닉네임, 프로필사진)
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> updateProc(@PathVariable Long id,
-            @Validated @RequestBody UpdateDto updateDto) {
+    public Map<String, Object> updateProc(@PathVariable("uid") Long id,
+                                          @Validated @RequestBody UpdateDto updateDto) {
         Map<String, Object> messagemap = new HashMap<>();
         userService.updateUser(id, updateDto);
-        messagemap.put("success","회원정보가 수정되었습니다.");
+        messagemap.put("message","회원정보가 수정되었습니다.");
         String redirectUrl = "/"+id+"/detail";
         messagemap.put("redirectUrl",redirectUrl);
-        return ResponseEntity.ok(messagemap);
+        return messagemap;
     }
 
     // 이메일 중복확인
     @GetMapping("/check-email")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> checkUserExist(@RequestParam(name="email") String email) {
+    @ResponseBody //
+    public Map<String, Object> checkUserExist(@RequestParam(name="email") String email) {
         Map<String, Object> messagemap = new HashMap<>();
         if (userService.findByEmail(email) != null) {
-            messagemap.put("state", "error");
-            messagemap.put("message", "이미 회원가입된 이메일입니다.");
-            return ResponseEntity.badRequest().body(messagemap);
+            throw new CustomException("409", "이미 사용 중인 이메일입니다.");
         }
-        messagemap.put("state", "success");
         messagemap.put("message", "이메일("+email+")을 사용할 수 있습니다.");
-        return ResponseEntity.ok().body(messagemap);
+        return messagemap;
     }
 
     // 닉네임 중복확인
     @GetMapping("/check-nickname")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> checkNicknameExist(@RequestParam(name="nickname") String nickname) {
+    @ResponseBody //
+    public Map<String, Object> checkNicknameExist(@RequestParam(name="nickname") String nickname) {
         Map<String, Object> messagemap = new HashMap<>();
         if (userService.findByNickname(nickname) != null) {
-            messagemap.put("state", "error");
-            messagemap.put("message", "이미 존재하는 닉네임입니다.");
-            return ResponseEntity.badRequest().body(messagemap);
+            throw new CustomException("409", "이미 사용 중인 닉네임입니다.");
         }
-        messagemap.put("state", "success");
         messagemap.put("message", "닉네임 " + nickname +"을 사용할 수 있습니다.");
-        return ResponseEntity.ok().body(messagemap);
+        return messagemap;
     }
 
     // 회원 탈퇴
     @GetMapping("/{id}")
     public String delete(@PathVariable Long id) {
         userService.deleteUser(id); //soft delete
-        return "redirect:/home";
-    }
-
-    // 회원정보 상세보기
-    @GetMapping("/{id}/detail")
-    public String detail(@PathVariable Long id,
-            @RequestParam(name="p", defaultValue = "1") int page,
-            Model model){
-        User user = userService.findById(id);
-        model.addAttribute("user", user);
-        Page<Post> postList = postService.getMyPostList(page, id);
-        model.addAttribute("postList", postList);
-        return "user/detail";
-    }
-
-    // 로그인
-    @GetMapping("/login")
-    @ResponseBody
-    public String loginForm() {
-        return "<h1>hello<h1>";
-        //return "user/login"
+        return "redirect:/api/users/custom-login";
     }
 
     // 로그인 성공 시
-    @GetMapping("/loginSuccess")
+    @GetMapping("/loginSuccess") // json return, home으로 redirect,
     public String loginSuccess(HttpSession session, Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         User user = userService.findByEmail(email);
-
+        System.out.println("---------아이디"+user.getId());
+        System.out.println("---------이메일"+user.getEmail());
         session.setAttribute("sessId", user.getId());
+        String url = "/home";
         String msg = user.getNickname() + "님 환영합니다.";
-        String url = "/";
         model.addAttribute("msg", msg);
-        model.addAttribute("url", url); 
+        model.addAttribute("url", url);
         return "common/alertMsg";
     }
 
     // 로그아웃
     @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/board/list";
+    public String logout() {
+        return "redirect:/home";
     }
 
     // 활성/비활성 회원 목록 가져오기
     @GetMapping("/list")
     public String list(@RequestParam(name="p", defaultValue = "1") int page,
-                        @RequestParam(name="status", defaultValue = "true") boolean status,
-                        Model model) {
+                       @RequestParam(name="status", defaultValue = "true") boolean status,
+                       Model model) {
         Page<User> pagedUsers = userService.getPagedUser(page, status);
         model.addAttribute("pagedUsers", pagedUsers);
         model.addAttribute("status", status);
         model.addAttribute("currentUserPage", page);
-        return "user/list";
+        return "users/list";
     }
 
     //회원 활성/비활성 여부 수정하기
-    @PostMapping("{uid}/status")
+    @PostMapping("/{uid}/status")
     public String updateUserState(@PathVariable Long id,
-                                    @RequestParam(name="status") boolean status,
-                                    Model model) {
+                                  @RequestParam(name="status") boolean status,
+                                  Model model) {
         userService.updateUserStatus(id, status);
         //todo model로 넘겨주는 parameter 추가 예정,,
-        return "redirect:/user/list";
+        return "redirect:/users/list";
+    }
+
+    @PostMapping("/find-password")
+    @ResponseBody //
+    public Map<String, Object> findPassword(@Validated @RequestBody UserFindPasswordDto findPasswordDto) {
+        Map<String, Object> messagemap = new HashMap<>();
+        User user = userService.findByEmail(findPasswordDto.getEmail());
+
+        if (user == null) {
+            throw new CustomException("404", "아이디가 존재하지 않습니다.");
+        }
+
+        if (user.getLoginProvider() != LoginProvider.FORM) {
+            throw new CustomException("403", "소셜 로그인으로 시도하세요.");
+        }
+
+        String savedPhoneNumber = user.getPhoneNumber();
+
+        if (!savedPhoneNumber.equals(findPasswordDto.getPhoneNumber())) {
+            throw new CustomException("403", "휴대폰 번호가 기존 정보와 일치하지 않습니다.");
+        }
+        messagemap.put("message", "비밀번호를 변경하세요.");
+        messagemap.put("redirectUrl", "redirect:/api/users/change-password");
+        return messagemap;
+    }
+
+    @PostMapping("/change-password")
+    @ResponseBody //
+    public Map<String, Object> changePassword(@Validated @RequestBody UserChangePasswordDto changePasswordDto) {
+        Map<String, Object> messagemap = new HashMap<>();
+
+        messagemap.put("message", "비밀번호가 변경되었습니다.");
+        messagemap.put("redirectUrl", "redirect:/api/users/home");
+        return messagemap;
+    }
+
+    @PostMapping("/find-id")
+    @ResponseBody //
+    public Map<String, Object> findId(@Validated @RequestBody UserFindIdDto findIdDto) {
+        Map<String, Object> messagemap = new HashMap<>();
+        List<User> users = userService.findByUsernameAndPhoneNumber(findIdDto.getUname(), findIdDto.getPhoneNumber());
+
+        if (users.isEmpty()) {
+            throw new CustomException("404", "정보와 일치하는 회원이 존재하지 않습니다.");
+        }
+
+        List<String> emailList = users.stream().map(User::getEmail).toList();
+
+        messagemap.put("message", "정보와 일치하는 아이디 목록입니다.");
+        messagemap.put("emailList", emailList);
+        return messagemap;
     }
 }
