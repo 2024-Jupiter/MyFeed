@@ -221,8 +221,10 @@ function isEmailAvailable() {
     dataType: 'json',
     success: function (response) {
       console.log(response.data);
+      console.log(response);
 
-      if (!response || !response.data) {
+
+      if (!response) {
         Swal.fire({
           icon: 'error',
           text: '서버 응답이 올바르지 않습니다.',
@@ -231,16 +233,16 @@ function isEmailAvailable() {
         return;
       }
 
-      if (!response.data.success) {
-        console.log(data);
+      if (response.status === 'error') {
+
         Swal.fire({
           icon: 'warning',
-          text: response.data.message,
+          text: '이미 사용 중인 이메일입니다.',
           ...swalConfig,
         });
       }
 
-      if (response.data.success) {
+      if (response.status === 'success') {
         Swal.fire({
           icon: 'success',
           text: response.data.message,
@@ -305,7 +307,7 @@ function isNicknameAvailable() {
     data: {nickname: nickname},
     dataType: 'json',
     success: function (response) {
-      if (!response || !response.data) {
+      if (!response) {
         Swal.fire({
           icon: 'error',
           text: '서버 응답이 올바르지 않습니다.',
@@ -313,14 +315,14 @@ function isNicknameAvailable() {
         });
         return;
       }
-      if (!response.data.success) {
+      if (response.status === 'error') {
         Swal.fire({
           icon: 'warning',
-          text: response.data.message,
+          text: '이미 사용 중인 닉네임입니다.',
           ...swalConfig,
         });
       }
-      if (response.data.success) {
+      if (response.status === 'success') {
         Swal.fire({
           icon: 'success',
           text: response.data.message,
