@@ -56,7 +56,7 @@ public class UserController {
     @GetMapping("/custom-login")
     public String loginForm() {
         Map<String, Object> messagemap = new HashMap<>();
-        return "home";
+        return "redirect:/home";
     }
 
     // 회원 가입(폼)
@@ -66,8 +66,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    @ResponseBody
-    public Map<String, Object> registerProc(@Validated @RequestBody RegisterDto registerDto){ // @RequestBody
+    public String registerProc(@Validated RegisterDto registerDto, Model model){ // @RequestBody
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
         if (registerDto.getEmail().equals("asd@naver.com")) {
@@ -82,9 +81,10 @@ public class UserController {
                 .role(Role.USER)
                 .build();
         userService.registerUser(user);
-        messagemap.put("message","회원가입 되었습니다.");
-        messagemap.put("redirectUrl","/home");
-        return messagemap;
+
+        model.addAttribute("msg", "회원가입 되었습니다.");
+        model.addAttribute("url", "/home");
+        return "common/alertMsg";
     }
 
     @GetMapping("/update/{uid}")
@@ -150,7 +150,7 @@ public class UserController {
     @GetMapping("/{id}")
     public String delete(@PathVariable Long id) {
         userService.deleteUser(id); //soft delete
-        return "redirect:/custom-login";
+        return "redirect:/api/users/custom-login";
     }
 
     // 로그인 성공 시
@@ -162,15 +162,17 @@ public class UserController {
         System.out.println("---------아이디"+user.getId());
         System.out.println("---------이메일"+user.getEmail());
         session.setAttribute("sessId", user.getId());
+        String url = "/home";
         String msg = user.getNickname() + "님 환영합니다.";
         model.addAttribute("msg", msg);
-        return "home";
+        model.addAttribute("url", url);
+        return "common/alertMsg";
     }
 
     // 로그아웃
     @GetMapping("/logout")
     public String logout() {
-        return "redirect:/board/list";
+        return "redirect:/home";
     }
 
     // 활성/비활성 회원 목록 가져오기

@@ -32,6 +32,9 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
         String hashedPwd = bCryptPasswordEncoder.encode("Social Login");
         User user = null;
 
+        String accessToken = userRequest.getAccessToken().getTokenValue();
+        System.out.println("------------액세스 토큰: "+ accessToken + " -------------");
+
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
         String provider = userRequest.getClientRegistration().getRegistrationId();
@@ -63,53 +66,54 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
                 }
                 break;
 
-                case "google":
+            case "google":
+                email = oAuth2User.getAttribute("email");
+                user = userService.findByEmail(email);
+                if (user == null) {
+                    uname = oAuth2User.getAttribute("name");
+                    String sub = oAuth2User.getAttribute("sub");
+                    uname = (uname == null) ? "g_"+sub : uname;
                     email = oAuth2User.getAttribute("email");
-                    user = userService.findByEmail(email);
-                    if (user == null) {
-                        uname = oAuth2User.getAttribute("name");
-                        String sub = oAuth2User.getAttribute("sub");
-                        uname = (uname == null) ? "g_"+sub : uname;
-                        email = oAuth2User.getAttribute("email");
-                        profileUrl = oAuth2User.getAttribute("picture");
-                        user = User.builder()
-                                .email(email)
-                                .password(hashedPwd)
-                                .username(uname)
-                                .nickname(uname)
-                                .role(Role.USER)
-                                .isActive(true)
-                                .profileImage(profileUrl)
-                                .loginProvider(LoginProvider.GOOGLE)
-                                .build();
-                        userService.registerUser(user);
-                        log.info("구글 계정을 통해 회원가입이 되었습니다.: " + user.getUsername());
-                    }
-                    break;
+                    profileUrl = oAuth2User.getAttribute("picture");
+                    user = User.builder()
+                            .email(email)
+                            .password(hashedPwd)
+                            .username(uname)
+                            .nickname(uname)
+                            .role(Role.USER)
+                            .isActive(true)
+                            .profileImage(profileUrl)
+                            .loginProvider(LoginProvider.GOOGLE)
+                            .build();
+                    userService.registerUser(user);
+                    log.info("구글 계정을 통해 회원가입이 되었습니다.: " + user.getUsername());
+                }
+                break;
 
-                case "github":
-                    email = oAuth2User.getAttribute("email");
-                    user = userService.findByEmail(email);
-                    if (user == null) {
-                        uname = oAuth2User.getAttribute("name");
-                        int id = oAuth2User.getAttribute("id");
-                        uname = (uname == null) ? "g_"+id : uname;
-                        email = oAuth2User.getAttribute("email");
-                        profileUrl = oAuth2User.getAttribute("avatar_url");
-                        user = User.builder()
-                                .email(email)
-                                .password(hashedPwd)
-                                .username(uname)
-                                .nickname(uname)
-                                .role(Role.USER)
-                                .isActive(true)
-                                .profileImage(profileUrl)
-                                .loginProvider(LoginProvider.GITHUB)
-                                .build();
-                        userService.registerUser(user);
-                        log.info("깃허브 계정을 통해 회원가입이 되었습니다. " + user.getUsername());
-                    }
-                    break;
+            case "github": // 깃허브 이메일 필수값 아님..
+                int id = oAuth2User.getAttribute("id");
+                email = oAuth2User.getAttribute("email");
+                email = (email == null) ? id+"@myfeed.com": email;
+                user = userService.findByEmail(email);
+
+                if (user == null) {
+                    uname = oAuth2User.getAttribute("login");
+                    uname = (uname == null) ? "g_"+id : uname;
+                    profileUrl = oAuth2User.getAttribute("avatar_url");
+                    user = User.builder()
+                            .email(email)
+                            .password(hashedPwd)
+                            .username(uname)
+                            .nickname(uname)
+                            .role(Role.USER)
+                            .isActive(true)
+                            .profileImage(profileUrl)
+                            .loginProvider(LoginProvider.GITHUB)
+                            .build();
+                    userService.registerUser(user);
+                    log.info("깃허브 계정을 통해 회원가입이 되었습니다. " + user.getUsername());
+                }
+                break;
 
 
         }
