@@ -1,5 +1,6 @@
 package com.myfeed.service.user;
 
+import com.myfeed.exception.ExpectedException;
 import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
 import com.myfeed.repository.jpa.UserRepository;
@@ -35,11 +36,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email).orElse(null);
+        return userRepository.findByEmail(email).orElse(null); // -> expectException 불가
     }
 
     @Override
-    public User findByNickname(String nickname) {return userRepository.findByNickname(nickname).orElse(null);
+    public User findByNickname(String nickname) {
+        return userRepository.findByNickname(nickname).orElse(null);
     }
 
     @Override

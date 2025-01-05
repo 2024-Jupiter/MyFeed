@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class MyAuthenticationFailureHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        String url = "/api/users/login";
+        String url = "/api/users/custom-login";
         String errorMsg;
 
         if (exception instanceof BadCredentialsException) {
@@ -25,8 +25,8 @@ public class MyAuthenticationFailureHandler implements AuthenticationFailureHand
             errorMsg = "존재하지 않는 아이디입니다.";
             url = "/api/users/register";
         } else if (exception instanceof DisabledException) {
-            errorMsg = "비활성화된 회원입니다.";
-            url = "/api/users/register";
+            errorMsg = "비활성화된 회원입니다. 관리자에게 문의하세요";
+            url = "/api/users/home";
         } else {
             errorMsg = "로그인 중 오류가 발생했습니다. 다시 시도해주세요.";
         }
