@@ -1,6 +1,5 @@
 package com.myfeed.model.elastic.post;
 
-import com.myfeed.model.post.BlockStatus;
 import com.myfeed.model.post.Category;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,7 +9,6 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Document(indexName = "posts")
@@ -18,20 +16,15 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Setter
+@ToString
 public class PostEs {
     @Id
     @Column(name = "id", nullable = false)
     private String id;
 
     // 글쓴이 정보
-    @Field(type = FieldType.Keyword)
-    private String userId;
-
-    @Field(type = FieldType.Keyword)
-    private String userName;
-
-    @Field(type = FieldType.Boolean)
-    private boolean userStatus;
+    @Field(type = FieldType.Keyword,name = "nickname")
+    private String nickname;
 
     // 게시글 정보
     @Field(type = FieldType.Text)
@@ -42,23 +35,14 @@ public class PostEs {
 
     @Field(type = FieldType.Keyword)
     private Category category;
-    
+
     @Field(type = FieldType.Integer)
     private int viewCount;
 
     @Field(type = FieldType.Integer)
     private int likeCount;
 
-    @Field(type = FieldType.Keyword)
-    private BlockStatus blockStatus;
-
-    @Field(type = FieldType.Keyword)
-    private List<String> imageUrls;
-
     @Field(type = FieldType.Date)
     private LocalDateTime createAt;
-
-    @Field(type = FieldType.Date)
-    private LocalDateTime updateAt;
 
 }

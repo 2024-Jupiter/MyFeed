@@ -4,6 +4,9 @@ import com.myfeed.model.elastic.post.PostEs;
 import com.myfeed.model.elastic.post.PostEsDto;
 import com.myfeed.model.post.*;
 import com.myfeed.repository.elasticsearch.PostEsRepository;
+import com.myfeed.service.Post.crawlingdata.NewsExcelReader;
+import com.myfeed.service.Post.crawlingdata.VelogDto;
+import com.myfeed.service.Post.crawlingdata.VelogJsonReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
@@ -14,7 +17,7 @@ import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -81,8 +84,30 @@ public class PostEsService {
     }
 
     // 게시글 검색
-    public Page<Post> searchQuery(String query, int page) {
+    public Page<PostEs> searchQuery(String query, int page) {
         Page<PostEs> result = postEsRepository.findByTitleOrContent(query, query, PageRequest.of(page - 1, PAGE_SIZE));
-
+        return result;
     }
+
+    @Async
+    public void insertByJsonFile() {
+        System.out.println("Inserting by JSON file...");
+        List<VelogDto> velogDtos = new VelogJsonReader().loadJson();
+        List<PostEs> list = velogDtos.stream().map(velogDto -> {
+            return PostEs.builder()
+                    .id(String.valueOf(velogDto.hashCode()))
+                    .title(velogDto.getTitle())
+                    .nickname(velogDto.getUserName())
+                    .content(velogDto.getContent())
+                    .category(Category.GENERAL)
+                    .createAt(LocalDateTime.parse(velogDto.getDate()))
+                    .likeCount(velogDto.getLikeCount())
+                    .viewCount(0)
+                    .build();
+        }).toList();
+        postEsRepository.saveAll(list);
+        System.out.println("Successfully saved to Elasticsearch");
+    }
+
+
 }

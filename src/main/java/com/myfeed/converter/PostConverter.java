@@ -13,18 +13,12 @@ public class PostConverter {
     public static PostEs toElasticsearchDocument(Post post) {
         return PostEs.builder()
                 .id(String.valueOf(post.getId()))
-                .userId(String.valueOf(post.getUser().getId()))
-                .userName(post.getUser().getNickname())
-                .userStatus(post.getUser().isDeleted() ? "DELETED" : "ACTIVE")
+                .nickname(post.getUser().getNickname())
                 .title(post.getTitle())
                 .content(post.getContent())
                 .category(Category.valueOf(post.getCategory().name()))
                 .viewCount(post.getViewCount())
                 .likeCount(post.getLikeCount())
-                .blockStatus(post.getStatus())
-                .imageUrls(post.getImages().stream()
-                        .map(Image::getImageSrc)
-                        .collect(Collectors.toList()))
                 .build();
     }
 
@@ -38,7 +32,7 @@ public class PostConverter {
         post.setCategory(Category.valueOf(postEs.getCategory().name()));
         post.setViewCount(postEs.getViewCount());
         post.setLikeCount(postEs.getLikeCount());
-        post.setStatus(postEs.getBlockStatus());
+
 
         // Replies와 Images 설정
         if (replies != null) {

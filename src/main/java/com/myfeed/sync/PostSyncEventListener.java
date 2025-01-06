@@ -26,25 +26,14 @@ public class PostSyncEventListener {
         if ("CREATE_OR_UPDATE".equals(event.getOperation())) {
             Post post = postRepository.findById(event.getPostId()).orElse(null);
             User user = userRepository.findById(post.getUser().getId()).orElse(null);
-
             PostEs postEs = new PostEs();
             postEs.setId(String.valueOf(post.getId()));
-            postEs.setUserId(String.valueOf(user.getId()));
-            postEs.setUserName(user.getNickname());
-            postEs.setUserStatus(user.isActive());
+            postEs.setNickname(user.getNickname());
             postEs.setTitle(post.getTitle());
             postEs.setContent(postEs.getContent());
             postEs.setCategory(post.getCategory());
             postEs.setViewCount(post.getViewCount());
             postEs.setLikeCount(post.getLikeCount());
-            postEs.setBlockStatus(post.getStatus());
-
-            List<Image> images = post.getImages();
-            List<String> imageUrls = images.stream()
-                    .map(Image::getImageSrc)
-                    .toList();
-
-            postEs.setImageUrls(imageUrls);
 
             postEsService.syncToElasticsearch(postEs);
         } else if ("DELETE".equals(event.getOperation())) {

@@ -13,7 +13,7 @@ public class VelogJsonReader {
     public List<VelogDto> loadJson() {
         try {
             // 파일 경로를 Spring Resource로 로드
-            ClassPathResource resource = new ClassPathResource("static/data/velog_data/velog_data.json");
+            ClassPathResource resource = new ClassPathResource("static/data/velog_data/velog_data01.json");
 
             // InputStream을 통해 파일 내용 읽기
             InputStream inputStream = resource.getInputStream();
