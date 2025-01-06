@@ -8,6 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/")
 public class HomeController {
 
+    @GetMapping("/home")
+    public String home() {
+        return "/main";
+    }
+
 //    @GetMapping("/home")
 //    public String home() {
 //        return "home";
@@ -19,7 +24,7 @@ public class HomeController {
     }
 
 
-    @GetMapping("/users/loginPage")
+    @GetMapping("/view/home")
     public String loginPage() {
         return "/main";
     }

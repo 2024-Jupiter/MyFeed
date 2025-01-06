@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8"/>
   <title>MyFeed</title>
@@ -270,173 +270,244 @@
         </tr>
         </tbody>
       </table>
+
+      <!-- pagination -->
+      <ul class="pagination justify-content-center my-4">
+						<span th:if="${session.currentBookEsPage gt 10}">
+							<li class="page-item"><a class="page-link"
+                                       th:href="@{/bookEs/list(p=${startPage-1},f=${field},q=${query})}"><i
+                  class="fa-solid fa-less-than"></i></a></li>
+						</span>
+        <span th:if="${session.currentBookEsPage le 10}">
+							<li class="page-item"><a class="page-link" href="#"><i
+                  class="fa-solid fa-less-than"></i></a></li>
+						</span>
+        <span th:each="page: ${pageList}">
+							<span th:switch="${page}">
+								<th:block th:case="${session.currentBookEsPage}">
+									<li class="page-item active">
+										<a class="page-link" href="#">[[${page}]]</a>
+									</li>
+								</th:block>
+								<th:block th:case="*">
+									<li class="page-item">
+										<a class="page-link" th:href="@{/bookEs/list(p=${page},f=${field},q=${query})}">[[${page}]]</a>
+									</li>
+								</th:block>
+							</span>
+						</span>
+        <span th:if="${totalPages gt endPage}">
+							<li class="page-item"><a class="page-link"
+                                       th:href="@{/bookEs/list(p=${endPage+1},f=${field},q=${query})}"><i
+                  class="fa-solid fa-greater-than"></i></a></li>
+						</span>
+        <span th:if="${totalPages eq endPage}">
+							<li class="page-item"><a class="page-link" href="#"><i
+                  class="fa-solid fa-greater-than"></i></a></li>
+						</span>
+      </ul>
+
     </div>
 
     <div class="col-3 mb-3" style="left: 3%; height: 100%;">
-      <div>
-        <form action="/api/users/login" method="post">
-          <div class="login">
-            <div class="group">
-              <div class="overlap-group">
-                <div class="rectangle"></div>
-                <div class="div">
-                  <input type="email" name="email" placeholder=" 아이디"/>
-                </div>
-                <div class="rectangle-2">
-                  <button type="button" class="btn btn-kakao" style="width: 100%; height: 100%;"><i
-                      class="fa-solid fa-comment" style="color: #050400"></i
-                  >&nbsp;&nbsp;kakao 로그인
-                  </button>
-                </div>
+      <!-- 로그인 상태 확인 -->
+      <div th:if="${session.sessId != null}">
+        <input type="hidden" id="userId" th:value="${session.sessId}">
+        <div class="user-info">
+          <table class="userInfoTable" style="border: 1px solid #dedede" ; width="100%">
+            <tr>
+              <td style=" width: 25%; padding: 5%;">
+                <img src="/img/undraw_profile.svg" style="height: 100px;">
+              </td>
+              <td style="padding: 5%; text-align: center; vertical-align: middle;"><p>환영합니다, <br><span th:text="${session.sessId}"></span>님!</p></td>
+            </tr>
+            <tr style="text-align: center; height: 50px;">
+              <td style="vertical-align: middle; width: 50%">
+<!--                <a href="/api/users/register">-->
+                  <div class="text-wrapper-2" id="userInfo" style="cursor: pointer">&nbsp;내정보&nbsp;</div>
+<!--                </a>-->
+                </td>
+              <td style="vertical-align: middle;">
+                <a>
+                <div class="text-wrapper-3" id="logout" style="cursor: pointer">로그아웃</div>
+                </a>
+        </td>
+            </tr>
 
-                <div class="rectangle-5">
-                  <button type="button" class="btn btn-github"
-                          style="width: 100%; height: 100%; color: #ffffff; background-color: #3d3d3d;">
-                    <i class="fa-brands fa-github" style="color: #e8e8e8;"></i>&nbsp;&nbsp;github
-                    로그인
-                  </button>
-                </div>
+            <!--          <p>이메일: <span th:text="${session.loggedInUser.email}"></span></p>-->
+            <!--          <form action="/api/users/logout" method="post">-->
+            <!--            <button type="submit" class="btn btn-secondary" style="width: 100%; height: 100%;">로그아웃</button>-->
+            <!--          </form>-->
+          </table>
+        </div>
+      </div>
 
-                <div class="rectangle-6">
-                  <button type="button" class="btn btn-github"
-                          style="width: 100%; height: 100%; color: #050400;"><i
-                      class="fa-brands fa-google"></i>&nbsp;&nbsp;google 로그인
-                  </button>
-                </div>
+      <!-- 비로그인 상태 -->
+      <div th:if="${session.sessId == null}">
+        <div>
+          <form action="/api/users/custom-login" method="post">
+            <div class="login">
+              <div class="group">
+                <div class="overlap-group">
+                  <div class="rectangle"></div>
+                  <div class="div">
+                    <input type="email" name="email" placeholder=" 아이디"/>
+                  </div>
+                  <div class="rectangle-2">
+                    <button type="button" class="btn btn-kakao" style="width: 100%; height: 100%;">
+                      <i
+                          class="fa-solid fa-comment" style="color: #050400"></i
+                      >&nbsp;&nbsp;kakao 로그인
+                    </button>
+                  </div>
 
-                <div class="rectangle-3">
-                  <button type="submit" class="btn btn-secondary"
-                          style="width: 100%; height: 100%;">로그인
-                  </button>
-                </div>
-                <div class="rectangle-4">
-                  <input type="password" name="pwd" placeholder=" 비밀번호" autoComplete="off"  />
-                </div>
-                <div>
-                  <a href="/api/users/register">
-                    <div class="text-wrapper-2">회원가입&nbsp;</div>
-                  </a>
-                  <div class="text-wrapper-3" onclick="find()">아이디/비밀번호 찾기</div>
+                  <div class="rectangle-5">
+                    <button type="button" class="btn btn-github"
+                            style="width: 100%; height: 100%; color: #ffffff; background-color: #3d3d3d;">
+                      <i class="fa-brands fa-github" style="color: #e8e8e8;"></i>&nbsp;&nbsp;github
+                      로그인
+                    </button>
+                  </div>
+
+                  <div class="rectangle-6">
+                    <button type="button" class="btn btn-github"
+                            style="width: 100%; height: 100%; color: #050400;"><i
+                        class="fa-brands fa-google"></i>&nbsp;&nbsp;google 로그인
+                    </button>
+                  </div>
+
+                  <div class="rectangle-3">
+                    <button type="submit" class="btn btn-secondary"
+                            style="width: 100%; height: 100%;">로그인
+                    </button>
+                  </div>
+                  <div class="rectangle-4">
+                    <input type="password" name="pwd" placeholder=" 비밀번호" autoComplete="off"/>
+                  </div>
+                  <div>
+                    <a href="/api/users/register">
+                      <div class="text-wrapper-2">회원가입&nbsp;</div>
+                    </a>
+                    <div class="text-wrapper-3" onclick="find()">아이디/비밀번호 찾기</div>
+                  </div>
                 </div>
               </div>
-            </div>
-
-
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
 
 
-    <div style="margin: 70% 0 10% 0;">
-      <span style="margin: 3%; color: black; font-size: medium;">트랜드 랭킹</span>
+      <div th:style="'margin: ' + (${session.sessId != null} ? '20%' : '70%') + ' 0 10% 0;'">
+        <span style="margin: 3%; color: black; font-size: medium;">트랜드 랭킹</span>
+      </div>
+      <table class="table">
+        <tbody>
+        <tr>
+          <td>
+            <a href="" style="text-decoration:none;  color: inherit;">
+              <span class="badge bg-warning" style="vertical-align: middle;">1</span>
+              @키워드
+            </a>
+          </td>
+        </tr>
+        <!-- 하단 제거-->
+        <tr>
+          <td>
+            <a href="" style="text-decoration:none;  color: inherit;">
+              <span class="badge bg-warning" style="vertical-align: middle;">2</span>
+              @키워드
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href="" style="text-decoration:none;  color: inherit;">
+              <span class="badge bg-warning" style="vertical-align: middle;">3</span>
+              @키워드
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href="" style="text-decoration:none;  color: inherit;">
+              <span class="badge bg-warning" style="vertical-align: middle;">4</span>
+              @키워드
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href="" style="text-decoration:none;  color: inherit;">
+              <span class="badge bg-warning" style="vertical-align: middle;">5</span>
+              @키워드
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href="" style="text-decoration:none;  color: inherit;">
+              <span class="badge bg-warning" style="vertical-align: middle;">6</span>
+              @키워드
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href="" style="text-decoration:none;  color: inherit;">
+              <span class="badge bg-warning" style="vertical-align: middle;">7</span>
+              @키워드
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href="" style="text-decoration:none;  color: inherit;">
+              <span class="badge bg-warning" style="vertical-align: middle;">8</span>
+              @키워드
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href="" style="text-decoration:none;  color: inherit;">
+              <span class="badge bg-warning" style="vertical-align: middle;">9</span>
+              @키워드
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <a href="" style="text-decoration:none;  color: inherit;">
+              <span class="badge bg-warning" style="vertical-align: middle;">10</span>
+              @키워드
+            </a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
     </div>
-    <table class="table">
-      <tbody>
-      <tr>
-        <td>
-          <a href="" style="text-decoration:none;  color: inherit;">
-            <span class="badge bg-warning" style="vertical-align: middle;">1</span>
-            @키워드
-          </a>
-        </td>
-      </tr>
-      <!-- 하단 제거-->
-      <tr>
-        <td>
-          <a href="" style="text-decoration:none;  color: inherit;">
-            <span class="badge bg-warning" style="vertical-align: middle;">2</span>
-            @키워드
-          </a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a href="" style="text-decoration:none;  color: inherit;">
-            <span class="badge bg-warning" style="vertical-align: middle;">3</span>
-            @키워드
-          </a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a href="" style="text-decoration:none;  color: inherit;">
-            <span class="badge bg-warning" style="vertical-align: middle;">4</span>
-            @키워드
-          </a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a href="" style="text-decoration:none;  color: inherit;">
-            <span class="badge bg-warning" style="vertical-align: middle;">5</span>
-            @키워드
-          </a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a href="" style="text-decoration:none;  color: inherit;">
-            <span class="badge bg-warning" style="vertical-align: middle;">6</span>
-            @키워드
-          </a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a href="" style="text-decoration:none;  color: inherit;">
-            <span class="badge bg-warning" style="vertical-align: middle;">7</span>
-            @키워드
-          </a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a href="" style="text-decoration:none;  color: inherit;">
-            <span class="badge bg-warning" style="vertical-align: middle;">8</span>
-            @키워드
-          </a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a href="" style="text-decoration:none;  color: inherit;">
-            <span class="badge bg-warning" style="vertical-align: middle;">9</span>
-            @키워드
-          </a>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <a href="" style="text-decoration:none;  color: inherit;">
-            <span class="badge bg-warning" style="vertical-align: middle;">10</span>
-            @키워드
-          </a>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+    <!-- </div> -->
   </div>
-  <!-- </div> -->
-</div>
-
-<!-- Back to Top -->
-<a href="#" class="btn btn-secondary back-to-top"
-><i class="fa-solid fa-arrow-up"></i></a>
-
-<!-- Categories End -->
 
 
-<!-- JavaScript Libraries -->
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script
-    src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+  <!-- Back to Top -->
+  <a href="#" class="btn btn-secondary back-to-top"
+  ><i class="fa-solid fa-arrow-up"></i></a>
 
-<script src="/lib/easing/easing.min.js"></script>
-<script src="/lib/owlcarousel/owl.carousel.min.js"></script>
+  <!-- Categories End -->
 
 
-<!-- Template Javascript -->
-<!--<script src="/js/main.js"></script>-->
+  <!-- JavaScript Libraries -->
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+
+  <script src="/lib/easing/easing.min.js"></script>
+  <script src="/lib/owlcarousel/owl.carousel.min.js"></script>
+
+
+  <!-- Template Javascript -->
+  <script src="/js/home.js"></script>
 
 
 </body>
