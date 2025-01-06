@@ -11,6 +11,8 @@
  */
 package com.myfeed.jwt;
 
+import com.myfeed.model.user.User;
+import com.myfeed.service.user.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -18,14 +20,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenUtil {
+    @Autowired UserService userService;
+
     private String SECRET_KEY = "BESP2JupiterELASTICSEARCHPROJECTWOWOWOWOWOWOWOWOWOWOWO";       // 서버에서만 알고 있는 비밀키
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJwt(token).getBody();
+        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -33,8 +38,8 @@ public class JwtTokenUtil {
         return claimsResolver.apply(claims);
     }
 
-    // 토큰에서 사용자 이름 추출
-    public String extractUsername(String token) {
+    // 토큰에서 사용자 이메일 추출
+    public String extractUserEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -60,14 +65,19 @@ public class JwtTokenUtil {
     }
 
     // 토큰 생성
-    public String generateToken(String useremail) {
+    public String generateToken(String userEmail) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, useremail);
+        System.out.println("사용자 이메일:  "+userEmail);
+        User user = userService.findByEmail(userEmail);
+        Long id = user.getId();
+        claims.put("id", id);
+        claims.put("email", userEmail);
+        return createToken(claims, userEmail);
     }
 
     // 토큰 유효성 검사
-    public Boolean validateToken(String token, String username) {
-        final String extractedUsername = extractUsername(token);
-        return extractedUsername.equals(username) && !isTokenExpired(token);
+    public Boolean validateToken(String token, String userEmail) {
+        final String extractedUserEmail = extractUserEmail(token);
+        return extractedUserEmail.equals(userEmail) && !isTokenExpired(token);
     }
 }
