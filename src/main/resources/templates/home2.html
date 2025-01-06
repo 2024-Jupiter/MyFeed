@@ -17,13 +17,13 @@
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet">
   <!-- Font Awesome -->
-  <link th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css}"
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css"
         rel="stylesheet"/>
-  <link th:href="@{https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css}"
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
         rel="stylesheet"/>
 
   <!-- Libraries Stylesheet -->
-  <link th:href="@{/lib/owlcarousel/assets/owl.carousel.min.css}" rel="stylesheet"/>
+  <link href="/static/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet"/>
 
   <!--Sweet Alert2-->
   <link rel="stylesheet"
@@ -32,8 +32,8 @@
 
 
   <!-- Customized Bootstrap Stylesheet -->
-  <link th:href="@{/css/style.css}" rel="stylesheet"/>
-  <link th:href="@{/css/globals.css}" rel="stylesheet"/>
+  <link href="/static/css/style.css" rel="stylesheet"/>
+  <link href="/static/css/globals.css" rel="stylesheet"/>
 </head>
 
 <body>
@@ -46,7 +46,7 @@
   <div class="row align-items-center py-3 px-xl-5">
     <div class="col-lg-3 d-none d-lg-block">
       <a th:href="@{/view/home2}">
-        <img th:src="@{/img/logo.png}" style="margin-left: 5%; width: 40%;"/>
+        <img src="/static/img/logo.png" style="margin-left: 5%; width: 40%;"/>
       </a>
     </div>
     <div class="col-lg-6 col-6 text-left">
@@ -142,38 +142,87 @@
     </div>
 
 
-    <div class="col-3 mb-3" style="left: 3%; height: 750px;">
+<!--    <div class="col-3 mb-3" style="left: 3%; height: 750px;">-->
+<!--      <div>-->
+<!--        <form th:action="@{/login}" method="post">-->
+<!--          <div class="login">-->
+<!--            <div class="group">-->
+<!--              <div class="overlap-group">-->
+<!--                <div class="rectangle"></div>-->
+<!--                <div class="div">-->
+<!--                  <input type="text" placeholder=" 아이디" name="uid"/>-->
+<!--                </div>-->
+<!--                <div class="rectangle-2">-->
+<!--                  <button type="button" class="btn btn-kakao" style="width: 100%; height: 100%;"><i-->
+<!--                      class="fa-solid fa-comment" style="color: #050400"></i-->
+<!--                  >&nbsp;&nbsp;kakao 로그인-->
+<!--                  </button>-->
+<!--                </div>-->
+<!--                <div class="rectangle-3">-->
+<!--                  <button type="submit" class="btn btn-secondary"-->
+<!--                          style="width: 100%; height: 100%;">로그인-->
+<!--                  </button>-->
+<!--                </div>-->
+<!--                <div class="rectangle-4">-->
+<!--                  <input type="password" placeholder=" 비밀번호" name="password"/>-->
+<!--                </div>-->
+<!--                <div>-->
+<!--                  <a href="api/user/register">-->
+<!--                    <div class="text-wrapper-2" id="register">회원가입&nbsp;</div>-->
+<!--                  </a>-->
+<!--                  <div class="text-wrapper-3" onclick="find()">아이디/비밀번호 찾기</div>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </form>-->
+<!--      </div>-->
+<!--    </div>-->
+
+    <div class="col-3 mb-3" style="left: 3%; height: 100%;">
       <div>
-        <form th:action="@{/login}" method="post">
+        <form action="#" method="post">
           <div class="login">
+            <div class="div">
+              <input type="email" name="email" placeholder=" 아이디" />
+            </div>
             <div class="group">
               <div class="overlap-group">
                 <div class="rectangle"></div>
                 <div class="div">
-                  <input type="text" placeholder=" 아이디" name="uid"/>
+                  <input type="text" placeholder=" 아이디" />
                 </div>
                 <div class="rectangle-2">
-                  <button type="button" class="btn btn-kakao" style="width: 100%; height: 100%;"><i
-                      class="fa-solid fa-comment" style="color: #050400"></i
-                  >&nbsp;&nbsp;kakao 로그인
-                  </button>
+                  <button type="button" class="btn btn-kakao" style="width: 100%; height: 100%;"><i class="fa-solid fa-comment" style="color: #050400"></i
+                  >&nbsp;&nbsp;kakao 로그인</button>
                 </div>
+
+                <div class="rectangle-5">
+                  <button type="button" class="btn btn-github" style="width: 100%; height: 100%; color: #ffffff; background-color: #3d3d3d;"><i class="fa-brands fa-github" style="color: #e8e8e8;"></i>&nbsp;&nbsp;github 로그인</button>
+                </div>
+
+                <div class="rectangle-6">
+                  <button type="button" class="btn btn-github" style="width: 100%; height: 100%; color: #050400;"><i class="fa-brands fa-google"></i>&nbsp;&nbsp;google 로그인</button>
+                </div>
+
                 <div class="rectangle-3">
-                  <button type="submit" class="btn btn-secondary"
-                          style="width: 100%; height: 100%;">로그인
-                  </button>
+                  <button type="submit" class="btn btn-secondary" style="width: 100%; height: 100%;">로그인</button>
                 </div>
                 <div class="rectangle-4">
-                  <input type="password" placeholder=" 비밀번호" name="password"/>
+                  <input type="password" placeholder=" 비밀번호" />
                 </div>
                 <div>
-                  <a href="api/user/register">
-                    <div class="text-wrapper-2" id="register">회원가입&nbsp;</div>
+                  <a href="register.html">
+                    <div class="text-wrapper-2">회원가입&nbsp;</div>
                   </a>
                   <div class="text-wrapper-3" onclick="find()">아이디/비밀번호 찾기</div>
                 </div>
+                 <div class="group-2"></div>
+                 <div class="text-wrapper-5"></div>
               </div>
             </div>
+
+
         </form>
       </div>
     </div>
@@ -204,12 +253,11 @@
 </a>
 
 <!-- JavaScript Libraries -->
-<script th:src="@{https://code.jquery.com/jquery-3.4.1.min.js}"></script>
-<script
-    th:src="@{https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js}"></script>
-<script th:src="@{/lib/easing/easing.min.js}"></script>
-<script th:src="@{/lib/owlcarousel/owl.carousel.min.js}"></script>
-<script th:src="@{/js/main.js}"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+<script src="/static/lib/easing/easing.min.js"></script>
+<script src="/static/lib/owlcarousel/owl.carousel.min.js"></script>
+<script src="/static/js/main.js"></script>
 </body>
 
 <script>

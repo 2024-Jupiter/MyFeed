@@ -27,11 +27,11 @@ public class Report extends BaseTimeEntity {
     @Column(name = "type", nullable = false)
     private ReportType type;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "post_id", nullable = true)
     private Post post;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "reply_id", nullable = true)
     private Reply reply;
 

@@ -60,9 +60,9 @@ public class JwtTokenUtil {
     }
 
     // 토큰 생성
-    public String generateToken(String username) {
+    public String generateToken(String useremail) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
+        return createToken(claims, useremail);
     }
 
     // 토큰 유효성 검사

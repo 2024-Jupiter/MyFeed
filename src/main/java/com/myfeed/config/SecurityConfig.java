@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,7 +19,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableMethodSecurity
 public class SecurityConfig {
     @Autowired private AuthenticationSuccessHandler authSuccessHandler;
     @Autowired private AuthenticationFailureHandler failureHandler;
@@ -32,15 +30,15 @@ public class SecurityConfig {
         http.csrf(auth -> auth.disable())       // CSRF 방어 기능 비활성화
                 .headers(x -> x.frameOptions(y -> y.disable()))     // H2-console
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/search/**").permitAll()
-                        .requestMatchers("/api/users/find-id" ,"/api/users/find-password" ,"/api/users/check-email","/api/users/check-nickname", "/api/users/custom-login","/api/users/register", "/api/replies/**", "/api/posts/**", "/api/postEs/**", "/api/users/*/detail", "/api/users/**", "/view/home", "/api/admin/reports/posts/{postId}", "/api/admin/reports/replies/{replyId}").permitAll()
+                        .requestMatchers("/login", "/api/users/find-id" ,"/api/users/find-password" ,"/api/users/check-email","/api/users/check-nickname", "/api/users/custom-login","/api/users/register", "/api/replies/**", "/api/posts/**", "/api/postEs/**", "/api/users/*/detail", "/api/users/*", "/view/home", "/api/admin/reports/posts/{postId}", "/api/admin/reports/replies/{replyId}").permitAll()
+                        .requestMatchers("/login/oauth2/code/google","auth/google/callback","/auth/kakao/callback", "/login/oauth2/code/**").permitAll()
                         .requestMatchers("/css/**","/js/**","/lib/**","/scss/**", "/img/**" ).permitAll()
-                        .requestMatchers("/api/admin/users/*/status", "/api/admin/users", "/api/admin/reports/**", "/posts/**?category=NEWS").hasAuthority(String.valueOf(Role.ADMIN))
+                        .requestMatchers("/api/admin/users/*/status", "/api/admin/users", "/api/admin/boards/report", "/api/admin/boards/**").hasAuthority(String.valueOf(Role.ADMIN))
                         .anyRequest().authenticated()
                 )
                 .formLogin(auth -> auth
                         .loginPage("/api/users/custom-login") // template return url users/loginPage
-                        .loginProcessingUrl("/api/users/login")  // post 엔드포인트
+                        .loginProcessingUrl("/api/users/custom-login")  // post 엔드포인트
                         .usernameParameter("email")
                         .passwordParameter("pwd")
                         //.defaultSuccessUrl("/api/users/loginSuccess", false)
@@ -55,7 +53,6 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/api/users/custom-login")
                 )
                 .oauth2Login(auth -> auth
-                        //.loginPage("/users/login")
                         .userInfoEndpoint(user -> user.userService(myOAuth2UserService))
                         .successHandler(authSuccessHandler)
                         .failureHandler(failureHandler)

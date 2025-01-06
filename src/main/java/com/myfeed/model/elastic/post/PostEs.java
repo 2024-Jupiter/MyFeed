@@ -44,5 +44,4 @@ public class PostEs {
 
     @Field(type = FieldType.Date)
     private LocalDateTime createAt;
-
 }

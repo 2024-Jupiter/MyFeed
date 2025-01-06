@@ -28,6 +28,5 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.setStatus(HttpServletResponse.SC_OK);
         response.sendRedirect("/api/users/test");
-
     }
 }
