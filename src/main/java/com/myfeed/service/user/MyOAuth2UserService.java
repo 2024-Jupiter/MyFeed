@@ -93,12 +93,12 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
             case "github": // 깃허브 이메일 필수값 아님..
                 int id = oAuth2User.getAttribute("id");
                 email = oAuth2User.getAttribute("email");
-                email = (email == null) ? id+"@myfeed.com": email;
+                email = (email == null) ? "git_"+id+"@myfeed.com": email;
                 user = userService.findByEmail(email);
 
                 if (user == null) {
                     uname = oAuth2User.getAttribute("login");
-                    uname = (uname == null) ? "g_"+id : uname;
+                    uname = (uname == null) ? "git_"+id : uname;
                     profileUrl = oAuth2User.getAttribute("avatar_url");
                     user = User.builder()
                             .email(email)
@@ -114,9 +114,10 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
                     log.info("깃허브 계정을 통해 회원가입이 되었습니다. " + user.getUsername());
                 }
                 break;
-
-
         }
+
+        // todo 해당 이메일이 폼 로그인 사용자인 경우 예외(로그인, 회원가입)
+
         return new MyUserDetails(user, oAuth2User.getAttributes());
     }
 }

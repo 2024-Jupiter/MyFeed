@@ -32,16 +32,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/login", "/api/users/find-id" ,"/api/users/find-password" ,"/api/users/check-email","/api/users/check-nickname", "/api/users/custom-login","/api/users/register", "/api/replies/**", "/api/posts/**", "/api/postEs/**", "/api/users/*/detail", "/api/users/*", "/view/home", "/api/admin/reports/posts/{postId}", "/api/admin/reports/replies/{replyId}").permitAll()
                         .requestMatchers("/login/oauth2/code/google","auth/google/callback","/auth/kakao/callback", "/login/oauth2/code/**").permitAll()
-                        .requestMatchers("/css/**","/js/**","/lib/**","/scss/**", "/img/**" ).permitAll()
+                        .requestMatchers("/css/**","/js/**","/lib/**","/scss/**", "/img/**", "/favicon.ico" ).permitAll()
                         .requestMatchers("/api/admin/users/*/status", "/api/admin/users", "/api/admin/boards/report", "/api/admin/boards/**").hasAuthority(String.valueOf(Role.ADMIN))
                         .anyRequest().authenticated()
                 )
                 .formLogin(auth -> auth
                         .loginPage("/api/users/custom-login") // template return url users/loginPage
-                        .loginProcessingUrl("/api/users/custom-login")  // post 엔드포인트
+                        .loginProcessingUrl("/api/users/login")  // post 엔드포인트
                         .usernameParameter("email")
                         .passwordParameter("pwd")
-                        //.defaultSuccessUrl("/api/users/loginSuccess", false)
                         .successHandler(authSuccessHandler)
                         .failureHandler(failureHandler)
                         .permitAll()
@@ -49,7 +48,7 @@ public class SecurityConfig {
                 .logout(auth -> auth
                         .logoutUrl("/api/users/logout")
                         //.invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("accessToken")
                         .logoutSuccessUrl("/api/users/custom-login")
                 )
                 .oauth2Login(auth -> auth
@@ -63,7 +62,6 @@ public class SecurityConfig {
 
         // JwtRequestFilter 추가
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-
 
         return http.build();
     }
