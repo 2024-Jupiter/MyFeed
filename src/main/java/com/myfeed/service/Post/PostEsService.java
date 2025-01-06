@@ -12,7 +12,9 @@ import com.myfeed.model.elastic.PostEsDto1;
 import com.myfeed.model.elastic.SearchField;
 import com.myfeed.model.elastic.post.PostEs;
 import com.myfeed.repository.elasticsearch.PostEsDataRepository;
+import com.myfeed.repository.elasticsearch.PostEsRepository;
 import com.myfeed.service.Post.record.KeywordCount;
+import com.myfeed.service.Post.record.NewsDto;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -27,7 +29,6 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -36,41 +37,28 @@ public class PostEsService {
     @Autowired private EsLogService esLogService;
     @Autowired private ElasticsearchTemplate elasticsearchTemplate;
     @Autowired private PostEsDataRepository postEsDataRepository;
+    @Autowired private PostEsRepository postEsRepository;
     @Autowired private ElasticsearchClient elasticsearchClient;
 
     @Autowired private ElasticsearchOperations elasticsearchOperations;
 
-    // 제목 검색
-    public Page<PostEs> searchPosts(String keyword, SearchField field,int page) {
+    // 제목 검색 - 일반 게시글
+    public Page<PostEs> searchGeneralPosts(String keyword, SearchField field,int page) {
         // 결과 값 선언
         Page<PostEs> posts = null;
         PageRequest pageRequest = PageRequest.of(page - 1, 10);
         posts = switch (field) {
-            case TITLE -> searchPostsByTitle(keyword, pageRequest);
-            case CONTENT -> searchPostsByContent(keyword, PageRequest.of(page - 1, 10));
-            case TITLE_CONTENT -> searchPostsByTitleAndContent(keyword, page);
+            // 제목 검색
+            case TITLE -> postEsRepository.searchGeneralPostsByTitle(keyword, pageRequest);
+
+            // 내용 검색
+            case CONTENT -> postEsRepository.searchGeneralPostsByContent(keyword, pageRequest);
+
+            // 제목+내용 검색
+            case TITLE_CONTENT -> postEsRepository.searchGeneralPostsByTitleAndContent(keyword, pageRequest);
         };
         System.out.println("posts: " + posts.getContent().get(0).getTitle());
         return posts;
-    }
-
-    private Page<PostEs> searchPostsByTitle(String keyword, PageRequest pageRequest) {
-        return postEsDataRepository.findByTitleContaining(keyword, pageRequest);
-    }
-
-    // 제목, 내용 검색
-    public Page<PostEs> searchPostsByTitleAndContent(String keyword,int page) {
-        PageRequest pageRequest = PageRequest.of(page -1, 10);
-        System.out.println("keyword: " + keyword);
-        Page<PostEs> byTitleOrContent= postEsDataRepository.findByTitleContainingAndContentContaining(keyword,keyword,pageRequest);
-        System.out.println("byTitleOrContent: " + byTitleOrContent.getContent().get(0).getCreateAt());
-        return byTitleOrContent;
-    }
-
-    // 내용 검색
-    public Page<PostEs> searchPostsByContent(String keyword, Pageable pageable) {
-        var a= postEsDataRepository.findByContentContaining(keyword, pageable);
-        return a;
     }
 
 
@@ -302,7 +290,7 @@ public class PostEsService {
         return new PageImpl<>(posts, pageable, response.hits().total().value());
     }
 
-    public Page<PostEsDto1> searchPosts(String keyword, Pageable pageable) {
+    public Page<PostEsDto1> searchGeneralPosts(String keyword, Pageable pageable) {
         postEsDataRepository.findAll(pageable);
         return null;
     }
@@ -328,4 +316,18 @@ public class PostEsService {
     }
 
 
+    public void saveNewsAll(List<NewsDto> newsDtos) {
+        postEsDataRepository.saveAll(newsDtos.stream().map(newsDto -> {
+            return PostEs.builder()
+                    .id(String.valueOf(newsDto.hashCode()))
+                    .title(newsDto.title())
+                    .nickname(newsDto.author())
+                    .content(newsDto.content())
+                    .category(Category.NEWS)
+                    .createAt(newsDto.date())
+                    .likeCount(0)
+                    .viewCount(0)
+                    .build();
+        }).toList());
+    }
 }

@@ -6,6 +6,8 @@ import com.myfeed.model.elastic.post.PostEs;
 import com.myfeed.service.Post.EsLogService;
 import com.myfeed.service.Post.PostEsService;
 import com.myfeed.service.Post.PostServiceImpl;
+import com.myfeed.service.Post.crawlingdata.NewsJsonReader;
+import com.myfeed.service.Post.record.NewsDto;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +30,11 @@ public class PostEsController {
     private EsLogService esLogService;
 
     @GetMapping("/logtest")
-    public void logSaveTest() {
-        esLogService.saveSearchLog("1", "test");
-        System.out.println("logSaveTest");
+    @ResponseBody
+    public String logSaveTest() {
+        List<NewsDto> newsDtos = new NewsJsonReader().loadJson();
+        postEsService.saveNewsAll(newsDtos);
+        return "logSaveTest";
     }
 
     // 기본 검색 ( 제목, 내용, 제목+내용 )
@@ -43,7 +47,7 @@ public class PostEsController {
         @RequestParam(name = "field", defaultValue = "TITLE") SearchField field
     ) throws IOException {
 //        esLogService.saveSearchLog(userId, q);
-        return postEsService.searchPosts(q,field, page);
+        return postEsService.searchGeneralPosts(q,field, page);
     }
 
     // 사용자 검색어 상위 3위 게시글 추천

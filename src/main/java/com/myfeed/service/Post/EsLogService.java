@@ -52,10 +52,6 @@ public class EsLogService {
         }
     }
 
-    public void saveSearchLog2(String userId, String searchWord) {
-        System.out.println("===========saveSearchLog==========");
-
-    }
     // 1. 전체 기간 상위 검색어
     public List<KeywordCount> findAllTimeTopKeywords() throws IOException {
         System.out.println("===========findAllTimeTopKeywords==========");
@@ -78,7 +74,7 @@ public class EsLogService {
     // 1. 내가 검색한 모든 시간 상위 검색어 3개
     public List<KeywordCount> findMyAllTimeTopKeywords(String userId) throws IOException {
         SearchRequest request = SearchRequest.of(builder -> builder
-            .index("user_search_logs")  // 실제 인덱스 이름으로 변경 필요
+            .index("user_search_logs")
             .size(0)
             .query(q -> q
                 .bool(b -> b
