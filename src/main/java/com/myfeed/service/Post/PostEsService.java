@@ -17,14 +17,17 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Map;
+import com.myfeed.model.post.*;
+import com.myfeed.service.Post.crawlingdata.VelogDto;
+import com.myfeed.service.Post.crawlingdata.VelogJsonReader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -303,4 +306,26 @@ public class PostEsService {
         postEsDataRepository.findAll(pageable);
         return null;
     }
+
+    @Async
+    public void insertByJsonFile() {
+        System.out.println("Inserting by JSON file...");
+        List<VelogDto> velogDtos = new VelogJsonReader().loadJson();
+        List<PostEs> list = velogDtos.stream().map(velogDto -> {
+            return PostEs.builder()
+                    .id(String.valueOf(velogDto.hashCode()))
+                    .title(velogDto.getTitle())
+                    .nickname(velogDto.getUserName())
+                    .content(velogDto.getContent())
+                    .category(Category.GENERAL)
+                    .createAt(velogDto.getDate())
+                    .likeCount(velogDto.getLikeCount())
+                    .viewCount(0)
+                    .build();
+        }).toList();
+        postEsDataRepository.saveAll(list);
+        System.out.println("Successfully saved to Elasticsearch");
+    }
+
+
 }

@@ -26,4 +26,5 @@ public interface PostEsDataRepository extends ElasticsearchRepository<PostEs, St
     Page<PostEs> findByTitleContainingAndContentContaining(String title, String content , Pageable pageable);
 
     Page<PostEsDto1> findByTitleOrContent(String keyword1,String keyword2,Pageable pageRequest);
+
 }

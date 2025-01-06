@@ -1,9 +1,8 @@
 package com.myfeed.sync;
 
 import com.myfeed.exception.ExpectedException;
-import com.myfeed.model.post.Image;
-import com.myfeed.model.post.Post;
 import com.myfeed.model.elastic.post.PostEs;
+import com.myfeed.model.post.Post;
 import com.myfeed.model.user.User;
 import com.myfeed.repository.jpa.PostRepository;
 import com.myfeed.repository.jpa.UserRepository;
