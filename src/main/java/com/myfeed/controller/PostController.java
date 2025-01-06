@@ -5,6 +5,7 @@ import com.myfeed.model.post.*;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.reply.ReplyDetailDto;
 import com.myfeed.model.user.User;
+import com.myfeed.service.Post.CsvFileReaderService;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.reply.ReplyService;
 import com.myfeed.service.user.UserService;
@@ -29,6 +30,7 @@ public class PostController {
     @Autowired PostService postService;
     @Autowired UserService userService;
     @Autowired ReplyService replyService;
+    @Autowired CsvFileReaderService csvFileReaderService;
 
     // 게시글 작성 폼 (GET 요청 으로 폼을 가져옴)
     @GetMapping("create")

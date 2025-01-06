@@ -34,6 +34,7 @@ public enum ErrorCode {
 	 * 신고
 	 */
 	REPORT_NOT_FOUND("REPORT_NOT_FOUND", "신고를 찾을 수 없습니다."),
+	NOT_REPORTED("NOT_REPORTED", "신고 되지 않은 상태 입니다."),
 	INCLUDED_DELETED_USER_POST_IN_REPORT("INCLUDED_DELETED_USER_POST_IN_REPORT", "삭제된 사용자의 게시글이 신고 리스트에 포함 되어 있습니다."),
 	INCLUDED_DELETED_USER_REPLY_IN_REPORT("INCLUDED_DELETED_USER_REPLY_IN_REPORT", "삭제된 사용자의 댓글이 신고 리스트에 포함 되어 있습니다."),
 	POST_BLOCKED("POST_BLOCKED", "차단된 게시글 입니다."),

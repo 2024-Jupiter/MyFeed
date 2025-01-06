@@ -2,7 +2,9 @@ package com.myfeed.service.Post;
 
 import com.myfeed.model.post.*;
 import com.myfeed.repository.elasticsearch.PostEsRepository;
+import com.myfeed.sync.PostSyncEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;

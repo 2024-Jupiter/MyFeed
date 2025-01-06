@@ -40,11 +40,8 @@ public class ReportServiceImpl implements ReportService {
         Page<Report> reports = reportRepository.findPagedReportsByPost(post, pageable);
 
         for (Report report: reports) {
-            if (post.getUser() == null || report.getPost().getUser().isDeleted()) {
+            if (report.getPost().getUser() == null || report.getPost().getUser().isDeleted()) {
                 throw new ExpectedException(ErrorCode.INCLUDED_DELETED_USER_POST_IN_REPORT);
-            }
-            if (post.getStatus() == BlockStatus.NORMAL_STATUS) {
-                throw new ExpectedException(ErrorCode.POST_UNBLOCKED);
             }
         }
 
@@ -59,14 +56,10 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<Report> getReportsByPost(Long postId) {
         List<Report> reports = reportRepository.findReportByPostId(postId);
-        Post post = postRepository.findById(postId).orElseThrow(() -> new ExpectedException(ErrorCode.POST_NOT_FOUND));
 
         for (Report report: reports) {
-            if (post.getUser() == null || report.getPost().getUser().isDeleted()) {
+            if (report.getPost().getUser() == null || report.getPost().getUser().isDeleted()) {
                 throw new ExpectedException(ErrorCode.INCLUDED_DELETED_USER_POST_IN_REPORT);
-            }
-            if (post.getStatus() == BlockStatus.NORMAL_STATUS) {
-                throw new ExpectedException(ErrorCode.POST_UNBLOCKED);
             }
         }
 
@@ -80,11 +73,8 @@ public class ReportServiceImpl implements ReportService {
         Page<Report> reports = reportRepository.findPagedReportsByReply(reply, pageable);
 
         for (Report report: reports) {
-            if (reply.getUser() == null || report.getReply().getUser().isDeleted()) {
+            if (report.getReply().getUser() == null || report.getReply().getUser().isDeleted()) {
                 throw new ExpectedException(ErrorCode.INCLUDED_DELETED_USER_REPLY_IN_REPORT);
-            }
-            if (reply.getStatus() == BlockStatus.NORMAL_STATUS) {
-                throw new ExpectedException(ErrorCode.REPLY_BLOCKED);
             }
         }
 
@@ -99,14 +89,10 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<Report> getReportsByReply(Long replyId) {
         List<Report> reports = reportRepository.findReportByReplyId(replyId);
-        Reply reply = replyRepository.findById(replyId).orElseThrow(() -> new ExpectedException(ErrorCode.REPLY_NOT_FOUND));
 
         for (Report report: reports) {
-            if (reply.getUser() == null || report.getReply().getUser().isDeleted()) {
+            if (report.getReply().getUser() == null || report.getReply().getUser().isDeleted()) {
                 throw new ExpectedException(ErrorCode.INCLUDED_DELETED_USER_REPLY_IN_REPORT);
-            }
-            if (reply.getStatus() == BlockStatus.NORMAL_STATUS) {
-                throw new ExpectedException(ErrorCode.REPLY_BLOCKED);
             }
         }
 
@@ -155,9 +141,9 @@ public class ReportServiceImpl implements ReportService {
 
     // 게시글 차단
     @Override
-    public void BlockPost(Long id, Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new ExpectedException(ErrorCode.POST_NOT_FOUND));
+    public void BlockPost(Long id) {
         Report report = findByReportId(id);
+        Post post = report.getPost();
 
         if (post.getUser() == null || post.getUser().isDeleted()) {
             throw new ExpectedException(ErrorCode.CAN_NOT_REPORT_DELETED_USER_POST);
@@ -176,9 +162,9 @@ public class ReportServiceImpl implements ReportService {
 
     // 게시글 해제
     @Override
-    public void unBlockPost(Long id, Long postId) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new ExpectedException(ErrorCode.POST_NOT_FOUND));
+    public void unBlockPost(Long id) {
         Report report = findByReportId(id);
+        Post post = report.getPost();
 
         if (post.getUser() == null || post.getUser().isDeleted()) {
             throw new ExpectedException(ErrorCode.CAN_NOT_REPORT_DELETED_USER_POST);
@@ -197,9 +183,9 @@ public class ReportServiceImpl implements ReportService {
 
     // 댓글 차단
     @Override
-    public void BlockReply(Long id , Long replyId) {
-        Reply reply = replyRepository.findById(replyId).orElseThrow(() -> new ExpectedException(ErrorCode.REPLY_NOT_FOUND));
+    public void BlockReply(Long id) {
         Report report = findByReportId(id);
+        Reply reply = report.getReply();
 
         if (reply.getUser() == null || reply.getUser().isDeleted()) {
             throw new ExpectedException(ErrorCode.CAN_NOT_REPORT_DELETED_USER_REPLY);
@@ -218,9 +204,9 @@ public class ReportServiceImpl implements ReportService {
 
     // 댓글 해제
     @Override
-    public void unBlockReply(Long id , Long replyId) {
-        Reply reply = replyRepository.findById(replyId).orElseThrow(() -> new ExpectedException(ErrorCode.REPLY_NOT_FOUND));
+    public void unBlockReply(Long id) {
         Report report = findByReportId(id);
+        Reply reply = report.getReply();
 
         if (reply.getUser() == null || reply.getUser().isDeleted()) {
             throw new ExpectedException(ErrorCode.CAN_NOT_REPORT_DELETED_USER_REPLY);
