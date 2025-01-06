@@ -1,5 +1,6 @@
 package com.myfeed.model.elastic.post;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.myfeed.model.post.BlockStatus;
 import com.myfeed.model.post.Category;
 import jakarta.persistence.*;
@@ -23,15 +24,8 @@ public class PostEs {
     @Column(name = "id", nullable = false)
     private String id;
 
-    // 글쓴이 정보
     @Field(type = FieldType.Keyword)
-    private String userId;
-
-    @Field(type = FieldType.Keyword)
-    private String userNickName;
-
-    @Field(type = FieldType.Keyword)
-    private String userStatus;
+    private String nickname;
 
     // 게시글 정보
     @Field(type = FieldType.Text)
@@ -49,16 +43,8 @@ public class PostEs {
     @Field(type = FieldType.Integer)
     private int likeCount;
 
-    @Field(type = FieldType.Keyword)
-    private BlockStatus blockStatus;
-
-    @Field(type = FieldType.Keyword)
-    private List<String> imageUrls;
-
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Field(type = FieldType.Date)
-    private LocalDateTime createAt;
-
-    @Field(type = FieldType.Date)
-    private LocalDateTime updateAt;
+    private String createAt;
 
 }

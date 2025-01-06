@@ -1,19 +1,17 @@
 package com.myfeed.controller;
 
-import com.myfeed.model.post.BlockStatus;
-import com.myfeed.model.post.Image;
-import com.myfeed.model.post.Post;
-import com.myfeed.model.reply.Reply;
-import com.myfeed.model.user.User;
+import com.myfeed.model.elastic.PostEsDto1;
+import com.myfeed.model.elastic.SearchField;
+import com.myfeed.model.elastic.post.PostEs;
+import com.myfeed.service.Post.EsLogService;
 import com.myfeed.service.Post.PostEsService;
-import com.myfeed.service.Post.PostService;
 import com.myfeed.service.Post.PostServiceImpl;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,68 +19,78 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.myfeed.service.reply.ReplyService.PAGE_SIZE;
-
 @Controller
-@RequestMapping("/api/postEs")
+@RequestMapping("/api/search/posts")
 public class PostEsController {
 
-    /*
-    // 게시글 상세 보기
-    @GetMapping("detail/{pid}")
-    public String detail(@RequestParam(name="p", defaultValue = "1") int page, @PathVariable long id,
-                         @RequestParam(name = "likeAction", required = false) String likeAction,
-                         HttpSession session, Model model) {
-        Post post = postService.findPostById(id);
-        User user = post.getUser();
-        List<Image> imgaeList = post.getImages();
+    @Autowired
+    private PostEsService postEsService;
+    @Autowired
+    private EsLogService esLogService;
 
-        // 조회수 증가 (동시성)
-        postService.incrementPostViewCountById(id);
-        if ("like".equals(likeAction)) {
-            // 좋아요 증가 (동시성)
-            postService.incrementPostLikeCountById(id);
-        } else {
-            // 좋아요 감소 (동시성)
-            postService.decrementPostLikeCountById(id);
-        }
+    @GetMapping("/logtest")
+    public void logSaveTest() {
+        esLogService.saveSearchLog("1", "test");
+        System.out.println("logSaveTest");
+    }
 
-        Page<Reply> pagedResult = replyService.getPagedRepliesByPost(page, post);
+    // 기본 검색 ( 제목, 내용, 제목+내용 )
+    @GetMapping
+    @ResponseBody
+    public Page<PostEs> searchPosts(
+        @RequestParam String q,
+        @RequestParam(name = "p", defaultValue = "1") int page,
+        @RequestParam(name = "userId", required = false) String userId,
+        @RequestParam(name = "field", defaultValue = "TITLE") SearchField field
+    ) throws IOException {
+//        esLogService.saveSearchLog(userId, q);
+        return postEsService.searchPosts(q,field, page);
+    }
 
-        List<Reply> filteredReplyList = new ArrayList<>();
-        for (Reply reply : pagedResult.getContent()) {
-            if (user.isDeleted()) {
-                filteredReplyList.add(reply);
-            }
-            if (reply.getStatus() == BlockStatus.NORMAL_STATUS) {
-                filteredReplyList.add(reply);
-            } else {
-                Reply blockedReplyPlaceholder = new Reply();
-                blockedReplyPlaceholder.setContent("차단된 댓글입니다.");
-                filteredReplyList.add(blockedReplyPlaceholder);
-            }
-        }
-
+    // 사용자 검색어 상위 3위 게시글 추천
+    @GetMapping("recommend")
+    @ResponseBody
+    public String recommend(@RequestParam(name="p", defaultValue = "1") int page, HttpSession session, Model model,@RequestParam(name = "userId") String userId)
+        throws IOException {
+//        var pagedResult = postEsService.getRecommendedPostsBySearchLog(page,"1");
+//        var pagedResult = postEsService.getRecommendPostForMe(page,userId);
+        var pagedResult = postEsService.getRecommendPostByTop3Keywords(page);
+//        System.out.println("pagedResult: " + pagedResult);
+        List<PostEsDto1> postList = pagedResult.getContent();
         int totalPages = pagedResult.getTotalPages();
-        int startPage = (int) Math.ceil((page - 0.5) / reportService.PAGE_SIZE - 1) * reportService.PAGE_SIZE + 1;
-        int endPage = Math.min(startPage + reportService.PAGE_SIZE - 1, totalPages);
+        int startPage = (int) Math.ceil((page - 0.5) / PostServiceImpl.PAGE_SIZE - 1) * PostServiceImpl.PAGE_SIZE + 1;
+        int endPage = Math.min(startPage + PostServiceImpl.PAGE_SIZE - 1, totalPages);
         List<Integer> pageList = new ArrayList<>();
         for (int i = startPage; i <= endPage; i++)
             pageList.add(i);
 
-        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        Page<Reply> filteredPagedResult = new PageImpl<>(filteredReplyList, pageable, pagedResult.getTotalElements());
-
         session.setAttribute("currentPostPage", page);
-        model.addAttribute("imageList", imgaeList);
-        model.addAttribute("postReplyList", filteredPagedResult.getContent());
-        model.addAttribute("viewCount", post.getViewCount());
-        model.addAttribute("likeCount", post.getLikeCount());
+        model.addAttribute("postList", postList);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
         model.addAttribute("pageList", pageList);
-        return "api/post/detail/" + id;
+        return "api/search/posts/recommend";
     }
-     */
+
+    // 비슷한 게시물 추천 - postId가 음수일 경우 작동 안함 ㅠ
+    @GetMapping("/recommend/{postId}/similar")
+    @ResponseBody
+    public Page<PostEsDto1> getRecommendationsByPostId(
+        @PathVariable String postId,
+        @PageableDefault(size = 10) Pageable pageable
+    ) throws IOException {
+        return postEsService.findSimilarPostsById(postId, pageable);
+    }
+    // 비슷한 게시물 추천 - keywords로 검색
+    @GetMapping("/recommend/keywords")
+    @ResponseBody
+    public Page<PostEsDto1> getRecommendationsByKeywords(
+        @RequestParam List<String> keywords,
+        @PageableDefault(size = 10) Pageable pageable
+    ) throws IOException {
+        System.out.println("keywords: " + keywords);
+        return postEsService.findSimilarPostsByKeywords(keywords, pageable);
+    }
+
 }

@@ -29,22 +29,17 @@ public class PostSyncEventListener {
 
             PostEs postEs = new PostEs();
             postEs.setId(String.valueOf(post.getId()));
-            postEs.setUserId(String.valueOf(user.getId()));
-            postEs.setUserNickName(user.getNickname());
-            postEs.setUserStatus(String.valueOf(user.isActive()));
             postEs.setTitle(post.getTitle());
             postEs.setContent(postEs.getContent());
             postEs.setCategory(post.getCategory());
             postEs.setViewCount(post.getViewCount());
             postEs.setLikeCount(post.getLikeCount());
-            postEs.setBlockStatus(post.getStatus());
 
             List<Image> images = post.getImages();
             List<String> imageUrls = images.stream()
                     .map(Image::getImageSrc)
                     .toList();
 
-            postEs.setImageUrls(imageUrls);
 
             postEsService.syncToElasticsearch(postEs);
         } else if ("DELETE".equals(event.getOperation())) {
