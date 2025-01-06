@@ -4,10 +4,10 @@ import com.myfeed.exception.*;
 import com.myfeed.model.post.*;
 import com.myfeed.model.user.Role;
 import com.myfeed.model.user.User;
+import com.myfeed.response.ErrorCode;
 import com.myfeed.sync.PostSyncEvent;
 import com.myfeed.repository.jpa.PostRepository;
 import com.myfeed.repository.jpa.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -25,40 +25,29 @@ public class PostServiceImpl implements PostService {
     // 게시글 가져 오기
     @Override
     public Post findPostById(Long id) {
-        return postRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
-    }
-
-    // 게시글의 사용자 아이디 가져 오기
-    @Override
-    public List<User> getUsersById(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-
-        if (user == null || user.isDeleted()) {
-            throw new UserDeletedException("삭제된 사용자의 게시글이 포함 되어 있습니다.");
-        }
-
-        return postRepository.findUsersById(userId);
+        return postRepository.findById(id).orElseThrow(() -> new ExpectedException(ErrorCode.POST_NOT_FOUND));
     }
 
     // 게시글 작성 (postEs로 post 전달)
     @Transactional
     @Override
     public Post createPost(Long userId, PostDto postDto) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new  ExpectedException(ErrorCode.USER_NOT_FOUND));
 
         if (postDto.getCategory().equals(Category.NEWS) && user.getRole().equals(Role.USER)) {
-            throw new AccessDeniedException("이 작업은 관리자만 수행할 수 있습니다.");
+            throw new ExpectedException(ErrorCode.ACCESS_DENIED);
         }
 
         Post post = Post.builder()
                 .user(user).title(postDto.getTitle()).content(postDto.getContent())
-                .category(postDto.getCategory())
+                .category(postDto.getCategory()).status(BlockStatus.NORMAL_STATUS)
+                .viewCount(0).likeCount(0)
                 .build();
 
         if (!postDto.getImages().isEmpty()) {
             for (ImageDto imageDto : postDto.getImages()) {
                 if (!isValidImageFormat(imageDto)) {
-                    throw new ImageUploadException("잘못된 이미지 형식 입니다.");
+                    throw new ExpectedException(ErrorCode.WRONG_IMAGE_FILE);
                 }
             }
         }
@@ -99,7 +88,7 @@ public class PostServiceImpl implements PostService {
         Post post = findPostById(id);
 
         if (post.getStatus() == BlockStatus.BLOCK_STATUS) {
-            throw new PostBlockedException("차단된 게시글 입니다.");
+            throw new  ExpectedException(ErrorCode.REPLY_BLOCKED);
         }
 
         List<Image> updatedImages = convertImageDtosToImages(updateDto.getImages(), post);
@@ -111,7 +100,7 @@ public class PostServiceImpl implements PostService {
         if (!updateDto.getImages().isEmpty()) {
             for (ImageDto imageDto : updateDto.getImages()) {
                 if (!isValidImageFormat(imageDto)) {
-                    throw new ImageUploadException("잘못된 이미지 형식 입니다.");
+                    throw new ExpectedException(ErrorCode.WRONG_IMAGE_FILE);
                 }
             }
         }
@@ -133,12 +122,12 @@ public class PostServiceImpl implements PostService {
     // 내 게시글 페이지 네이션
     @Override
     public Page<Post> getPagedPostsByUserId(int page,User user) {
-        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("createdDate").descending());
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("updatedAt").descending());
         Page<Post> posts = postRepository.findPagedPostsByUserId(user, pageable);
 
         for (Post post : posts) {
             if (post.getStatus() == BlockStatus.BLOCK_STATUS) {
-                throw new ReplyBlockedException("차단된 게시글이 포함 되어 있습니다.");
+                throw new ExpectedException(ErrorCode.INCLUDED_BLOCK_POST);
             }
         }
 

@@ -1,5 +1,6 @@
 package com.myfeed.controller;
 
+import com.myfeed.exception.ExpectedException;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.post.PostReportDto;
 import com.myfeed.model.reply.Reply;
@@ -8,6 +9,7 @@ import com.myfeed.model.report.ProcessStatus;
 import com.myfeed.model.report.Report;
 import com.myfeed.model.report.ReportDetailDto;
 import com.myfeed.model.report.ReportDto;
+import com.myfeed.response.ErrorCode;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.reply.ReplyService;
 import com.myfeed.service.report.ReportService;
@@ -72,9 +74,10 @@ public class ReportController {
     public ResponseEntity<Map<String, Object>> reportReply(@PathVariable Long replyId,
                                                            @Valid @RequestBody ReportDto reportDto) {
         Report report = reportService.reportReply(replyId, reportDto);
+        Reply reply = replyService.findByReplyId(replyId);
         Map<String, Object> response = new HashMap<>();
 
-        String redirectUrl = "/api/posts/detail/" + report.getPost().getId();
+        String redirectUrl = "/api/posts/detail/" + reply.getPost().getId();
         response.put("redirectUrl",redirectUrl);
         response.put("success", true);
         response.put("message", "댓글이 신고 되었습니다.");
@@ -96,10 +99,19 @@ public class ReportController {
 
         if (status != null) {
             ProcessStatus processStatus = ProcessStatus.valueOf(status.toUpperCase());
+            List<Report> filteredReports;
 
-            List<Report> filteredReports = reports.stream()
-                    .filter(report -> report.getStatus() == processStatus)
-                    .collect(Collectors.toList());
+            if (processStatus == ProcessStatus.PENDING) {
+                filteredReports = reports.stream()
+                        .filter(report -> report.getStatus() == ProcessStatus.PENDING)
+                        .collect(Collectors.toList());
+            } else if (processStatus == ProcessStatus.COMPLETED) {
+                filteredReports = reports.stream()
+                        .filter(report -> report.getStatus() == ProcessStatus.COMPLETED)
+                        .collect(Collectors.toList());
+            } else {
+                throw new ExpectedException(ErrorCode.NOT_REPORTED);
+            }
 
             reports = new PageImpl<>(filteredReports, reports.getPageable(), filteredReports.size());
         }
@@ -126,8 +138,8 @@ public class ReportController {
 
     // 게시글 신고 내역 상세 보기
     @ResponseBody
-    @GetMapping("/posts/{postId}/detail")
-    public ResponseEntity<Map<String, Object>> getPostDetail(@PathVariable Long postId) {
+    @GetMapping("/posts/detail")
+    public ResponseEntity<Map<String, Object>> getPostDetail(@RequestParam Long postId) {
         Post post = postService.findPostById(postId);
         PostReportDto postReportDto = new PostReportDto(post);
 
@@ -135,7 +147,6 @@ public class ReportController {
         List<ReportDetailDto> reportDetailDto = reports.stream()
                 .map(ReportDetailDto::new)
                 .toList();
-
 
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
@@ -149,7 +160,7 @@ public class ReportController {
     // 신고 댓글 리스트 페이지 네이션 (동시성)
     @ResponseBody
     @GetMapping("/replies/{replyId}")
-    public ResponseEntity<Map<String, Object>> getReportsByReply( @PathVariable Long replyId,
+    public ResponseEntity<Map<String, Object>> getReportsByReply(@PathVariable Long replyId,
                                                            @RequestParam(name="p", defaultValue = "1") int page,
                                                            @Valid @RequestParam(name="status", required = false) String status,
                                                            HttpSession session) {
@@ -159,10 +170,19 @@ public class ReportController {
 
         if (status != null) {
             ProcessStatus processStatus = ProcessStatus.valueOf(status.toUpperCase());
+            List<Report> filteredReports;
 
-            List<Report> filteredReports = reports.stream()
-                    .filter(report -> report.getStatus() == processStatus)
-                    .collect(Collectors.toList());
+            if (processStatus == ProcessStatus.PENDING) {
+                filteredReports = reports.stream()
+                        .filter(report -> report.getStatus() == ProcessStatus.PENDING)
+                        .collect(Collectors.toList());
+            } else if (processStatus == ProcessStatus.COMPLETED) {
+                filteredReports = reports.stream()
+                        .filter(report -> report.getStatus() == ProcessStatus.COMPLETED)
+                        .collect(Collectors.toList());
+            } else {
+                throw new ExpectedException(ErrorCode.NOT_REPORTED);
+            }
 
             reports = new PageImpl<>(filteredReports, reports.getPageable(), filteredReports.size());
         }
@@ -189,8 +209,8 @@ public class ReportController {
 
     // 댓글 신고 내역 상세 보기
     @ResponseBody
-    @GetMapping("/replies/{replyId}/detail")
-    public ResponseEntity<Map<String, Object>> getReplyDetail(@PathVariable Long replyId) {
+    @GetMapping("/replies/detail")
+    public ResponseEntity<Map<String, Object>> getReplyDetail(@RequestParam Long replyId) {
         Reply reply = replyService.findByReplyId(replyId);
         ReplyReportDto reportDto = new ReplyReportDto(reply);
 
@@ -210,37 +230,33 @@ public class ReportController {
 
     // 게시글 차단
     @ResponseBody
-    @PostMapping("/posts/{postId}/block")
-    public ResponseEntity<Map<String, String>> blockPost(@PathVariable Long postId,
-                                                         @RequestParam Long reportId) {
-        reportService.BlockPost(reportId, postId);
+    @PostMapping("/posts/block")
+    public ResponseEntity<Map<String, String>> blockPost(@RequestParam Long id) {
+        reportService.BlockPost(id);
         return ResponseEntity.ok(Map.of("message", "게시글이 차단 되었습니다."));
     }
 
     // 게시글 차단 해제
     @ResponseBody
-    @PostMapping("/posts/{postId}/unblock")
-    public ResponseEntity<Map<String, String>> unblockPost(@PathVariable Long postId,
-                                                           @RequestParam Long reportId) {
-        reportService.unBlockPost(reportId, postId);
+    @PostMapping("/posts/unblock")
+    public ResponseEntity<Map<String, String>> unblockPost(@RequestParam Long id) {
+        reportService.unBlockPost(id);
         return ResponseEntity.ok(Map.of("message", "게시글 차단이 해제 되었습니다."));
     }
 
     // 댓글 차단
     @ResponseBody
-    @PostMapping("/replies/{replyId}/block")
-    public ResponseEntity<Map<String, String>> blockReply(@PathVariable Long replyId,
-                                                          @RequestParam Long reportId) {
-        reportService.BlockReply(reportId, replyId);
+    @PostMapping("/replies/block")
+    public ResponseEntity<Map<String, String>> blockReply(@RequestParam Long id) {
+        reportService.BlockReply(id);
         return ResponseEntity.ok(Map.of("message", "댓글이 차단 되었습니다."));
     }
 
     // 댓글 차단 해제
     @ResponseBody
-    @PostMapping("/replies/{replyId}/unblock")
-    public ResponseEntity<Map<String, String>> unblockReply(@PathVariable Long replyId,
-                                                            @RequestParam Long reportId) {
-        reportService.unBlockReply(reportId, replyId);
+    @PostMapping("/replies/unblock")
+    public ResponseEntity<Map<String, String>> unblockReply(@RequestParam Long id) {
+        reportService.unBlockReply(id);
         return ResponseEntity.ok(Map.of("message", "댓글 차단이 해제 되었습니다."));
     }
 }
