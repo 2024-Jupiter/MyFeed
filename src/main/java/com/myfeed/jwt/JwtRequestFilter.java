@@ -23,25 +23,30 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path.equals("/api/users/register");
+        return path.equals("/api/users/register") || path.startsWith("/lib/") || path.startsWith("/img/") || path.startsWith("/css/") || path.equals("/favicon.ico");
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        final String authorizationHeader = request.getHeader("Authorization");
+        System.out.println("-----------  JwtRequestFilter invoked for: " + request.getRequestURI());
 
-        String username = null;
+        final String cookieHeader = request.getHeader("Cookie");
+        System.out.println("-----------  쿠키: "+cookieHeader);
+        //--------------쿠키: accessToken=eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZW1haWwiOiJzYXJhaDIzMTZAbmF2ZXIuY29tIiwic3ViIjoic2FyYWgyMzE2QG5hdmVyLmNvbSIsImlhdCI6MTczNjE1ODk4MiwiZXhwIjoxNzM2MTk0OTgyfQ.z2W7zRlWwu5hN9c5hyEPj1j7ZlVMqFABK5sSXXw7pFw;
+
+        String userEmail = null;
         String jwt = null;
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            jwt = authorizationHeader.substring(7);
-            username = jwtTokenUtil.extractUsername(jwt);
+        if (cookieHeader != null && cookieHeader.startsWith("accessToken=")) {
+            jwt = cookieHeader.substring(12);
+            userEmail = jwtTokenUtil.extractUserEmail(jwt);
+            System.out.println(userEmail);
         }
         // contextHolder에 정보 저장하기
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.myUserDetailsService.loadUserByUsername(username);
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.myUserDetailsService.loadUserByUsername(userEmail);
 
             if (jwtTokenUtil.validateToken(jwt, userDetails.getUsername())) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =

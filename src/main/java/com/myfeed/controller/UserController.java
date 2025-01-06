@@ -23,11 +23,13 @@ import java.util.Map;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,19 +46,16 @@ public class UserController {
     @Autowired PostService postService;
 
     @GetMapping("/test")
-    @ResponseBody
-    public Map<String, Object> loginTest() {
-        Map<String, Object> messagemap = new HashMap<>();
-        messagemap.put("message", "로그인 완료");
-        return messagemap;
+    public String testEndpoint(@CookieValue(name = "accessToken", required = false) String accessToken) {
+        System.out.println("accessToken: " + accessToken);
+        return "main";
     }
 
     // 로그인
-    // @ResponseBody //
     @GetMapping("/custom-login")
     public String loginForm() {
         Map<String, Object> messagemap = new HashMap<>();
-        return "redirect:/home";
+        return "main";
     }
 
     // 회원 가입(폼)
@@ -69,9 +68,9 @@ public class UserController {
     public String registerProc(@Validated RegisterDto registerDto, Model model){ // @RequestBody
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
-        if (registerDto.getEmail().equals("asd@naver.com")) {
-            throw new ExpectedException(ErrorCode.USER_NOT_FOUND);
-        }
+//        if (registerDto.getEmail().equals("asd@naver.com")) {
+//            throw new ExpectedException(ErrorCode.USER_NOT_FOUND);
+//        }
         User user = User.builder()
                 .email(registerDto.getEmail()).password(hashedPwd)
                 .username(registerDto.getUname()).nickname(registerDto.getNickname())
@@ -87,7 +86,7 @@ public class UserController {
         return "common/alertMsg";
     }
 
-    @GetMapping("/update/{uid}")
+    @GetMapping("/update/{uid}") //
     public String update(@PathParam("uid") Long id, Model model) {
         User user = userService.findById(id);
         model.addAttribute(user);
@@ -169,6 +168,22 @@ public class UserController {
         return "common/alertMsg";
     }
 
+    // 로그인 성공 시
+    @GetMapping("/loginSuccessV2") // json return, home으로 redirect,
+    public String loginSuccessV2(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        System.out.println("authentication.getName(): " + authentication.getName());
+        User user = userService.findByEmail(email);
+        System.out.println("---------아이디"+user.getId());
+        System.out.println("---------이메일"+user.getEmail());
+        String url = "/home";
+        String msg = user.getNickname() + "님 환영합니다.";
+        model.addAttribute("msg", msg);
+        model.addAttribute("url", url);
+        return "common/alertMsg";
+    }
+
     // 로그아웃
     @GetMapping("/logout")
     public String logout() {
@@ -176,7 +191,7 @@ public class UserController {
     }
 
     // 활성/비활성 회원 목록 가져오기
-    @GetMapping("/list")
+    @GetMapping("/list") //
     public String list(@RequestParam(name="p", defaultValue = "1") int page,
                        @RequestParam(name="status", defaultValue = "true") boolean status,
                        Model model) {
