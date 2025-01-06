@@ -1,5 +1,6 @@
 package com.myfeed.service.Post;
 
+
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.query_dsl.MoreLikeThisQuery;
@@ -16,8 +17,8 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;

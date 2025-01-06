@@ -1,7 +1,6 @@
 package com.myfeed.model.elastic.post;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.myfeed.model.post.BlockStatus;
 import com.myfeed.model.post.Category;
 import jakarta.persistence.*;
 import lombok.*;
