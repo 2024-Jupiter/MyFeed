@@ -26,7 +26,6 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
         //  tokenProvider.generateRefreshToken(authentication, accessToken);
 
         //헤더에 토큰을 포함해 클라이언트에게 전달
-        response.setHeader("Authorization", "Bearer " + accessToken);
         System.out.println("--- 사용자 토큰 --- "+ accessToken);
 
         response.setStatus(HttpServletResponse.SC_OK);

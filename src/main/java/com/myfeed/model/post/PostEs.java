@@ -1,6 +1,5 @@
 package com.myfeed.model.post;
 
-import com.myfeed.model.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,27 +11,21 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Document(indexName = "posts")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PostEs extends BaseTimeEntity {
+public class PostEs {
     @Id
     @Column(name = "id", nullable = false)
     private String id;
 
     // 글쓴이 정보
     @Field(type = FieldType.Keyword)
-    private String userId;
-
-    @Field(type = FieldType.Keyword)
-    private String userNickName;
-
-    @Field(type = FieldType.Keyword)
-    private String userStatus;
+    private String nickname;
 
     // 게시글 정보
     @Field(type = FieldType.Text)
@@ -50,9 +43,6 @@ public class PostEs extends BaseTimeEntity {
     @Field(type = FieldType.Integer)
     private int likeCount;
 
-    @Field(type = FieldType.Keyword)
-    private BlockStatus blockStatus;
-
-    @Field(type = FieldType.Keyword)
-    private List<String> imageUrls;
+    @Field(type = FieldType.Date)
+    private LocalDateTime createAt;
 }

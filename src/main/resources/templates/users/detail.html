@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+  <p>상세보기</p>
+  <input type="text" th:value="${user}" >
+  <input type="text" th:value="${postList}" >
+  <p>상세보기</p>
+</body>
+<script>
+  console.log('user', [[${user}]]);
+  console.log('postList', [[${postList}]]);
+</script>
+</html>
