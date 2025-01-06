@@ -5,6 +5,7 @@ import com.myfeed.model.post.*;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.reply.ReplyDetailDto;
 import com.myfeed.model.user.User;
+import com.myfeed.service.Post.CsvFileReaderService;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.reply.ReplyService;
 import com.myfeed.service.user.UserService;
@@ -29,6 +30,7 @@ public class PostController {
     @Autowired PostService postService;
     @Autowired UserService userService;
     @Autowired ReplyService replyService;
+    @Autowired CsvFileReaderService csvFileReaderService;
 
     // 게시글 작성 폼 (GET 요청 으로 폼을 가져옴)
     @GetMapping("create")
@@ -39,6 +41,7 @@ public class PostController {
     // 게시글 작성
     @ResponseBody
     @PostMapping("create")
+    //@PreAuthorize("#user.id == authentication.principal.id")
     public ResponseEntity<Map<String, Object>> createPost(@RequestParam Long userId,
                                                           @Valid @RequestBody PostDto postDto) {
         Post post = postService.createPost(userId, postDto);
@@ -55,8 +58,8 @@ public class PostController {
 
     // 내 게시글 페이지 네이션
     @ResponseBody
-    @GetMapping("/user/{userId}")
-    @PreAuthorize("#user.id == authentication.principal.id")
+    @GetMapping("/users/{userId}")
+    //@PreAuthorize("#user.id == authentication.principal.id")
     public ResponseEntity<Map<String, Object>> myPostList(@RequestParam(name="p", defaultValue = "1") int page,
                                                            @PathVariable long userId, HttpSession session) {
         User user = userService.findById(userId);
@@ -146,7 +149,7 @@ public class PostController {
     // 게시글 수정
     @ResponseBody
     @PatchMapping("/{id}")
-    @PreAuthorize("#user.id == authentication.principal.id")
+    //@PreAuthorize("#user.id == authentication.principal.id")
     public ResponseEntity<Map<String, Object>> updatePost(@PathVariable Long id,
                                                           @Valid @RequestBody UpdateDto updateDto) {
         Post post = postService.updatePost(id, updateDto);
@@ -164,7 +167,7 @@ public class PostController {
     // 게시글 삭제
     @ResponseBody
     @DeleteMapping("/{id}")
-    @PreAuthorize("#user.id == authentication.principal.id")
+    //@PreAuthorize("#user.id == authentication.principal.id")
     public ResponseEntity<Map<String, Object>> deletePost(@PathVariable Long id) {
         Post post = postService.findPostById(id);
         postService.deletePostById(id);

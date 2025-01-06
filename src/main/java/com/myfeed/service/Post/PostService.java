@@ -18,9 +18,6 @@ public interface PostService {
     // 내 게시글 페이지 네이션
     Page<Post> getPagedPostsByUserId(int page, User user);
 
-    // 게시글의 사용자 아이디 가져오기
-    List<User> getUsersById(Long userId);
-
     // 게시글 생성
     Post createPost(Long userId, PostDto postDto);
 

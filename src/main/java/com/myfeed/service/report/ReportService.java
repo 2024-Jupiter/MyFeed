@@ -36,14 +36,14 @@ public interface ReportService {
     Report reportReply(Long replyId, ReportDto reportDto);
 
     // 게시글 차단
-    void BlockPost(Long id, Long postId);
+    void BlockPost(Long id);
 
     // 게시글 해제
-    void unBlockPost(Long id, Long postId);
+    void unBlockPost(Long id);
 
     // 댓글 차단
-    void BlockReply(Long id, Long replyId);
+    void BlockReply(Long id);
 
     // 댓긍 해제
-    void unBlockReply(Long id, Long replyId);
+    void unBlockReply(Long id);
 }

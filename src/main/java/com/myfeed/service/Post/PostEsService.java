@@ -2,7 +2,9 @@ package com.myfeed.service.Post;
 
 import com.myfeed.model.post.*;
 import com.myfeed.repository.elasticsearch.PostEsRepository;
+import com.myfeed.sync.PostSyncEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
@@ -30,7 +32,6 @@ public class PostEsService {
     @Async
     public void deleteFromElasticsearch(String id) {
         postEsRepository.deleteById(id);
-        System.out.println("Deleted from Elasticsearch: ID=" + id);
     }
 
     // 차단된 게시글 차단 처리 & 삭제된 유저 게시글 안 보이게
