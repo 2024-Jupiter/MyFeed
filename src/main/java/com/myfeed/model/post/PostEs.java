@@ -1,5 +1,6 @@
 package com.myfeed.model.post;
 
+import com.myfeed.model.reply.ReplyDetailDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,8 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Document(indexName = "posts")
 @Data
@@ -45,4 +48,8 @@ public class PostEs {
 
     @Field(type = FieldType.Date)
     private LocalDateTime createAt;
+
+    // 댓글
+    @Field(type = FieldType.Nested)
+    private List<Map<String, Object>> replies;
 }

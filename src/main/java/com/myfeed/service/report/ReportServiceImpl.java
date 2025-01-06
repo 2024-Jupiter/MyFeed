@@ -20,12 +20,9 @@ import java.util.List;
 
 @Service
 public class ReportServiceImpl implements ReportService {
-    @Autowired
-    ReportRepository reportRepository;
-    @Autowired
-    ReplyRepository replyRepository;
-    @Autowired
-    PostRepository postRepository;
+    @Autowired private ReportRepository reportRepository;
+    @Autowired private ReplyRepository replyRepository;
+    @Autowired private PostRepository postRepository;
 
     // 신고 불러오기
     @Override

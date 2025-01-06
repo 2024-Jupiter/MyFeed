@@ -24,10 +24,8 @@ import java.util.Map;
 @Controller
 @RequestMapping("/api/replies")
 public class ReplyController {
-    @Autowired
-    private ReplyService replyService;
-    @Autowired
-    private PostService postService;
+    @Autowired private ReplyService replyService;
+    @Autowired private PostService postService;
 
     // 댓글 작성 폼 (GET 요청 으로 폼을 가져옴)
     @GetMapping("/create")

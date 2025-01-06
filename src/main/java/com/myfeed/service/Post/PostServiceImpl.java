@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 @Service
 public class PostServiceImpl implements PostService {
-    @Autowired PostRepository postRepository;
-    @Autowired UserRepository userRepository;
+    @Autowired private PostRepository postRepository;
+    @Autowired private UserRepository userRepository;
     @Autowired private ApplicationEventPublisher eventPublisher;
 
     // 게시글 가져 오기
