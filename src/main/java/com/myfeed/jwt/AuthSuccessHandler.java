@@ -1,5 +1,6 @@
 package com.myfeed.jwt;
 
+import com.myfeed.model.user.MyUserDetails;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,9 +22,10 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
-        // accessToken, refreshToken 발급
-        String accessToken = jwtTokenUtil.generateToken(authentication.getName());
-        //  tokenProvider.generateRefreshToken(authentication, accessToken);
+
+        MyUserDetails userDetails = (MyUserDetails) authentication.getPrincipal();
+
+        String accessToken = jwtTokenUtil.generateToken(userDetails.getName());
 
         //헤더에 토큰을 포함해 클라이언트에게 전달
         System.out.println("--- 사용자 토큰 --- "+ accessToken);
