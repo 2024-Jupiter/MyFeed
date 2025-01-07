@@ -16,6 +16,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -100,7 +101,6 @@ public class ReplyServiceImpl implements ReplyService {
     @Transactional
     @Override
     public void deleteReply (Long id) {
-         replyRepository.deleteById(id);
-         eventPublisher.publishEvent(new ReplySyncEvent(id, "DELETE"));
+        eventPublisher.publishEvent(new ReplySyncEvent(id, "DELETE"));
     }
 }

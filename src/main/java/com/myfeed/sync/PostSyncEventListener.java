@@ -3,8 +3,6 @@ package com.myfeed.sync;
 import com.myfeed.exception.ExpectedException;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.post.PostEs;
-import com.myfeed.model.reply.Reply;
-import com.myfeed.model.reply.ReplyDetailDto;
 import com.myfeed.model.user.User;
 import com.myfeed.repository.elasticsearch.PostEsRepository;
 import com.myfeed.repository.jpa.PostRepository;
@@ -17,16 +15,15 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class PostSyncEventListener {
     @Autowired private PostEsService postEsService;
+    @Autowired private PostEsRepository postEsRepository;
     @Autowired private PostRepository postRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private ReplyRepository replyRepository;
 
     // 게시글 작성
     @Async
@@ -45,11 +42,77 @@ public class PostSyncEventListener {
             postEs.setCategory(post.getCategory());
             postEs.setViewCount(post.getViewCount());
             postEs.setLikeCount(post.getLikeCount());
-            //postEs.setReplies(new ArrayList<>());
+            postEs.setCreatedAt(post.getCreatedAt());
+            postEs.setReplies(new ArrayList<>());
 
             postEsService.syncToElasticsearch(postEs);
         } else if ("DELETE".equals(event.getOperation())) {
             postEsService.deleteFromElasticsearch(String.valueOf(event.getPostId()));
+        } else if ("VIEW_COUNT".equals(event.getOperation())) {
+            PostEs postEs = postEsRepository.findById(String.valueOf(event.getPostId())).orElseThrow(() -> new ExpectedException(ErrorCode.POST_ES_NOT_FOUND));
+
+            postEs.setId(String.valueOf(postEs.getId()));
+            postEs.setNickname(postEs.getNickname());
+            postEs.setTitle(postEs.getTitle());
+            postEs.setContent(postEs.getContent());
+            postEs.setCategory(postEs.getCategory());
+            postEs.setCreatedAt(postEs.getCreatedAt());
+            int viewCount = postEs.getViewCount();
+            viewCount += 1;
+            postEs.setViewCount(viewCount);
+            postEs.setLikeCount(postEs.getLikeCount());
+
+            if (postEs.getReplies() == null) {
+                postEs.setReplies(new ArrayList<>());
+            } else {
+                postEs.setReplies(postEs.getReplies());
+            }
+
+            postEsService.syncToElasticsearch(postEs);
+        } else if ("LIKE_COUNT_UP".equals(event.getOperation())) {
+            PostEs postEs = postEsRepository.findById(String.valueOf(event.getPostId())).orElseThrow(() -> new ExpectedException(ErrorCode.POST_ES_NOT_FOUND));
+
+            postEs.setId(String.valueOf(postEs.getId()));
+            postEs.setNickname(postEs.getNickname());
+            postEs.setTitle(postEs.getTitle());
+            postEs.setContent(postEs.getContent());
+            postEs.setCategory(postEs.getCategory());
+            postEs.setViewCount(postEs.getViewCount());
+            postEs.setCreatedAt(postEs.getCreatedAt());
+            int likeCount = postEs.getLikeCount();
+            likeCount += 1;
+            postEs.setLikeCount(likeCount);
+
+            if (postEs.getReplies() == null) {
+                postEs.setReplies(new ArrayList<>());
+            } else {
+                postEs.setReplies(postEs.getReplies());
+            }
+
+            postEsService.syncToElasticsearch(postEs);
+        } else if ("LIKE_COUNT_DOWN".equals(event.getOperation())) {
+            PostEs postEs = postEsRepository.findById(String.valueOf(event.getPostId())).orElseThrow(() -> new ExpectedException(ErrorCode.POST_ES_NOT_FOUND));
+
+            postEs.setId(String.valueOf(postEs.getId()));
+            postEs.setNickname(postEs.getNickname());
+            postEs.setTitle(postEs.getTitle());
+            postEs.setContent(postEs.getContent());
+            postEs.setCategory(postEs.getCategory());
+            postEs.setViewCount(postEs.getViewCount());
+            postEs.setCreatedAt(postEs.getCreatedAt());
+            int likeCount = postEs.getLikeCount();
+            if (likeCount > 0) {
+                likeCount -= 1;
+            }
+            postEs.setLikeCount(likeCount);
+
+            if (postEs.getReplies() == null) {
+                postEs.setReplies(new ArrayList<>());
+            } else {
+                postEs.setReplies(postEs.getReplies());
+            }
+
+            postEsService.syncToElasticsearch(postEs);
         }
     }
 }

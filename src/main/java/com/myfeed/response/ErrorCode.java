@@ -15,6 +15,11 @@ public enum ErrorCode {
 	/**
 	 * 게시글
 	 */
+	POST_ES_NOT_FOUND("POST_ES_NOT_FOUND", "PostEs를 찾을 수 없습니다."),
+
+	/**
+	 * 게시글
+	 */
 	POST_NOT_FOUND("POST_NOT_FOUND", "게시글을 찾을 수 없습니다."),
 	ACCESS_DENIED("ACCESS_DENIED", "이 카테고리는 관리자만 선택 가능 합니다. "),
 	IMAGE_UPLOAD_FAIL("IMAGE_UPLOAD_FAIL", "이미지 업로드 실패 했습니다."),

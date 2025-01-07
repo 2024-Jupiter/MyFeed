@@ -1,6 +1,8 @@
 package com.myfeed.model.post;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.myfeed.model.reply.ReplyDetailDto;
+import com.myfeed.model.reply.ReplyEs;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,10 +48,11 @@ public class PostEs {
     @Field(type = FieldType.Integer)
     private int likeCount;
 
-    @Field(type = FieldType.Date)
-    private LocalDateTime createAt;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Field(type = FieldType.Date, format = {}, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
 
     // 댓글
     @Field(type = FieldType.Nested)
-    private List<Map<String, Object>> replies;
+    private List<ReplyEs> replies;
 }

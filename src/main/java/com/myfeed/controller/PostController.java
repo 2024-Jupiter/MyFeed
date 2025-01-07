@@ -102,16 +102,13 @@ public class PostController {
 
         // 조회수 증가 (동시성)
         postService.incrementPostViewCountById(id);
-        postEsService.incrementPostEsViewCountById(String.valueOf(id));
 
         if ("like".equals(likeAction)) {
             // 좋아요 증가 (동시성)
             postService.incrementPostLikeCountById(id);
-            postEsService.incrementPostEsLikeCountById(String.valueOf(id));
         } else {
             // 좋아요 감소 (동시성)
             postService.decrementPostLikeCountById(id);
-            postEsService.decrementPostEsLikeCountById(String.valueOf(id));
         }
 
         PostDetailDto postDetailDto = new PostDetailDto(post);
