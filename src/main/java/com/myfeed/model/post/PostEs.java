@@ -55,4 +55,7 @@ public class PostEs {
     // 댓글
     @Field(type = FieldType.Nested)
     private List<ReplyEs> replies;
+
+    @Field(type = FieldType.Integer)
+    private int replyCount;
 }

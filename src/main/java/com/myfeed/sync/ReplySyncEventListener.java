@@ -52,6 +52,7 @@ public class ReplySyncEventListener {
                     .collect(Collectors.toList());
 
             postEs.setReplies(replies);
+            postEs.setReplyCount(replies.size());
 
             postEsService.syncToElasticsearch(postEs);
         } else if ("DELETE".equals(event.getOperation())) { // 댓글 삭제

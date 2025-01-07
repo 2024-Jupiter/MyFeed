@@ -66,6 +66,7 @@ public class PostSyncEventListener {
                 postEs.setReplies(new ArrayList<>());
             } else {
                 postEs.setReplies(postEs.getReplies());
+                postEs.setReplyCount(postEs.getReplyCount());
             }
 
             postEsService.syncToElasticsearch(postEs);
@@ -87,6 +88,7 @@ public class PostSyncEventListener {
                 postEs.setReplies(new ArrayList<>());
             } else {
                 postEs.setReplies(postEs.getReplies());
+                postEs.setReplyCount(postEs.getReplyCount());
             }
 
             postEsService.syncToElasticsearch(postEs);
@@ -110,6 +112,7 @@ public class PostSyncEventListener {
                 postEs.setReplies(new ArrayList<>());
             } else {
                 postEs.setReplies(postEs.getReplies());
+                postEs.setReplyCount(postEs.getReplyCount());
             }
 
             postEsService.syncToElasticsearch(postEs);
