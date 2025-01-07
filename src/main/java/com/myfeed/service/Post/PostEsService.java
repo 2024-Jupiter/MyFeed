@@ -2,19 +2,18 @@ package com.myfeed.service.Post;
 
 import com.myfeed.model.post.*;
 import com.myfeed.repository.elasticsearch.PostEsRepository;
-import com.myfeed.sync.PostSyncEvent;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.query.Query;
-import org.springframework.data.elasticsearch.core.query.StringQuery;
+import org.springframework.data.elasticsearch.core.query.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PostEsService {
@@ -22,13 +21,13 @@ public class PostEsService {
     @Autowired private ElasticsearchTemplate elasticsearchTemplate;
     @Autowired private PostEsRepository postEsRepository;
 
-    // 생성, 수정, 조회수 & 좋아요 (비동기 동기화)
+    // 게시글 생성 (비동기 동기화)
     @Async
     public void syncToElasticsearch(PostEs postEs) {
         postEsRepository.save(postEs);
     }
 
-    // 삭제
+    // 게시글 삭제
     @Async
     public void deleteFromElasticsearch(String id) {
         postEsRepository.deleteById(id);
@@ -71,7 +70,7 @@ public class PostEsService {
                                     "fuzziness": "AUTO"
                                 }
                             }
-                        }        
+                        }
                 """,
                 field, keyword
         );

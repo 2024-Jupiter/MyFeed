@@ -10,17 +10,23 @@ import com.myfeed.repository.jpa.ReplyRepository;
 import com.myfeed.repository.jpa.PostRepository;
 import com.myfeed.repository.jpa.UserRepository;
 import com.myfeed.response.ErrorCode;
+import com.myfeed.sync.PostSyncEvent;
+import com.myfeed.sync.ReplySyncEvent;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class ReplyServiceImpl implements ReplyService {
-    @Autowired UserRepository userRepository;
-    @Autowired PostRepository postRepository;
-    @Autowired ReplyRepository replyRepository;
+    @Autowired private UserRepository userRepository;
+    @Autowired private PostRepository postRepository;
+    @Autowired private ReplyRepository replyRepository;
+    @Autowired private ApplicationEventPublisher eventPublisher;
 
     // 댓글 가져 오기
     @Override
@@ -29,6 +35,7 @@ public class ReplyServiceImpl implements ReplyService {
     }
 
     // 댓글 작성
+    @Transactional
     @Override
     public Reply createReply(Long userId, Long postId, ReplyDto replyDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ExpectedException(ErrorCode.USER_NOT_FOUND));
@@ -44,7 +51,10 @@ public class ReplyServiceImpl implements ReplyService {
                 .build();
         post.addReply(reply);
 
-        return replyRepository.save(reply);
+        Reply savedReply = replyRepository.save(reply);
+        eventPublisher.publishEvent(new ReplySyncEvent(savedReply.getId(), "CREATE_OR_UPDATE"));
+
+        return savedReply;
     }
 
     // 게시글 내의 댓글 리스트 (동시성)
@@ -70,6 +80,7 @@ public class ReplyServiceImpl implements ReplyService {
     }
 
     // 댓글 수정
+    @Transactional
     @Override
     public void updateReply (Long id, ReplyDto replyDto) {
         Reply reply = findByReplyId(id);
@@ -82,12 +93,14 @@ public class ReplyServiceImpl implements ReplyService {
         }
 
         reply.setContent(replyDto.getContent());
-        replyRepository.save(reply);
+        Reply savedReply = replyRepository.save(reply);
+        eventPublisher.publishEvent(new ReplySyncEvent(savedReply.getId(), "CREATE_OR_UPDATE"));
     }
 
     // 댓글 삭제
+    @Transactional
     @Override
     public void deleteReply (Long id) {
-         replyRepository.deleteById(id);
+        eventPublisher.publishEvent(new ReplySyncEvent(id, "DELETE"));
     }
 }

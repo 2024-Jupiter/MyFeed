@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 @Service
 public class PostServiceImpl implements PostService {
-    @Autowired PostRepository postRepository;
-    @Autowired UserRepository userRepository;
+    @Autowired private PostRepository postRepository;
+    @Autowired private UserRepository userRepository;
     @Autowired private ApplicationEventPublisher eventPublisher;
 
     // 게시글 가져 오기
@@ -139,6 +139,9 @@ public class PostServiceImpl implements PostService {
     @Override
     public void incrementPostViewCountById(Long id) {
         postRepository.updateViewCountById(id);
+
+        // Elasticsearch 동기화
+        eventPublisher.publishEvent(new PostSyncEvent(id, "VIEW_COUNT"));
     }
 
     // 좋아요 증가 (동시성)
@@ -146,6 +149,9 @@ public class PostServiceImpl implements PostService {
     @Override
     public void incrementPostLikeCountById(Long id) {
         postRepository.updateLikeCountById(id);
+
+        // Elasticsearch 동기화
+        eventPublisher.publishEvent(new PostSyncEvent(id, "LIKE_COUNT_UP"));
     }
 
     // 좋아요 감소 (동시성)
@@ -153,5 +159,8 @@ public class PostServiceImpl implements PostService {
     @Override
     public void decrementPostLikeCountById(Long id) {
         postRepository.decrementLikeCountById(id);
+
+        // Elasticsearch 동기화
+        eventPublisher.publishEvent(new PostSyncEvent(id, "LIKE_COUNT_DOWN"));
     }
 }

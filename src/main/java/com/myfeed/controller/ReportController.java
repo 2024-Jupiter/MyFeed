@@ -33,11 +33,9 @@ import java.util.stream.Collectors;
 @Validated
 @RequestMapping("/api/admin/reports")
 public class ReportController {
-    @Autowired ReportService reportService;
-    @Autowired
-    private ReplyService replyService;
-    @Autowired
-    private PostService postService;
+    @Autowired private ReportService reportService;
+    @Autowired private ReplyService replyService;
+    @Autowired private PostService postService;
 
     // 게시글 신고 폼 (GET 요청 으로 폼을 가져옴)
     @GetMapping("/posts/{postId}/form")
