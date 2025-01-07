@@ -48,14 +48,13 @@ public class ReportController {
     @PostMapping("/posts/{postId}")
     public ResponseEntity<Map<String, Object>> reportPost(@PathVariable Long postId,
                                                           @Valid @RequestBody ReportDto reportDto) {
-        Report report = reportService.reportPost(postId, reportDto);
+        reportService.reportPost(postId, reportDto);
         Map<String, Object> response = new HashMap<>();
 
         String redirectUrl = "/api/posts/detail/" + postId;
         response.put("redirectUrl",redirectUrl);
         response.put("success", true);
         response.put("message", "게시글이 신고 되었습니다.");
-        response.put("data", report);
 
         return ResponseEntity.ok(response);
     }
@@ -71,7 +70,7 @@ public class ReportController {
     @PostMapping("/replies/{replyId}")
     public ResponseEntity<Map<String, Object>> reportReply(@PathVariable Long replyId,
                                                            @Valid @RequestBody ReportDto reportDto) {
-        Report report = reportService.reportReply(replyId, reportDto);
+        reportService.reportReply(replyId, reportDto);
         Reply reply = replyService.findByReplyId(replyId);
         Map<String, Object> response = new HashMap<>();
 
@@ -79,7 +78,6 @@ public class ReportController {
         response.put("redirectUrl",redirectUrl);
         response.put("success", true);
         response.put("message", "댓글이 신고 되었습니다.");
-        response.put("data", report);
 
         return ResponseEntity.ok(response);
     }

@@ -40,14 +40,13 @@ public class ReplyController {
     public ResponseEntity<Map<String, Object>> createReply(@RequestParam Long userId,
                                                            @RequestParam Long postId,
                                                            @Valid @RequestBody ReplyDto replyDto) {
-        Reply reply = replyService.createReply(userId, postId, replyDto);
+        replyService.createReply(userId, postId, replyDto);
         Map<String, Object> response = new HashMap<>();
 
         String redirectUrl = "/api/posts/detail/" + postId;
         response.put("redirectUrl",redirectUrl);
         response.put("success", true);
         response.put("message", "댓글이 작성 되었습니다.");
-        response.put("data", reply);
 
         return ResponseEntity.ok(response);
     }
@@ -92,6 +91,8 @@ public class ReplyController {
         response.put("success", true);
         response.put("message", "게시글 내의 댓글들");
         response.put("data", replyDetailDto);
+        int count = replyDetailDto.size();
+        response.put("repliesCount", count);
         response.put("totalPages", totalPages);
         response.put("startPage", startPage);
         response.put("endPage", endPage);
@@ -114,7 +115,6 @@ public class ReplyController {
         response.put("redirectUrl", redirectUrl);
         response.put("success", true);
         response.put("message", "댓글이 수정 되었습니다.");
-        response.put("data", reply);
 
         return ResponseEntity.ok(response);
     }
@@ -132,7 +132,6 @@ public class ReplyController {
         response.put("redirectUrl", redirectUrl);
         response.put("success", true);
         response.put("message", "댓글이 삭제 되었습니다.");
-        response.put("data", reply);
 
         return ResponseEntity.ok(response);
     }
