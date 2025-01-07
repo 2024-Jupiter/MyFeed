@@ -17,9 +17,10 @@ public class SmsController {
 
     @Autowired SmsService smsService;
 
-    @PostMapping("/send-authcode")
+    //@PostMapping("/send-authcode")
+    @PostMapping("/send-one")
     @ResponseBody
-    public ResponseEntity sendAuthCode(@RequestBody SmsRequestDto smsRequestDto) {
+    public ResponseEntity sendAuthCode(SmsRequestDto smsRequestDto) {
         String authCode = smsService.sendMessage(smsRequestDto);
 
         SmsResponseDto smsResponseDto = new SmsResponseDto();
