@@ -2,8 +2,6 @@ package com.myfeed.service.Post;
 
 import com.myfeed.model.elastic.post.PostEs;
 import com.myfeed.model.post.Category;
-import com.myfeed.model.post.Post;
-import com.myfeed.model.post.PostDto;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -40,7 +38,7 @@ public class CsvFileReaderService {
 
                     PostEs postEs = PostEs.builder()
                             .nickname(userName).title(title).content(content).category(Category.GENERAL)
-                            .viewCount(0).likeCount(Integer.parseInt(likeCount)).createAt(date)
+                            .viewCount(0).likeCount(Integer.parseInt(likeCount)).createdAt(LocalDateTime.parse(date))
                             .build();
 
                     postEsService.syncToElasticsearch(postEs);

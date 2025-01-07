@@ -1,10 +1,14 @@
 package com.myfeed.service.Post.crawlingdata;
 
+import com.myfeed.model.elastic.post.ReplyEs;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -24,4 +28,18 @@ public class VelogDto {
     private String date;
     private int likeCount;
     private List<VelogCommentDto> comments;
+
+    public List<ReplyEs> velogCommentToReplyEs() {
+        List<ReplyEs> replies = new ArrayList<>();
+        if (comments != null && !comments.isEmpty()) {
+            for (VelogCommentDto comment : comments) {
+                replies.add(ReplyEs.builder()
+                        .nickname(comment.getCommentUser())
+                        .content(comment.getCommentContent())
+                        .createdAt(LocalDateTime.parse(comment.getCommentDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")))
+                        .build());
+            }
+        }
+        return replies;
+    }
 }

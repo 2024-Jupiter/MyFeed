@@ -11,12 +11,16 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.myfeed.model.elastic.PostEsDto1;
 import com.myfeed.model.elastic.SearchField;
 import com.myfeed.model.elastic.post.PostEs;
+import com.myfeed.model.elastic.post.ReplyEs;
 import com.myfeed.repository.elasticsearch.PostEsDataRepository;
 import com.myfeed.repository.elasticsearch.PostEsRepository;
+import com.myfeed.service.Post.crawlingdata.NewsJsonReader;
 import com.myfeed.service.Post.record.KeywordCount;
 import com.myfeed.service.Post.record.NewsDto;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import com.myfeed.model.post.*;
@@ -296,38 +300,42 @@ public class PostEsService {
     }
 
     @Async
-    public void insertByJsonFile() {
+    public void initVelogData() {
         System.out.println("Inserting by JSON file...");
         List<VelogDto> velogDtos = new VelogJsonReader().loadJson();
+
         List<PostEs> list = velogDtos.stream().map(velogDto -> {
             return PostEs.builder()
-                    .id(String.valueOf(velogDto.hashCode()))
-                    .title(velogDto.getTitle())
                     .nickname(velogDto.getUserName())
+                    .title(velogDto.getTitle())
                     .content(velogDto.getContent())
                     .category(Category.GENERAL)
-                    .createAt(velogDto.getDate())
-                    .likeCount(velogDto.getLikeCount())
                     .viewCount(0)
+                    .likeCount(velogDto.getLikeCount())
+                    .replies(velogDto.velogCommentToReplyEs())
+                    .createdAt(LocalDateTime.parse(velogDto.getDate()))
                     .build();
         }).toList();
         postEsDataRepository.saveAll(list);
         System.out.println("Successfully saved to Elasticsearch");
     }
 
-
-    public void saveNewsAll(List<NewsDto> newsDtos) {
+    @Async
+    public void initNewsData() {
+        System.out.println("Inserting news data...");
+        List<NewsDto> newsDtos = new NewsJsonReader().loadJson();
         postEsDataRepository.saveAll(newsDtos.stream().map(newsDto -> {
             return PostEs.builder()
-                    .id(String.valueOf(newsDto.hashCode()))
-                    .title(newsDto.title())
                     .nickname(newsDto.author())
+                    .title(newsDto.title())
                     .content(newsDto.content())
                     .category(Category.NEWS)
-                    .createAt(newsDto.date())
-                    .likeCount(0)
                     .viewCount(0)
+                    .likeCount(0)
+                    .replies(new ArrayList<ReplyEs>())
+                    .createdAt(newsDto.getParsedDate())
                     .build();
         }).toList());
     }
+
 }

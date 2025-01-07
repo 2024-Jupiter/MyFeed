@@ -11,6 +11,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Document(indexName = "posts")
@@ -44,8 +45,11 @@ public class PostEs {
     @Field(type = FieldType.Integer)
     private int likeCount;
 
+    @Field(type = FieldType.Nested)
+    private List<ReplyEs> replies;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Field(type = FieldType.Date)
-    private String createAt;
+    @Field(type = FieldType.Date, format = {}, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
 
 }

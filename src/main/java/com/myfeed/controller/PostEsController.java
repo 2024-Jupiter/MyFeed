@@ -6,8 +6,6 @@ import com.myfeed.model.elastic.post.PostEs;
 import com.myfeed.service.Post.EsLogService;
 import com.myfeed.service.Post.PostEsService;
 import com.myfeed.service.Post.PostServiceImpl;
-import com.myfeed.service.Post.crawlingdata.NewsJsonReader;
-import com.myfeed.service.Post.record.NewsDto;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +16,7 @@ import com.myfeed.service.Post.CsvFileReaderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +28,6 @@ public class PostEsController {
     @Autowired
     private EsLogService esLogService;
 
-    @GetMapping("/logtest")
-    @ResponseBody
-    public String logSaveTest() {
-        List<NewsDto> newsDtos = new NewsJsonReader().loadJson();
-        postEsService.saveNewsAll(newsDtos);
-        return "logSaveTest";
-    }
 
     // 기본 검색 ( 제목, 내용, 제목+내용 )
     @GetMapping
@@ -102,10 +94,17 @@ public class PostEsController {
         csvFileReaderService.csvFileToElasticSearch();
         return "<h1>일래스틱 서치에 데이터를 저장 했습니다.</h1>";
     }
-
-    // 게시글 리스트
-
-
-    // 게시글 상세 보기
+    @GetMapping("init/news")
+    @ResponseBody
+    public String ElasticsearchNewsInit() {
+//        postEsService.initNewsData();
+        return "<h1>일래스틱 서치에 뉴스 데이터를 저장 했습니다.</h1>";
+    }
+    @GetMapping("/init/velog")
+    @ResponseBody
+    public String ElasticsearchPostsInit() {
+//        postEsService.initVelogData();
+        return "<h1>일래스틱 서치에 velog 데이터를 저장 했습니다.</h1>";
+    }
 
 }
