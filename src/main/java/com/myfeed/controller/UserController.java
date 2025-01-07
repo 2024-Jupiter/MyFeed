@@ -64,9 +64,8 @@ public class UserController {
         return "register";
     }
 
-    // @RequestBody 삭제 해야함
-    @PostMapping("/register")
-    public String registerProc(@Validated @RequestBody RegisterDto registerDto, Model model){ // @RequestBody
+    @PostMapping("/register") // todo 휴대폰 번호 인증 시 DTO 값 null
+    public String registerProc(@Validated RegisterDto registerDto, Model model){
         Map<String, Object> messagemap = new HashMap<>();
         String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
 //        if (registerDto.getEmail().equals("asd@naver.com")) {
