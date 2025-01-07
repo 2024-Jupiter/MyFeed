@@ -110,7 +110,7 @@ public class ReportServiceImpl implements ReportService {
 
         Report report = Report.builder()
                 .post(post).type(ReportType.valueOf(reportDto.getType()))
-                .description(reportDto.getDescription()).status(ProcessStatus.PENDING)
+                .description(reportDto.getDescription()).status(ProcessStatus.RELEASED)
                 .build();
 
         return reportRepository.save(report);
@@ -130,7 +130,7 @@ public class ReportServiceImpl implements ReportService {
 
         Report report = Report.builder()
                 .reply(reply).type(ReportType.valueOf(reportDto.getType()))
-                .description(reportDto.getDescription()).status(ProcessStatus.PENDING)
+                .description(reportDto.getDescription()).status(ProcessStatus.RELEASED)
                 .build();
 
         return reportRepository.save(report);
