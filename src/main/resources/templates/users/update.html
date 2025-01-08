@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <title>MyFeed</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="Free HTML Templates" name="keywords"/>
+  <meta content="Free HTML Templates" name="description"/>
+
+  <!-- Favicon -->
+  <!--  <link href="/static/img/favicon.ico" rel="icon" />-->
+
+
+  <!-- Google Web Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet">
+  <!-- Font Awesome -->
+  <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css"
+      rel="stylesheet"
+  />
+  <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+  />
+
+  <!-- Libraries Stylesheet -->
+  <link href="/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet"/>
+
+  <!--Sweet Alert2-->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.10/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.10/dist/sweetalert2.min.js"></script>
+
+  <!-- Customized Bootstrap Stylesheet -->
+  <link href="/css/style.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/globals.css"/>
+  <link rel="stylesheet" href="/css/register.css" type="text/css"/>
+</head>
+
+<body>
+<!-- Topbar Start -->
+<div class="container-fluid">
+  <div class="row bg-secondary py-2 px-xl-5">
+    <div class="col-lg-6 d-none d-lg-block">
+    </div>
+  </div>
+</div>
+<div class="row align-items-center py-3 px-xl-5">
+  <div class="col-lg-3 d-none d-lg-block">
+    <a href="/home">
+      <img src="/img/logo.png" style="margin-left: 5%; width: 40%;">
+    </a>
+  </div>
+</div>
+<!-- Topbar End -->
+
+<!-- Navbar Start -->
+<div class="container-fluid mb-2">
+  <div class="row border-top px-xl-5">
+  </div>
+</div>
+<!-- Navbar End -->
+
+
+<div class="container-fluid pt-5">
+  <div class="row"
+       style="justify-content: space-between; flex-wrap: nowrap; margin: auto; width: 70%;">
+    <div class="col-12 mb-0">
+      <div class="mb-8">
+        <h4 class="font-weight-semi-bold mb-5"
+            style="font-size: 20px; text-align: center; color: darkgray;">회원정보 수정</h4>
+        <form action="/api/users/update" id="updateForm" method="post" style="color: black; font-weight: 400;" onsubmit="return false"
+              >
+          <div class="row">
+            <div class="col-md-7 form-group">
+              <label>이름</label>
+              <div class="check-group">
+                <input class="form-control" type="text" id="uname" name="uname"
+                       th:value="${user.username}"  style="width: 100%;">
+              </div>
+              <input type="hidden" th:value="${user.id}" name="uid" id="uid">
+            </div>
+            <div class="col-md-7 form-group">
+              <label>비밀번호</label>
+              <input class="form-control" id="pwd" name="pwd" type="password"
+                     placeholder="사용하실 비밀번호를 입력해 주세요." autoComplete="off" required>
+            </div>
+            <div class="col-md-7 form-group">
+              <label>비밀번호 재확인</label>
+              <input class="form-control" id="pwd2" name="pwd2" type="password"
+                     placeholder="비밀번호를 다시 한 번 입력해 주세요." autoComplete="off" required>
+              <font id="chk" style="font-size: small; float: right;"></font>
+            </div>
+            <div class="col-md-7 form-group">
+              <label>닉네임</label>
+              <div class="check-group">
+                <input class="form-control" name="nickname" id="nickname" type="text"
+                       placeholder="사용하실 닉네임을 입력해 주세요." style=" width: 80%;" th:value="${user.nickname}">
+                <button class="btn btn-info" id="checkNicknameBtn" type="button"
+                        style="padding: 0;" data-available="true">중복확인
+                </button>
+              </div>
+            </div>
+        </form>
+            <div class="col-md-7 form-group pt-3">
+              <button type="button" id="formSubmit" class="btn btn-info" style="width: 100%;">저장</button>
+            </div>
+
+      </div>
+
+  </div>
+</div>
+
+</div>
+
+
+<!-- JavaScript Libraries -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script
+    src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+
+<script src="/lib/easing/easing.min.js"></script>
+<script src="/lib/owlcarousel/owl.carousel.min.js"></script>
+
+
+<!-- Template Javascript -->
+<!--<script src="/js/main.js"></script>-->
+</body>
+<script>
+  const swalConfig = {confirmButtonColor: '#1f9bcf'};
+  document
+  .getElementById('checkNicknameBtn')
+  .addEventListener('click', isNicknameAvailable);
+
+  function isNicknameAvailable() {
+    let nickname = document.getElementById('nickname').value.trim();
+
+    if (!nickname) {
+      Swal.fire({
+        icon: 'warning',
+        text: '닉네임을 입력해 주세요.',
+        ...swalConfig,
+      });
+      return;
+    }
+
+    $.ajax({
+      url: '/api/users/check-nickname',
+      type: 'GET',
+      data: {nickname: nickname},
+      dataType: 'json',
+      success: function (response) {
+        if (!response) {
+          Swal.fire({
+            icon: 'error',
+            text: '서버 응답이 올바르지 않습니다.',
+            ...swalConfig,
+          });
+          return;
+        }
+        if (response.status === 'error') {
+          Swal.fire({
+            icon: 'warning',
+            text: response.errorMessage,
+            ...swalConfig,
+          });
+        }
+        if (response.status === 'success') {
+          Swal.fire({
+            icon: 'success',
+            text: response.data.message,
+            showCancelButton: true,
+            cancelButtonColor: '#d33',
+            confirmButtonText: '사용',
+            cancelButtonText: '취소',
+            ...swalConfig,
+          }).then((result) => {
+            if (result.isConfirmed) {
+              document
+              .getElementById('checkNicknameBtn')
+              .setAttribute('data-available', 'true');
+              document
+              .getElementById('checkNicknameBtn')
+              .setAttribute('disabled', true);
+            }
+          });
+        }
+      },
+      error: function () {
+        Swal.fire({
+          icon: 'error',
+          text: '서버 응답이 올바르지 않습니다.',
+          ...swalConfig,
+        });
+      },
+    });
+  }
+
+  // 닉네임 재입력 시 중복 검사 버튼 활성화
+  document.getElementById('nickname').addEventListener('input', function () {
+    if (document.getElementById('checkNicknameBtn').getAttribute('data-available')
+        === 'true') {
+      document.getElementById('checkNicknameBtn').removeAttribute('disabled');
+      document
+      .getElementById('checkNicknameBtn')
+      .setAttribute('data-available', 'false');
+    }
+  });
+
+
+  document.getElementById('formSubmit').addEventListener('click', checkForm);
+
+  function checkForm() {
+
+    console.log('checkForm');
+    const updateForm = document.getElementById('updateForm');
+    const formData = new FormData(updateForm);
+    // let file = document.getElementById('formFile').files[0];
+    // if (file) {
+    //   formData.append('profileImage', file);
+    // }
+
+    if (document.getElementById('checkNicknameBtn').getAttribute('data-available')
+        === 'false') {
+      Swal.fire({
+        icon: 'warning',
+        text: '닉네임 중복 확인을 해주세요.',
+        ...swalConfig,
+      });
+      return false;
+    }
+    //
+    // document.getElementById('updateForm').submit();
+    // window.opener.location.reload(); // 부모 창 새로고침
+    // window.close(); // 팝업창 닫기
+
+
+
+    fetch(updateForm.action, {
+      method: 'POST',
+      body: formData,
+    })
+    .then((response) => {
+      if (response.ok) {
+        return response.json(); // 응답 데이터 확인
+      }
+      throw new Error('업데이트 실패!');
+    })
+    .then((data) => {
+      alert(data.data.message);
+      console.log(data);
+      if (window.opener && !window.opener.closed) {
+        window.opener.location.reload(); // 부모 창 새로고침
+      }
+      window.close(); // 팝업창 닫기
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      alert('업데이트 실패! 다시 시도해 주세요.');
+    });
+  }
+
+</script>
+</html>

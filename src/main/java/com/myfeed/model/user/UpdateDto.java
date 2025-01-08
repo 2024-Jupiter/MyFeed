@@ -23,7 +23,7 @@ public class UpdateDto {
     @NotBlank(message = "닉네임을 입력하세요.")
     private String nickname;
 
-    //private String profileImage;
+    private String profileImage;
 
 
 }
