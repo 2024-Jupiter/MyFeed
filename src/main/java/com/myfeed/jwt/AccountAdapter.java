@@ -20,4 +20,9 @@ public class AccountAdapter extends org.springframework.security.core.userdetail
         }));
         this.user = user;
     }
+
+    @Override // 비활성회원 로그인 차단
+    public boolean isEnabled() {
+        return user.isActive();
+    }
 }

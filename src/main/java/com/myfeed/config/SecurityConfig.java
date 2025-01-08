@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .logoutUrl("/api/users/logout")
                         //.invalidateHttpSession(true)
                         .deleteCookies("accessToken")
+                        .deleteCookies("JSESSIONID")
                         .logoutSuccessUrl("/api/users/custom-login")
                 )
                 .oauth2Login(auth -> auth
