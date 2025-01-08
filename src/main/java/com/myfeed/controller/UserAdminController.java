@@ -63,5 +63,4 @@ public class UserAdminController {
         userService.updateUserStatus(id, status);
         return "redirect:/users/list";
     }
-
 }
