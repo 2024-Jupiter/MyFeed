@@ -1,6 +1,7 @@
 
 package com.myfeed.controller;
 
+import com.myfeed.annotation.CurrentUser;
 import com.myfeed.exception.CustomException;
 import com.myfeed.exception.ExpectedException;
 import com.myfeed.model.post.Post;
@@ -44,8 +45,14 @@ public class UserController {
     @Autowired PostService postService;
 
     @GetMapping("/test")
-    public String testEndpoint(@CookieValue(name = "accessToken", required = false) String accessToken) {
-        System.out.println("accessToken: " + accessToken);
+    public String testEndpoint(@CurrentUser User user, Model model) {
+        if (user == null) {
+            model.addAttribute("username", "Guest");
+            return "main";
+        }
+        model.addAttribute("username", user.getNickname());
+        model.addAttribute("id", user.getId());
+        model.addAttribute("email", user.getEmail());
         return "main";
     }
 
@@ -62,7 +69,7 @@ public class UserController {
         return "users/register";
     }
 
-    @PostMapping("/register") // todo 휴대폰 번호 인증 시 DTO 값 null
+    @PostMapping("/register")
     public String registerProc(@Validated RegisterDto registerDto, Model model){
         Map<String, Object> messagemap = new HashMap<>();
         userService.registerUser(registerDto);
@@ -71,21 +78,18 @@ public class UserController {
         return "common/alertMsg";
     }
 
-    @GetMapping("/update/{uid}") //
-    public String update(@PathParam("uid") Long id, Model model) {
-        User user = userService.findById(id);
+    @GetMapping("/update") //
+    public String update(@CurrentUser User user, Model model) {
         model.addAttribute(user);
         return "users/update";
     }
 
     // 회원정보 상세보기
-    @GetMapping("/{id}/detail")
-    public String detail(@PathVariable Long id,
-            @RequestParam(name="p", defaultValue = "1") int page,
-            Model model){
+    @GetMapping("/detail")
+    public String detail(@CurrentUser User user,
+            @RequestParam(name = "p", defaultValue = "1") int page,
+            Model model) {
         Map<String, Object> messagemap = new HashMap<>();
-
-        User user = userService.findById(id);
         model.addAttribute("user", user);
         Page<Post> postList = postService.getPagedPostsByUserId(page, user);
         model.addAttribute("postList", postList);
@@ -94,17 +98,18 @@ public class UserController {
     }
 
     // 사용자 정보 수정
-    @PostMapping("/{uid}") // 변경 가능 필드(비밀번호, 실명, 닉네임, 프로필사진)
+    @PostMapping("/update") // 변경 가능 필드(비밀번호, 실명, 닉네임, 프로필사진)
     @ResponseBody
-    public Map<String, Object> updateProc(@PathVariable("uid") Long id,
+    public Map<String, Object> updateProc(@CurrentUser User user,
             @Validated UpdateDto updateDto) {
         Map<String, Object> messagemap = new HashMap<>();
-        userService.updateUser(id, updateDto);
-        messagemap.put("message","회원정보가 수정되었습니다.");
-        String redirectUrl = "/"+id+"/detail";
-        messagemap.put("redirectUrl",redirectUrl);
+        userService.updateUser(user.getId(), updateDto);
+        messagemap.put("message", "회원정보가 수정되었습니다.");
+        String redirectUrl = "/api/users/detail";
+        messagemap.put("redirectUrl", redirectUrl);
         return messagemap;
     }
+
 
     // 이메일 중복확인
     @GetMapping("/check-email")
@@ -132,7 +137,7 @@ public class UserController {
 
     // 회원 탈퇴
     @GetMapping("/{id}")
-    public String delete(@PathVariable Long id,  HttpServletResponse response) {
+    public String delete(@PathVariable Long id, HttpServletResponse response) {
         //탈퇴 시 쿠키 제거해 redirection 방지
         userService.deleteUserAccessToken(response);
         userService.deleteUser(id); //soft delete
