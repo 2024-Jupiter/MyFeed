@@ -24,9 +24,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtTokenUtil.generateToken(authentication.getName());
         //  tokenProvider.generateRefreshToken(authentication, accessToken);
 
-        //헤더에 토큰을 포함해 클라이언트에게 전달
-//        response.setHeader("Authorization", "Bearer " + accessToken);
-//        response.setStatus(HttpServletResponse.SC_OK);
+        //헤더에 쿠키를 포함해 클라이언트에게 전달
         response.addCookie(createCookie("accessToken", accessToken));
         response.sendRedirect("/api/users/test");
 
