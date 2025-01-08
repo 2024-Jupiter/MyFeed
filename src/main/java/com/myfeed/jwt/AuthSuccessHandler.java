@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RequiredArgsConstructor
 @Component
@@ -24,15 +25,10 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtTokenUtil.generateToken(authentication.getName());
         //  tokenProvider.generateRefreshToken(authentication, accessToken);
 
-        //헤더에 토큰을 포함해 클라이언트에게 전달
-//        response.setHeader("Authorization", "Bearer " + accessToken);
-//        response.setStatus(HttpServletResponse.SC_OK);
+        //헤더에 쿠키를 포함해 클라이언트에게 전달
         response.addCookie(createCookie("accessToken", accessToken));
         response.sendRedirect("/api/users/test");
-
-
     }
-
 
     private Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
@@ -42,5 +38,4 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
         cookie.setHttpOnly(true);
         return cookie;
     }
-
 }
