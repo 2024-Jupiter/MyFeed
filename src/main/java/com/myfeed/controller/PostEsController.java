@@ -1,11 +1,12 @@
 package com.myfeed.controller;
 
-import com.myfeed.model.elastic.PostEsDto1;
+import com.myfeed.log.annotation.LogUserBehavior;
+import com.myfeed.model.elastic.PostEsClientDto;
 import com.myfeed.model.elastic.SearchField;
+import com.myfeed.model.elastic.UserSearchLogEs;
 import com.myfeed.model.elastic.post.PostEs;
 import com.myfeed.service.Post.EsLogService;
 import com.myfeed.service.Post.PostEsService;
-import com.myfeed.service.Post.PostServiceImpl;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -25,68 +25,88 @@ import java.util.List;
 public class PostEsController {
     @Autowired CsvFileReaderService csvFileReaderService;
     @Autowired PostEsService postEsService;
-    @Autowired
-    private EsLogService esLogService;
+    @Autowired EsLogService esLogService;
 
+    @GetMapping("/logs")
+    public List<UserSearchLogEs> logTest() {
+        return esLogService.findAll();
+    }
+    // 최신 게시글 조회 (비유저 메인 페이지 )
+    @GetMapping("/recent")
+    @ResponseBody
+    public Page<PostEs> getRecentPosts(
+            @RequestParam(name = "p",defaultValue = "1") int page
+    ) {
+        return postEsService.getRecentPosts(page);
+    }
 
-    // 기본 검색 ( 제목, 내용, 제목+내용 )
+    // 기본 검색(뉴스 제외) ( 제목, 내용, 제목+내용 )
     @GetMapping
     @ResponseBody
+    @LogUserBehavior
     public Page<PostEs> searchPosts(
         @RequestParam String q,
         @RequestParam(name = "p", defaultValue = "1") int page,
-        @RequestParam(name = "userId", required = false) String userId,
         @RequestParam(name = "field", defaultValue = "TITLE") SearchField field
     ) throws IOException {
-//        esLogService.saveSearchLog(userId, q);
         return postEsService.searchGeneralPosts(q,field, page);
     }
 
-    // 사용자 검색어 상위 3위 게시글 추천
-    @GetMapping("recommend")
+    // ID로 postES 상세 검색
+    @GetMapping("/{id}")
+    @ResponseBody
+    public PostEs getPostById(@PathVariable String id) {
+        return postEsService.findById(id);
+    }
+
+    // 사용자 검색 로그 상위 3위 키워드로 게시글 추천
+    @GetMapping("/recommend/by-top3-keywords")
+    @ResponseBody
+    public Page<PostEsClientDto> recommendByTop3Keywords(@RequestParam(name="p", defaultValue = "1") int page, HttpSession session, Model model)
+        throws IOException {
+        return postEsService.getRecommendPostByTop3Keywords(page);
+    }
+    // 나의 검색 로그 상위 3위 키워드로 게시글 추천
+    @GetMapping("/recommend/by-my-top3-keywords")
     @ResponseBody
     public String recommend(@RequestParam(name="p", defaultValue = "1") int page, HttpSession session, Model model,@RequestParam(name = "userId") String userId)
+            throws IOException {
+        var pagedResult = postEsService.getRecommendPostForMe(page,userId);
+        return "api/search/posts/recommend";
+    }
+    // 유저의 한달 간 검색어 상위 3위 게시글 추천( 사용 x )
+    @GetMapping("/recommend/by-top3-keywords/month")
+    @ResponseBody
+    public String recommendByTop3KeywordsMonth(@RequestParam(name="p", defaultValue = "1") int page, HttpSession session, Model model,@RequestParam(name = "userId") String userId)
         throws IOException {
-//        var pagedResult = postEsService.getRecommendedPostsBySearchLog(page,"1");
-//        var pagedResult = postEsService.getRecommendPostForMe(page,userId);
-        var pagedResult = postEsService.getRecommendPostByTop3Keywords(page);
-//        System.out.println("pagedResult: " + pagedResult);
-        List<PostEsDto1> postList = pagedResult.getContent();
-        int totalPages = pagedResult.getTotalPages();
-        int startPage = (int) Math.ceil((page - 0.5) / PostServiceImpl.PAGE_SIZE - 1) * PostServiceImpl.PAGE_SIZE + 1;
-        int endPage = Math.min(startPage + PostServiceImpl.PAGE_SIZE - 1, totalPages);
-        List<Integer> pageList = new ArrayList<>();
-        for (int i = startPage; i <= endPage; i++)
-            pageList.add(i);
-
-        session.setAttribute("currentPostPage", page);
-        model.addAttribute("postList", postList);
-        model.addAttribute("totalPages", totalPages);
-        model.addAttribute("startPage", startPage);
-        model.addAttribute("endPage", endPage);
-        model.addAttribute("pageList", pageList);
+        var pagedResult = postEsService.getRecommendedPostsByMonthSearchLog(page,userId);
+        System.out.println("pagedResult: " + pagedResult);
         return "api/search/posts/recommend";
     }
 
-    // 비슷한 게시물 추천 - postId가 음수일 경우 작동 안함 ㅠ
+    // 비슷한 게시물 추천
     @GetMapping("/recommend/{postId}/similar")
     @ResponseBody
-    public Page<PostEsDto1> getRecommendationsByPostId(
+    public Page<PostEsClientDto> getRecommendationsByPostId(
         @PathVariable String postId,
         @PageableDefault(size = 10) Pageable pageable
     ) throws IOException {
         return postEsService.findSimilarPostsById(postId, pageable);
     }
-    // 비슷한 게시물 추천 - keywords로 검색
+    // 비슷한 게시물 추천 - keywords로 검색 ( 사용 x 작동 o)
     @GetMapping("/recommend/keywords")
     @ResponseBody
-    public Page<PostEsDto1> getRecommendationsByKeywords(
+    public Page<PostEsClientDto> getRecommendationsByKeywords(
         @RequestParam List<String> keywords,
         @PageableDefault(size = 10) Pageable pageable
     ) throws IOException {
         System.out.println("keywords: " + keywords);
         return postEsService.findSimilarPostsByKeywords(keywords, pageable);
     }
+
+
+    //  이하 크롤링 데이터 저장 관련 메소드
+
     // 일렉스틱 서치에 크롤링 데이터 저장
     @GetMapping("/Elasticsearch")
     @ResponseBody
@@ -97,13 +117,13 @@ public class PostEsController {
     @GetMapping("init/news")
     @ResponseBody
     public String ElasticsearchNewsInit() {
-//        postEsService.initNewsData();
+        postEsService.initNewsData();
         return "<h1>일래스틱 서치에 뉴스 데이터를 저장 했습니다.</h1>";
     }
     @GetMapping("/init/velog")
     @ResponseBody
     public String ElasticsearchPostsInit() {
-//        postEsService.initVelogData();
+        postEsService.initVelogData();
         return "<h1>일래스틱 서치에 velog 데이터를 저장 했습니다.</h1>";
     }
 

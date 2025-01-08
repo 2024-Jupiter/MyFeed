@@ -1,8 +1,11 @@
 package com.myfeed.repository.elasticsearch;
 
-import com.myfeed.model.elastic.SearchLogEs;
+import com.myfeed.model.elastic.UserSearchLogEs;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
-public interface SearchLogEsDataRepository extends ElasticsearchRepository<SearchLogEs, String> {
+import java.util.List;
 
+public interface SearchLogEsDataRepository extends ElasticsearchRepository<UserSearchLogEs, String> {
+
+    List<UserSearchLogEs> findAll();
 }

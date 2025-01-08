@@ -15,7 +15,6 @@ public class PostEsRepository {
 
     // 일반 게시글 제목 검색
     public Page<PostEs> searchGeneralPostsByTitle(String keyword, PageRequest pageRequest) {
-        System.out.println("searchGeneralPostsByTitle");
         return postEsDataRepository.searchByTitleAndCategory(keyword, Category.GENERAL.toString() ,pageRequest);
     }
 
@@ -26,9 +25,6 @@ public class PostEsRepository {
 
     // 일반 게시글 제목+내용 검색
     public Page<PostEs> searchGeneralPostsByTitleAndContent(String keyword, PageRequest pageRequest) {
-        System.out.println("searchGeneralPostsByTitleAndContent");
         return postEsDataRepository.searchTitleAndContent(keyword, Category.GENERAL.toString(), pageRequest);
     }
-
-
 }

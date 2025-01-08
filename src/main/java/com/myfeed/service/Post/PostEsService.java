@@ -8,7 +8,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
-import com.myfeed.model.elastic.PostEsDto1;
+import com.myfeed.model.elastic.PostEsClientDto;
 import com.myfeed.model.elastic.SearchField;
 import com.myfeed.model.elastic.post.PostEs;
 import com.myfeed.model.elastic.post.ReplyEs;
@@ -48,6 +48,8 @@ public class PostEsService {
 
     // 제목 검색 - 일반 게시글
     public Page<PostEs> searchGeneralPosts(String keyword, SearchField field,int page) {
+//        여기 수정하자 createdAt 잘 저장되게
+        esLogService.saveSearchLog("anonymous", keyword);
         // 결과 값 선언
         Page<PostEs> posts = null;
         PageRequest pageRequest = PageRequest.of(page - 1, 10);
@@ -61,7 +63,6 @@ public class PostEsService {
             // 제목+내용 검색
             case TITLE_CONTENT -> postEsRepository.searchGeneralPostsByTitleAndContent(keyword, pageRequest);
         };
-        System.out.println("posts: " + posts.getContent().get(0).getTitle());
         return posts;
     }
 
@@ -79,8 +80,8 @@ public class PostEsService {
         System.out.println("Deleted from Elasticsearch: ID=" + id);
     }
 
-
-    public List<Map<String, Object>> getRecommendedPostsBySearchLog(int page,String userId) throws IOException {
+    // 1달간 관심 있는 키워드 검색
+    public List<Map<String, Object>> getRecommendedPostsByMonthSearchLog(int page, String userId) throws IOException {
         // 현재 시점에서 1달 전 날짜 계산
         String oneMonthAgo = ZonedDateTime.now().minusMonths(1).toString();
         // 검색 요청 생성
@@ -129,28 +130,31 @@ public class PostEsService {
             ))
             .toList();
     }
-    // 특정 사용자의 검색로그 기반으로 추천하는 게시글
-    public Page<PostEsDto1> getRecommendPostForMe(int page,String userId) throws IOException {
-        List<KeywordCount> myAllTimeTopKeywords = esLogService.findMyAllTimeTopKeywords(userId);
-        List<String> list = myAllTimeTopKeywords.stream().map(KeywordCount::keyword).toList();
-        System.out.println("추천 검색어 " + list);
-        return this.getPostBySearchLogs(page, list);
-    }
-    // 현재 사용자 검색 로그 상위 3개 키워드로 게시글 검색
-    public Page<PostEsDto1> getRecommendPostByTop3Keywords(int page) throws IOException {
+    // 사용자 검색 로그 상위 3개 키워드로 게시글 검색
+    public Page<PostEsClientDto> getRecommendPostByTop3Keywords(int page) throws IOException {
+        // 유저들의 검색어 로그 find
         List<KeywordCount> myAllTimeTopKeywords = esLogService.findAllTimeTopKeywords();
+        // 검색어 추출
         List<String> list = myAllTimeTopKeywords.stream().map(KeywordCount::keyword).toList();
         System.out.println("추천 검색어2 " + list);
         return this.getPostBySearchLogs(page, list);
     }
+    // 나의 검색로그 기반으로 추천하는 게시글
+    public Page<PostEsClientDto> getRecommendPostForMe(int page, String userId) throws IOException {
+        // 검색 로그 가져오기
+        List<KeywordCount> myAllTimeTopKeywords = esLogService.findMyAllTimeTopKeywords(userId);
+        List<String> list = myAllTimeTopKeywords.stream().map(KeywordCount::keyword).toList();
+        System.out.println("추천 검색어 " + list);
 
-    public Page<PostEsDto1> getPostBySearchLogs(int page, List<String> keywords) throws IOException {
+        return this.getPostBySearchLogs(page, list);
+    }
+
+    public Page<PostEsClientDto> getPostBySearchLogs(int page, List<String> keywords) throws IOException {
         // 페이지네이션
         Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE);
-        // 검색어
-        String keyword1 = keywords.get(0);
-        String keyword2 = keywords.get(1);
-        String keyword3 = keywords.get(2);
+        String keyword1 = !keywords.isEmpty() ? keywords.get(0) : "자바";
+        String keyword2 = keywords.size() > 1 ? keywords.get(1) : "스프링";
+        String keyword3 = keywords.size() > 2 ? keywords.get(2) : "도커";
 
         SearchRequest searchRequest = SearchRequest.of(builder -> builder
             .index("posts") // 인덱스 이름을 실제 사용하는 이름으로 변경해주세요
@@ -211,12 +215,17 @@ public class PostEsService {
 
 
 
-        SearchResponse<PostEsDto1> response = elasticsearchClient.search(searchRequest, PostEsDto1.class);
+        SearchResponse<PostEsClientDto> response = elasticsearchClient.search(searchRequest, PostEsClientDto.class);
+        System.out.println("response : "+response);
 
-        List<PostEsDto1> posts = response.hits().hits().stream()
-            .map(Hit::source)
-            .toList();
-        System.out.println("posts: " + posts.get(0).getTitle());
+        response.hits().hits()
+            .forEach(metaData ->{
+                        metaData.source().setId(metaData.id());
+                        metaData.source().setScore(metaData.score());
+                    }
+                    );
+        List<PostEsClientDto> posts = response.hits().hits().stream().map(Hit::source).toList();
+        System.out.println("posts: " + posts.get(0).getId());
         return new PageImpl<>(
             posts,
             pageable,
@@ -225,7 +234,7 @@ public class PostEsService {
     }
 
     // 1. 키워드 기반 추천 (Match 쿼리 사용)
-    public Page<PostEsDto1> findSimilarPostsByKeywords(List<String> keywords, Pageable pageable) throws IOException {
+    public Page<PostEsClientDto> findSimilarPostsByKeywords(List<String> keywords, Pageable pageable) throws IOException {
         // 키워드들을 하나의 문자열로 합침
         String combinedKeywords = String.join(" ", keywords);
 
@@ -247,9 +256,9 @@ public class PostEsService {
             .size(pageable.getPageSize())
         );
 
-        SearchResponse<PostEsDto1> response = elasticsearchClient.search(searchRequest, PostEsDto1.class);
+        SearchResponse<PostEsClientDto> response = elasticsearchClient.search(searchRequest, PostEsClientDto.class);
 
-        List<PostEsDto1> posts = response.hits().hits().stream()
+        List<PostEsClientDto> posts = response.hits().hits().stream()
             .map(hit -> hit.source())
             .toList();
         System.out.println("posts: " + posts.get(0).getTitle());
@@ -258,7 +267,7 @@ public class PostEsService {
     }
 
     // 2. 문서 기반 추천 (More Like This 사용)
-    public Page<PostEsDto1> findSimilarPostsById(String postId, Pageable pageable) throws IOException {
+    public Page<PostEsClientDto> findSimilarPostsById(String postId, Pageable pageable) throws IOException {
         System.out.println("postId: " + postId);
         SearchRequest searchRequest = SearchRequest.of(builder -> builder
             .index("posts")
@@ -282,9 +291,9 @@ public class PostEsService {
             .size(pageable.getPageSize())
         );
 
-        SearchResponse<PostEsDto1> response = elasticsearchClient.search(searchRequest, PostEsDto1.class);
+        SearchResponse<PostEsClientDto> response = elasticsearchClient.search(searchRequest, PostEsClientDto.class);
 
-        List<PostEsDto1> posts = response.hits().hits().stream()
+        List<PostEsClientDto> posts = response.hits().hits().stream()
             .map(Hit::source)
             .toList();
         if (posts == null) {
@@ -294,7 +303,7 @@ public class PostEsService {
         return new PageImpl<>(posts, pageable, response.hits().total().value());
     }
 
-    public Page<PostEsDto1> searchGeneralPosts(String keyword, Pageable pageable) {
+    public Page<PostEsClientDto> searchGeneralPosts(String keyword, Pageable pageable) {
         postEsDataRepository.findAll(pageable);
         return null;
     }
@@ -312,6 +321,7 @@ public class PostEsService {
                     .category(Category.GENERAL)
                     .viewCount(0)
                     .likeCount(velogDto.getLikeCount())
+                    .replyCount(velogDto.getComments().size())
                     .replies(velogDto.velogCommentToReplyEs())
                     .createdAt(LocalDateTime.parse(velogDto.getDate()))
                     .build();
@@ -338,4 +348,14 @@ public class PostEsService {
         }).toList());
     }
 
+    public PostEs findById(String id) {
+        return postEsDataRepository.findById(id).orElse(null);
+    }
+
+    // 최신 게시글 가져오기
+    public Page<PostEs> getRecentPosts(int page) {
+        var pr = PageRequest.of(page-1,10,Sort.by("createdAt").descending());
+        var result = postEsDataRepository.findAllByOrderByCreatedAtDesc(pr);
+        return postEsDataRepository.findAllByOrderByCreatedAtDesc(pr);
+    }
 }

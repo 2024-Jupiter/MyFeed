@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -34,6 +35,7 @@ public class VelogDto {
         if (comments != null && !comments.isEmpty()) {
             for (VelogCommentDto comment : comments) {
                 replies.add(ReplyEs.builder()
+                        .id(UUID.randomUUID().toString())
                         .nickname(comment.getCommentUser())
                         .content(comment.getCommentContent())
                         .createdAt(LocalDateTime.parse(comment.getCommentDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")))

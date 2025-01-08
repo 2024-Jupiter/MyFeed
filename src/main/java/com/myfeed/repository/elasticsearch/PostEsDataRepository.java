@@ -4,6 +4,7 @@ import com.myfeed.model.elastic.post.PostEs;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.annotations.Query;
+import org.springframework.data.elasticsearch.annotations.SourceFilters;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 public interface PostEsDataRepository extends ElasticsearchRepository<PostEs, String> {
@@ -23,6 +24,7 @@ public interface PostEsDataRepository extends ElasticsearchRepository<PostEs, St
     Page<PostEs> searchByTitle(String keyword, Pageable pageable);
 
     // 1-1. 제목+카테고리 검색
+    @SourceFilters(excludes = "content")
     @Query("""
             {
               "bool": {
@@ -31,6 +33,7 @@ public interface PostEsDataRepository extends ElasticsearchRepository<PostEs, St
                   { "term": { "category": "?1" } }
                 ]
               }
+           
             }
             """)
     Page<PostEs> searchByTitleAndCategory(String keyword, String category, Pageable pageable);
@@ -49,6 +52,7 @@ public interface PostEsDataRepository extends ElasticsearchRepository<PostEs, St
     Page<PostEs> searchByContent(String keyword , Pageable pageable);
 
     // 2. 내용 검색 + 카테고리 검색
+    @SourceFilters(excludes = "content")
     @Query("""
             {
               "bool": {
@@ -63,13 +67,14 @@ public interface PostEsDataRepository extends ElasticsearchRepository<PostEs, St
 
 
     // 3.  제목+내용 검색 (OR 조건) + 카테고리 검색
+    @SourceFilters(excludes = "content")
     @Query("""
         {
          "bool": {
            "must": {
              "multi_match": {
                "query": "?0",
-               "fields": ["title^1.2", "content^1.1"]
+               "fields": ["title^1.4", "content^1.1"]
              }
            },
            "filter": {
@@ -81,4 +86,8 @@ public interface PostEsDataRepository extends ElasticsearchRepository<PostEs, St
         }
     """)
     Page<PostEs> searchTitleAndContent(String keyword, String category, Pageable pageable);
+
+
+    @SourceFilters(excludes = "content")
+    Page<PostEs> findAllByOrderByCreatedAtDesc(Pageable pr);
 }
