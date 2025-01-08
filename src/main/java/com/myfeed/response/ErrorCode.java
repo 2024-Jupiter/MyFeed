@@ -2,7 +2,6 @@ package com.myfeed.response;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
@@ -12,8 +11,6 @@ public enum ErrorCode {
 	 * 사용자
 	 */
 	USER_NOT_FOUND("USER_NOT_FOUND","사용자를 찾을 수 없습니다."),
-	EMAIL_ALREADY_EXISTED("EMAIL_ALREADY_EXISTED", "이미 사용 중인 이메일입니다."),
-	NICKNAME_ALREADY_EXISTED("NICKNAME_ALREADY_EXISTED", "이미 사용 중인 닉네임입니다."),
 
 	/**
 	 * 게시글
