@@ -20,8 +20,9 @@ public class MyUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userService.findByEmail(email);
 
-        if (user == null) {
-            log.warn("form Login 실패: 이메일을 찾을 수 없습니다. (user email: " + email + ")");
+        // soft deleted된 유저 차단
+        if (user == null || user.isDeleted()) {
+            // log.warn("form Login 실패: 이메일을 찾을 수 없습니다. (user email: " + email + ")");
             throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email);
         }
 
