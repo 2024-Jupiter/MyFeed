@@ -20,9 +20,12 @@ import java.util.List;
 
 @Service
 public class ReportServiceImpl implements ReportService {
-    @Autowired private ReportRepository reportRepository;
-    @Autowired private ReplyRepository replyRepository;
-    @Autowired private PostRepository postRepository;
+    @Autowired
+    ReportRepository reportRepository;
+    @Autowired
+    ReplyRepository replyRepository;
+    @Autowired
+    PostRepository postRepository;
 
     // 신고 불러오기
     @Override
@@ -110,7 +113,7 @@ public class ReportServiceImpl implements ReportService {
 
         Report report = Report.builder()
                 .post(post).type(ReportType.valueOf(reportDto.getType()))
-                .description(reportDto.getDescription()).status(ProcessStatus.RELEASED)
+                .description(reportDto.getDescription()).status(ProcessStatus.PENDING)
                 .build();
 
         return reportRepository.save(report);
@@ -130,7 +133,7 @@ public class ReportServiceImpl implements ReportService {
 
         Report report = Report.builder()
                 .reply(reply).type(ReportType.valueOf(reportDto.getType()))
-                .description(reportDto.getDescription()).status(ProcessStatus.RELEASED)
+                .description(reportDto.getDescription()).status(ProcessStatus.PENDING)
                 .build();
 
         return reportRepository.save(report);

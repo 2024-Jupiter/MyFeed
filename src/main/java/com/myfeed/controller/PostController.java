@@ -5,7 +5,7 @@ import com.myfeed.model.post.*;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.reply.ReplyDetailDto;
 import com.myfeed.model.user.User;
-import com.myfeed.service.Post.PostEsService;
+import com.myfeed.service.Post.CsvFileReaderService;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.reply.ReplyService;
 import com.myfeed.service.user.UserService;
@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,10 +27,10 @@ import java.util.Map;
 @Controller
 @RequestMapping("/api/posts")
 public class PostController {
-    @Autowired private PostService postService;
-    @Autowired private PostEsService postEsService;
-    @Autowired private UserService userService;
-    @Autowired private ReplyService replyService;
+    @Autowired PostService postService;
+    @Autowired UserService userService;
+    @Autowired ReplyService replyService;
+    @Autowired CsvFileReaderService csvFileReaderService;
 
     // 게시글 작성 폼 (GET 요청 으로 폼을 가져옴)
     @GetMapping("create")
@@ -50,6 +51,7 @@ public class PostController {
         response.put("redirectUrl",redirectUrl);
         response.put("success", true);
         response.put("message", "게시글이 작성 되었습니다.");
+        response.put("data", post);
 
         return ResponseEntity.ok(response);
     }
@@ -101,7 +103,6 @@ public class PostController {
 
         // 조회수 증가 (동시성)
         postService.incrementPostViewCountById(id);
-
         if ("like".equals(likeAction)) {
             // 좋아요 증가 (동시성)
             postService.incrementPostLikeCountById(id);
@@ -137,8 +138,6 @@ public class PostController {
         response.put("message", "게시글 상세 보기");
         response.put("post", postDetailDto);
         response.put("replies", replyDetailDto);
-        int count = replyDetailDto.size();
-        response.put("repliesCount", count);
         response.put("totalPages", totalPages);
         response.put("startPage", startPage);
         response.put("endPage", endPage);
@@ -160,6 +159,7 @@ public class PostController {
         response.put("redirectUrl",redirectUrl);
         response.put("success", true);
         response.put("message", "게시글이 수정 되었습니다.");
+        response.put("data", post);
 
         return ResponseEntity.ok(response);
     }
@@ -169,6 +169,7 @@ public class PostController {
     @DeleteMapping("/{id}")
     //@PreAuthorize("#user.id == authentication.principal.id")
     public ResponseEntity<Map<String, Object>> deletePost(@PathVariable Long id) {
+        Post post = postService.findPostById(id);
         postService.deletePostById(id);
         Map<String, Object> response = new HashMap<>();
 
@@ -176,6 +177,7 @@ public class PostController {
         response.put("redirectUrl", redirectUrl);
         response.put("success", true);
         response.put("message", "댓글이 삭제 되었습니다.");
+        response.put("data", post);
 
         return ResponseEntity.ok(response);
     }
@@ -191,7 +193,7 @@ public class PostController {
             return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             response.put("status", "fail");
-            response.put("message", "게시글을 찾을 수 없습니다.");
+            response.put("message", "Post not found.");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
@@ -207,7 +209,7 @@ public class PostController {
             return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             response.put("status", "fail");
-            response.put("message", "게시글을 찾을 수 없습니다.");
+            response.put("message", "Post not found.");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
@@ -223,7 +225,7 @@ public class PostController {
             return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             response.put("status", "fail");
-            response.put("message", "게시글을 찾을 수 없습니다.");
+            response.put("message", "Post not found.");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }

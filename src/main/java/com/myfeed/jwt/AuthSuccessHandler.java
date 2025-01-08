@@ -1,7 +1,6 @@
 package com.myfeed.jwt;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -9,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RequiredArgsConstructor
 @Component
@@ -25,22 +25,8 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
         //  tokenProvider.generateRefreshToken(authentication, accessToken);
 
         //헤더에 토큰을 포함해 클라이언트에게 전달
-//        response.setHeader("Authorization", "Bearer " + accessToken);
-//        response.setStatus(HttpServletResponse.SC_OK);
-        response.addCookie(createCookie("accessToken", accessToken));
+        response.setHeader("Authorization", "Bearer " + accessToken);
+        response.setStatus(HttpServletResponse.SC_OK);
         response.sendRedirect("/api/users/test");
-
-
     }
-
-
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(60 * 60 * 1000);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        return cookie;
-    }
-
 }
