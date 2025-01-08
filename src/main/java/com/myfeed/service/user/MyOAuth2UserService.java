@@ -62,7 +62,7 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
                                     .profileImage(profileUrl)
                                     .loginProvider(LoginProvider.KAKAO)
                                     .build();
-                    userService.registerUser(user);
+                    userService.saveUser(user); // refactor 예정
                 }
                 break;
 
@@ -85,7 +85,7 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
                             .profileImage(profileUrl)
                             .loginProvider(LoginProvider.GOOGLE)
                             .build();
-                    userService.registerUser(user);
+                    userService.saveUser(user);
                     log.info("구글 계정을 통해 회원가입이 되었습니다.: " + user.getUsername());
                 }
                 break;
@@ -110,7 +110,7 @@ public class MyOAuth2UserService extends DefaultOAuth2UserService {
                             .profileImage(profileUrl)
                             .loginProvider(LoginProvider.GITHUB)
                             .build();
-                    userService.registerUser(user);
+                    userService.saveUser(user);
                     log.info("깃허브 계정을 통해 회원가입이 되었습니다. " + user.getUsername());
                 }
                 break;
