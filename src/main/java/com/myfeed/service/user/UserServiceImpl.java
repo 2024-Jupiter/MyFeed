@@ -91,9 +91,9 @@ public class UserServiceImpl implements UserService {
         Pageable pageable = PageRequest.of(page-1,PAGE_SIZE);
         Page<User> userPage = null;
         if (isActive) {
-            userPage = userRepository.findAllByIsActiveTrue(pageable);
+            userPage = userRepository.findAllByActiveTrue(pageable);
         } else {
-            userPage = userRepository.findAllByIsActiveFalse(pageable);
+            userPage = userRepository.findAllByActiveFalse(pageable);
         }
         return null;
     }

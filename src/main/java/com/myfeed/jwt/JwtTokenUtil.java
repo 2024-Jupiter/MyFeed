@@ -11,8 +11,6 @@
  */
 package com.myfeed.jwt;
 
-import com.myfeed.model.user.User;
-import com.myfeed.service.user.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -20,13 +18,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenUtil {
-    @Autowired UserService userService;
-
     private String SECRET_KEY = "BESP2JupiterELASTICSEARCHPROJECTWOWOWOWOWOWOWOWOWOWOWO";       // 서버에서만 알고 있는 비밀키
 
     private Claims extractAllClaims(String token) {
@@ -38,19 +33,9 @@ public class JwtTokenUtil {
         return claimsResolver.apply(claims);
     }
 
-    public Object extractUserEmail(String token) {
-        final Claims claims = extractAllClaims(token);
-        return claims.get("email");
-    }
-
-    public Object extractUserId(String token) {
-        final Claims claims = extractAllClaims(token);
-        return claims.get("id");
-    }
-
-    public Object extractUserRole(String token) {
-        final Claims claims = extractAllClaims(token);
-        return claims.get("role");
+    // 토큰에서 사용자 이름 추출
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
     }
 
     // 토큰에서 만료시간 추출
@@ -64,9 +49,10 @@ public class JwtTokenUtil {
     }
 
     // 토큰 생성 로직
-    private String createToken(Map<String, Object> claims) {
+    private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
                 .setClaims(claims)
+                .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))      // 10시간 만료
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
@@ -74,17 +60,15 @@ public class JwtTokenUtil {
     }
 
     // 토큰 생성
-    public String generateToken(String userId) {
+    public String generateToken(String useremail) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("id", userId);
-        claims.put("email", userService.findById(Long.valueOf(userId)).getEmail());
-        claims.put("role", String.valueOf(userService.findById(Long.valueOf(userId)).getRole()));
-        return createToken(claims);
+        return createToken(claims, useremail);
     }
 
     // 토큰 유효성 검사
-    public Boolean validateToken(String token, String userEmail) {
-        final String extractedUserEmail = (String) extractUserEmail(token);
-        return extractedUserEmail.equals(userEmail) && !isTokenExpired(token);
+    public Boolean validateToken(String token, String username) {
+        final String extractedUsername = extractUsername(token);
+        return extractedUsername.equals(username) && !isTokenExpired(token);
     }
+
 }

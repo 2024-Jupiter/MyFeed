@@ -146,12 +146,13 @@ function sendNumber() {
     const cleanedPhoneNum = phone.replace(/-/g, '');
 
     $.ajax({
-      url: '/api/send-sms/send-one',
+      url: '/api/send-sms/send-authcode',
       type: 'POST',
-      data: JSON.stringify({phone: cleanedPhoneNum}),
-      contentType: 'application/json',
+      data: JSON.stringify ({phoneNumber: cleanedPhoneNum}),
       dataType: 'json',
+      contentType: 'application/json',
       success: function (data) {
+        console.log(data);
         if (data.state === 'success') {
           Swal.fire({
             icon: 'success',
@@ -220,9 +221,6 @@ function isEmailAvailable() {
     data: {email: email},
     dataType: 'json',
     success: function (response) {
-      console.log(response.data);
-      console.log(response);
-
 
       if (!response) {
         Swal.fire({
@@ -234,10 +232,9 @@ function isEmailAvailable() {
       }
 
       if (response.status === 'error') {
-
         Swal.fire({
           icon: 'warning',
-          text: '이미 사용 중인 이메일입니다.',
+          text: response.errorMessage,
           ...swalConfig,
         });
       }
@@ -266,7 +263,7 @@ function isEmailAvailable() {
     error: function () {
       Swal.fire({
         icon: 'error',
-        text: '이메일 중복 확인 중 오류가 발생했습니다.',
+        text: '서버 응답이 올바르지 않습니다.',
         ...swalConfig,
       });
     },
@@ -318,7 +315,7 @@ function isNicknameAvailable() {
       if (response.status === 'error') {
         Swal.fire({
           icon: 'warning',
-          text: '이미 사용 중인 닉네임입니다.',
+          text: response.errorMessage,
           ...swalConfig,
         });
       }
@@ -346,7 +343,7 @@ function isNicknameAvailable() {
     error: function () {
       Swal.fire({
         icon: 'error',
-        text: '닉네임 중복 확인 중 오류가 발생했습니다.',
+        text: '서버 응답이 올바르지 않습니다.',
         ...swalConfig,
       });
     },

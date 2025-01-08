@@ -27,5 +27,5 @@ public class PostDto {
     @NotNull(message = "게시글 유형을 선택 하세요.")
     private Category category;
 
-    private List<ImageDto> images = new ArrayList<>();
+//    private List<ImageDto> images = new ArrayList<>();
 }

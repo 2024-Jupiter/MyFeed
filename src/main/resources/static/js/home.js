@@ -53,25 +53,34 @@
 
 const swalConfig = {confirmButtonColor: '#1f9bcf'};
 
+const userInfo = document.getElementById('userInfo');
+if(userInfo) {
 
-document.getElementById('userInfo').addEventListener('click', function () {
-  let id = document.getElementById('userId').value;
+  document.getElementById('userInfo').addEventListener('click', function () {
+    location.href = `/api/users/detail`;
+  });
 
-  if (!id) {
-    alert("유효하지 않은 사용자 ID입니다.");
-    return;
-  }
+  document.getElementById('logout').addEventListener('click', function () {
+    location.href = `/api/users/logout`;
+  });
+}
 
-  location.href = `/api/users/${id}/detail`;
-});
+const updateBtn = document.getElementById('update');
+if (updateBtn) {
+  updateBtn.addEventListener('click', function () {
+      const options = 'width=700, height=600, top=50, left=50, scrollbars=yes'
+      window.open(`/api/users/update`,'_blank',options)
 
-document.getElementById('logout').addEventListener('click', function () {
-  // let id = document.getElementById('userId').value;
-  //
-  // if (!id) {
-  //   alert("유효하지 않은 사용자 ID입니다.");
-  //   return;
-  // }
 
-  location.href = `/api/users/logout`;
-});
+  });
+}
+
+const save = document.getElementById('save');
+
+if(save) {
+  save.addEventListener('click', function () {
+    document.getElementById('postForm').submit();
+  });
+}
+
+

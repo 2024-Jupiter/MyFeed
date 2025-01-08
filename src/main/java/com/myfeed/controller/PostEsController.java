@@ -1,5 +1,6 @@
 package com.myfeed.controller;
 
+
 import com.myfeed.log.annotation.LogUserBehavior;
 import com.myfeed.model.elastic.PostEsClientDto;
 import com.myfeed.model.elastic.SearchField;
@@ -13,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import com.myfeed.service.Post.CsvFileReaderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +23,6 @@ import java.util.List;
 @Controller
 @RequestMapping("/api/search/posts")
 public class PostEsController {
-    @Autowired CsvFileReaderService csvFileReaderService;
     @Autowired PostEsService postEsService;
     @Autowired EsLogService esLogService;
 
@@ -107,13 +106,6 @@ public class PostEsController {
 
     //  이하 크롤링 데이터 저장 관련 메소드
 
-    // 일렉스틱 서치에 크롤링 데이터 저장
-    @GetMapping("/Elasticsearch")
-    @ResponseBody
-    public String Elasticsearch() {
-        csvFileReaderService.csvFileToElasticSearch();
-        return "<h1>일래스틱 서치에 데이터를 저장 했습니다.</h1>";
-    }
     @GetMapping("init/news")
     @ResponseBody
     public String ElasticsearchNewsInit() {

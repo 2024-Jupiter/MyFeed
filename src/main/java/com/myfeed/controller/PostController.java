@@ -1,11 +1,14 @@
 package com.myfeed.controller;
 
+import com.myfeed.annotation.CurrentUser;
+import com.myfeed.exception.ExpectedException;
 import com.myfeed.model.post.*;
 ;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.reply.ReplyDetailDto;
 import com.myfeed.model.user.User;
-import com.myfeed.service.Post.CsvFileReaderService;
+import com.myfeed.response.ErrorCode;
+import com.myfeed.service.Post.PostEsService;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.reply.ReplyService;
 import com.myfeed.service.user.UserService;
@@ -15,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,31 +29,34 @@ import java.util.Map;
 @Controller
 @RequestMapping("/api/posts")
 public class PostController {
-    @Autowired PostService postService;
-    @Autowired UserService userService;
-    @Autowired ReplyService replyService;
-    @Autowired CsvFileReaderService csvFileReaderService;
+    @Autowired private PostService postService;
+    @Autowired private PostEsService postEsService;
+    @Autowired private UserService userService;
+    @Autowired private ReplyService replyService;
 
     // 게시글 작성 폼 (GET 요청 으로 폼을 가져옴)
-    @GetMapping("create")
+    @GetMapping("/create")
     public String createPostForm() {
-        return "api/posts/create";
+        return "post/create";
     }
 
     // 게시글 작성
     @ResponseBody
-    @PostMapping("create")
-    //@PreAuthorize("#user.id == authentication.principal.id")
-    public ResponseEntity<Map<String, Object>> createPost(@RequestParam Long userId,
-                                                          @Valid @RequestBody PostDto postDto) {
-        Post post = postService.createPost(userId, postDto);
+    @PostMapping("/create")
+    public ResponseEntity<Map<String, Object>> createPost(@CurrentUser User user,
+                                                          @Valid PostDto postDto) {
+//        Post post = postService.findPostById(id);
+//        if (!post.getUser().equals(user)) {
+//            throw new ExpectedException(ErrorCode.AUTHENTICATION_REQUIRED);
+//        }
+
+        postService.createPost(user.getId(), postDto);
         Map<String, Object> response = new HashMap<>();
 
-        String redirectUrl = "/api/posts/detail/" + post.getId();
-        response.put("redirectUrl",redirectUrl);
+//        String redirectUrl = "/api/posts/detail/" + id;
+//        response.put("redirectUrl",redirectUrl);
         response.put("success", true);
         response.put("message", "게시글이 작성 되었습니다.");
-        response.put("data", post);
 
         return ResponseEntity.ok(response);
     }
@@ -59,10 +64,14 @@ public class PostController {
     // 내 게시글 페이지 네이션
     @ResponseBody
     @GetMapping("/users/{userId}")
-    //@PreAuthorize("#user.id == authentication.principal.id")
-    public ResponseEntity<Map<String, Object>> myPostList(@RequestParam(name="p", defaultValue = "1") int page,
-                                                           @PathVariable long userId, HttpSession session) {
-        User user = userService.findById(userId);
+    public ResponseEntity<Map<String, Object>> myPostList(@PathVariable Long id,
+                                                          @RequestParam(name="p", defaultValue = "1") int page,
+                                                          @CurrentUser User user, HttpSession session) {
+        Post p = postService.findPostById(id);
+        if (!p.getUser().equals(user)) {
+            throw new ExpectedException(ErrorCode.AUTHENTICATION_REQUIRED);
+        }
+
         Page<Post> posts = postService.getPagedPostsByUserId(page, user);
         Map<String, Object> response = new HashMap<>();
 
@@ -103,6 +112,7 @@ public class PostController {
 
         // 조회수 증가 (동시성)
         postService.incrementPostViewCountById(id);
+
         if ("like".equals(likeAction)) {
             // 좋아요 증가 (동시성)
             postService.incrementPostLikeCountById(id);
@@ -138,6 +148,8 @@ public class PostController {
         response.put("message", "게시글 상세 보기");
         response.put("post", postDetailDto);
         response.put("replies", replyDetailDto);
+        int count = replyDetailDto.size();
+        response.put("repliesCount", count);
         response.put("totalPages", totalPages);
         response.put("startPage", startPage);
         response.put("endPage", endPage);
@@ -149,17 +161,21 @@ public class PostController {
     // 게시글 수정
     @ResponseBody
     @PatchMapping("/{id}")
-    //@PreAuthorize("#user.id == authentication.principal.id")
     public ResponseEntity<Map<String, Object>> updatePost(@PathVariable Long id,
+                                                          @CurrentUser User user,
                                                           @Valid @RequestBody UpdateDto updateDto) {
-        Post post = postService.updatePost(id, updateDto);
+        Post post = postService.findPostById(id);
+        if (!post.getUser().equals(user)) {
+            throw new ExpectedException(ErrorCode.AUTHENTICATION_REQUIRED);
+        }
+
+        postService.updatePost(id, user, updateDto);
         Map<String, Object> response = new HashMap<>();
 
-        String redirectUrl = "/api/posts/detail/" + post.getId();
+        String redirectUrl = "/api/posts/detail/" + id;
         response.put("redirectUrl",redirectUrl);
         response.put("success", true);
         response.put("message", "게시글이 수정 되었습니다.");
-        response.put("data", post);
 
         return ResponseEntity.ok(response);
     }
@@ -167,17 +183,20 @@ public class PostController {
     // 게시글 삭제
     @ResponseBody
     @DeleteMapping("/{id}")
-    //@PreAuthorize("#user.id == authentication.principal.id")
-    public ResponseEntity<Map<String, Object>> deletePost(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> deletePost(@PathVariable Long id,
+                                                          @CurrentUser User user) {
         Post post = postService.findPostById(id);
-        postService.deletePostById(id);
+        if (!post.getUser().equals(user)) {
+            throw new ExpectedException(ErrorCode.AUTHENTICATION_REQUIRED);
+        }
+
+        postService.deletePostById(id, user);
         Map<String, Object> response = new HashMap<>();
 
         String redirectUrl = "/api/posts/detail/" + id;
         response.put("redirectUrl", redirectUrl);
         response.put("success", true);
         response.put("message", "댓글이 삭제 되었습니다.");
-        response.put("data", post);
 
         return ResponseEntity.ok(response);
     }
@@ -193,7 +212,7 @@ public class PostController {
             return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             response.put("status", "fail");
-            response.put("message", "Post not found.");
+            response.put("message", "게시글을 찾을 수 없습니다.");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
@@ -209,7 +228,7 @@ public class PostController {
             return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             response.put("status", "fail");
-            response.put("message", "Post not found.");
+            response.put("message", "게시글을 찾을 수 없습니다.");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
@@ -225,7 +244,7 @@ public class PostController {
             return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             response.put("status", "fail");
-            response.put("message", "Post not found.");
+            response.put("message", "게시글을 찾을 수 없습니다.");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
