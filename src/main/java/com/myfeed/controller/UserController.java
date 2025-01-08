@@ -6,7 +6,6 @@ import com.myfeed.exception.ExpectedException;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
-import com.myfeed.model.user.Role;
 import com.myfeed.model.user.UpdateDto;
 import com.myfeed.model.user.User;
 import com.myfeed.model.user.UserChangePasswordDto;
@@ -15,17 +14,14 @@ import com.myfeed.model.user.UserFindPasswordDto;
 import com.myfeed.response.ErrorCode;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.user.UserService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.server.PathParam;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -69,20 +65,7 @@ public class UserController {
     @PostMapping("/register") // todo 휴대폰 번호 인증 시 DTO 값 null
     public String registerProc(@Validated RegisterDto registerDto, Model model){
         Map<String, Object> messagemap = new HashMap<>();
-        String hashedPwd = BCrypt.hashpw(registerDto.getPwd(), BCrypt.gensalt());
-//        if (registerDto.getEmail().equals("asd@naver.com")) {
-//            throw new ExpectedException(ErrorCode.USER_NOT_FOUND);
-//        }
-        User user = User.builder()
-                .email(registerDto.getEmail()).password(hashedPwd)
-                .username(registerDto.getUname()).nickname(registerDto.getNickname())
-                .profileImage(registerDto.getProfileImage())
-                .phoneNumber(registerDto.getPhoneNumber())
-                .loginProvider(LoginProvider.FORM)
-                .role(Role.USER)
-                .build();
-        userService.registerUser(user);
-
+        userService.registerUser(registerDto);
         model.addAttribute("msg", "회원가입 되었습니다.");
         model.addAttribute("url", "/home");
         return "common/alertMsg";
@@ -151,13 +134,7 @@ public class UserController {
     @GetMapping("/{id}")
     public String delete(@PathVariable Long id,  HttpServletResponse response) {
         //탈퇴 시 쿠키 제거해 redirection 방지
-        Cookie cookie = new Cookie("accessToken", null);
-        cookie.setMaxAge(0);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
-
+        userService.deleteUserAccessToken(response);
         userService.deleteUser(id); //soft delete
         return "redirect:/api/users/custom-login";
     }
@@ -207,19 +184,8 @@ public class UserController {
         Map<String, Object> messagemap = new HashMap<>();
         User user = userService.findByEmail(findPasswordDto.getEmail());
 
-        if (user == null) {
-            throw new ExpectedException(ErrorCode.USER_NOT_FOUND);
-        }
+        userService.checkUserInfoMatch(user, findPasswordDto.getEmail());
 
-        if (user.getLoginProvider() != LoginProvider.FORM) {
-            throw new ExpectedException(ErrorCode.ID_CONFLICT);
-        }
-
-        String savedPhoneNumber = user.getPhoneNumber();
-
-        if (!savedPhoneNumber.equals(findPasswordDto.getPhoneNumber())) {
-            throw new ExpectedException(ErrorCode.PROFILE_PHONE_MISMATCH);
-        }
         messagemap.put("message", "비밀번호를 변경하세요.");
         messagemap.put("redirectUrl", "redirect:/api/users/change-password");
         return messagemap;
