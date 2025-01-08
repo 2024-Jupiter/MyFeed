@@ -1,10 +1,14 @@
 package com.myfeed.controller;
 
+import com.myfeed.annotation.CurrentUser;
+import com.myfeed.exception.ExpectedException;
 import com.myfeed.model.post.BlockStatus;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.reply.ReplyDetailDto;
 import com.myfeed.model.reply.ReplyDto;
+import com.myfeed.model.user.User;
+import com.myfeed.response.ErrorCode;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.reply.ReplyService;
 import jakarta.servlet.http.HttpSession;
@@ -12,7 +16,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,14 +39,19 @@ public class ReplyController {
     // 댓글 작성 (POST 요청)
     @ResponseBody
     @PostMapping("/create")
-    //@PreAuthorize("#user.id == authentication.principal.id")
-    public ResponseEntity<Map<String, Object>> createReply(@RequestParam Long userId,
+    public ResponseEntity<Map<String, Object>> createReply(@PathVariable Long id,
+                                                           @CurrentUser User user,
                                                            @RequestParam Long postId,
                                                            @Valid @RequestBody ReplyDto replyDto) {
-        replyService.createReply(userId, postId, replyDto);
+        Reply reply = replyService.findByReplyId(id);
+        if (!reply.getUser().equals(user)) {
+            throw new ExpectedException(ErrorCode.AUTHENTICATION_REQUIRED);
+        }
+
+        replyService.createReply(user.getId(), postId, replyDto);
         Map<String, Object> response = new HashMap<>();
 
-        String redirectUrl = "/api/posts/detail/" + postId;
+        String redirectUrl = "/api/posts/detail/" + reply.getPost().getId();
         response.put("redirectUrl",redirectUrl);
         response.put("success", true);
         response.put("message", "댓글이 작성 되었습니다.");
@@ -104,11 +112,15 @@ public class ReplyController {
     // 댓글 수정
     @ResponseBody
     @PatchMapping("/{id}")
-    //@PreAuthorize("#user.id == authentication.principal.id")
     public ResponseEntity<Map<String, Object>> updateReply(@PathVariable Long id,
+                                                           @CurrentUser User user,
                                                            @Valid @RequestBody ReplyDto replyDto) {
         Reply reply = replyService.findByReplyId(id);
-        replyService.updateReply(id, replyDto);
+        if (!reply.getUser().equals(user)) {
+            throw new ExpectedException(ErrorCode.AUTHENTICATION_REQUIRED);
+        }
+
+        replyService.updateReply(id, user, replyDto);
         Map<String, Object> response = new HashMap<>();
 
         String redirectUrl = "/api/posts/detail/" + reply.getPost().getId();
@@ -123,9 +135,14 @@ public class ReplyController {
     @ResponseBody
     @DeleteMapping("/{id}")
     //@PreAuthorize("#user.id == authentication.principal.id")
-    public ResponseEntity<Map<String, Object>> deleteReply(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> deleteReply(@PathVariable Long id,
+                                                           @CurrentUser User user) {
         Reply reply = replyService.findByReplyId(id);
-        replyService.deleteReply(id);
+        if (!reply.getUser().equals(user)) {
+            throw new ExpectedException(ErrorCode.AUTHENTICATION_REQUIRED);
+        }
+
+        replyService.deleteReply(id, user);
         Map<String, Object> response = new HashMap<>();
 
         String redirectUrl = "/api/posts/detail/" + reply.getPost().getId();
@@ -136,4 +153,3 @@ public class ReplyController {
         return ResponseEntity.ok(response);
     }
 }
-

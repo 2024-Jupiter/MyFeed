@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 @Service
 public class PostServiceImpl implements PostService {
-    @Autowired private PostRepository postRepository;
-    @Autowired private UserRepository userRepository;
+    @Autowired PostRepository postRepository;
+    @Autowired UserRepository userRepository;
     @Autowired private ApplicationEventPublisher eventPublisher;
 
     // 게시글 가져 오기
@@ -31,7 +31,7 @@ public class PostServiceImpl implements PostService {
     // 게시글 작성 (postEs로 post 전달)
     @Transactional
     @Override
-    public Post createPost(Long userId, PostDto postDto) {
+    public void createPost(Long userId, PostDto postDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new  ExpectedException(ErrorCode.USER_NOT_FOUND));
 
         if (postDto.getCategory().equals(Category.NEWS) && user.getRole().equals(Role.USER)) {
@@ -60,7 +60,6 @@ public class PostServiceImpl implements PostService {
         Post savedPost = postRepository.save(post);
         eventPublisher.publishEvent(new PostSyncEvent(savedPost.getId(), "CREATE_OR_UPDATE"));
 
-        return savedPost;
     }
 
     // 이미지 형식 확인
@@ -84,7 +83,7 @@ public class PostServiceImpl implements PostService {
     // 게시글 수정 (postEs로 post 전달)
     @Transactional
     @Override
-    public Post updatePost(Long id, UpdateDto updateDto) {
+    public void updatePost(Long id, User user, UpdateDto updateDto) {
         Post post = findPostById(id);
 
         if (post.getStatus() == BlockStatus.BLOCK_STATUS) {
@@ -107,14 +106,12 @@ public class PostServiceImpl implements PostService {
 
         Post savedPost = postRepository.save(post);
         eventPublisher.publishEvent(new PostSyncEvent(savedPost.getId(), "CREATE_OR_UPDATE"));
-
-        return savedPost;
     }
 
     // 게시글 삭제
     @Transactional
     @Override
-    public void deletePostById(Long id) {
+    public void deletePostById(Long id, User user) {
         postRepository.deleteById(id);
         eventPublisher.publishEvent(new PostSyncEvent(id, "DELETE"));
     }
@@ -139,9 +136,6 @@ public class PostServiceImpl implements PostService {
     @Override
     public void incrementPostViewCountById(Long id) {
         postRepository.updateViewCountById(id);
-
-        // Elasticsearch 동기화
-        eventPublisher.publishEvent(new PostSyncEvent(id, "VIEW_COUNT"));
     }
 
     // 좋아요 증가 (동시성)
@@ -149,9 +143,6 @@ public class PostServiceImpl implements PostService {
     @Override
     public void incrementPostLikeCountById(Long id) {
         postRepository.updateLikeCountById(id);
-
-        // Elasticsearch 동기화
-        eventPublisher.publishEvent(new PostSyncEvent(id, "LIKE_COUNT_UP"));
     }
 
     // 좋아요 감소 (동시성)
@@ -159,8 +150,5 @@ public class PostServiceImpl implements PostService {
     @Override
     public void decrementPostLikeCountById(Long id) {
         postRepository.decrementLikeCountById(id);
-
-        // Elasticsearch 동기화
-        eventPublisher.publishEvent(new PostSyncEvent(id, "LIKE_COUNT_DOWN"));
     }
 }

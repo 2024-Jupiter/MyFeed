@@ -1,10 +1,13 @@
 package com.myfeed.controller;
 
+import com.myfeed.annotation.CurrentUser;
+import com.myfeed.exception.ExpectedException;
 import com.myfeed.model.post.*;
 ;
 import com.myfeed.model.reply.Reply;
 import com.myfeed.model.reply.ReplyDetailDto;
 import com.myfeed.model.user.User;
+import com.myfeed.response.ErrorCode;
 import com.myfeed.service.Post.PostEsService;
 import com.myfeed.service.Post.PostService;
 import com.myfeed.service.reply.ReplyService;
@@ -40,13 +43,17 @@ public class PostController {
     // 게시글 작성
     @ResponseBody
     @PostMapping("create")
-    //@PreAuthorize("#user.id == authentication.principal.id")
-    public ResponseEntity<Map<String, Object>> createPost(@RequestParam Long userId,
+    public ResponseEntity<Map<String, Object>> createPost(@PathVariable Long id, @CurrentUser User user,
                                                           @Valid @RequestBody PostDto postDto) {
-        Post post = postService.createPost(userId, postDto);
+        Post post = postService.findPostById(id);
+        if (!post.getUser().equals(user)) {
+            throw new ExpectedException(ErrorCode.AUTHENTICATION_REQUIRED);
+        }
+
+        postService.createPost(user.getId(), postDto);
         Map<String, Object> response = new HashMap<>();
 
-        String redirectUrl = "/api/posts/detail/" + post.getId();
+        String redirectUrl = "/api/posts/detail/" + id;
         response.put("redirectUrl",redirectUrl);
         response.put("success", true);
         response.put("message", "게시글이 작성 되었습니다.");
@@ -57,10 +64,14 @@ public class PostController {
     // 내 게시글 페이지 네이션
     @ResponseBody
     @GetMapping("/users/{userId}")
-    //@PreAuthorize("#user.id == authentication.principal.id")
-    public ResponseEntity<Map<String, Object>> myPostList(@RequestParam(name="p", defaultValue = "1") int page,
-                                                           @PathVariable long userId, HttpSession session) {
-        User user = userService.findById(userId);
+    public ResponseEntity<Map<String, Object>> myPostList(@PathVariable Long id,
+                                                          @RequestParam(name="p", defaultValue = "1") int page,
+                                                          @CurrentUser User user, HttpSession session) {
+        Post p = postService.findPostById(id);
+        if (!p.getUser().equals(user)) {
+            throw new ExpectedException(ErrorCode.AUTHENTICATION_REQUIRED);
+        }
+
         Page<Post> posts = postService.getPagedPostsByUserId(page, user);
         Map<String, Object> response = new HashMap<>();
 
@@ -150,13 +161,18 @@ public class PostController {
     // 게시글 수정
     @ResponseBody
     @PatchMapping("/{id}")
-    //@PreAuthorize("#user.id == authentication.principal.id")
     public ResponseEntity<Map<String, Object>> updatePost(@PathVariable Long id,
+                                                          @CurrentUser User user,
                                                           @Valid @RequestBody UpdateDto updateDto) {
-        Post post = postService.updatePost(id, updateDto);
+        Post post = postService.findPostById(id);
+        if (!post.getUser().equals(user)) {
+            throw new ExpectedException(ErrorCode.AUTHENTICATION_REQUIRED);
+        }
+
+        postService.updatePost(id, user, updateDto);
         Map<String, Object> response = new HashMap<>();
 
-        String redirectUrl = "/api/posts/detail/" + post.getId();
+        String redirectUrl = "/api/posts/detail/" + id;
         response.put("redirectUrl",redirectUrl);
         response.put("success", true);
         response.put("message", "게시글이 수정 되었습니다.");
@@ -167,9 +183,14 @@ public class PostController {
     // 게시글 삭제
     @ResponseBody
     @DeleteMapping("/{id}")
-    //@PreAuthorize("#user.id == authentication.principal.id")
-    public ResponseEntity<Map<String, Object>> deletePost(@PathVariable Long id) {
-        postService.deletePostById(id);
+    public ResponseEntity<Map<String, Object>> deletePost(@PathVariable Long id,
+                                                          @CurrentUser User user) {
+        Post post = postService.findPostById(id);
+        if (!post.getUser().equals(user)) {
+            throw new ExpectedException(ErrorCode.AUTHENTICATION_REQUIRED);
+        }
+
+        postService.deletePostById(id, user);
         Map<String, Object> response = new HashMap<>();
 
         String redirectUrl = "/api/posts/detail/" + id;

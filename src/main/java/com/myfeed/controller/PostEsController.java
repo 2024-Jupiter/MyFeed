@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/api/postEs")
 public class PostEsController {
-    @Autowired private PostEsService postEsService;
-
+    @Autowired PostEsService postEsService;
 
     // 게시글 리스트
 

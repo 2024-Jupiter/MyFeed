@@ -24,8 +24,11 @@ public enum ErrorCode {
 	ID_CONFLICT("ID_CONFLICT", "소셜 로그인으로 시도하세요."),
 	PROFILE_PHONE_MISMATCH("PROFILE_PHONE_MISMATCH", "휴대폰 번호가 기존 정보와 일치하지 않습니다."),
 
+	// 인증 되지 않은 사용자
+	AUTHENTICATION_REQUIRED("AUTHENTICATION_REQUIRED", "인증되지 않은 사용자입니다."),
+
 	/**
-	 * 게시글
+	 * 게시글 Es
 	 */
 	POST_ES_NOT_FOUND("POST_ES_NOT_FOUND", "PostEs를 찾을 수 없습니다."),
 
