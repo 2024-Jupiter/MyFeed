@@ -53,7 +53,7 @@
 </div>
 <div class="row align-items-center py-3 px-xl-5">
   <div class="col-lg-3 d-none d-lg-block">
-    <a href="index.html">
+    <a href="/home">
       <img src="/img/logo.png" style="margin-left: 5%; width: 40%;">
     </a>
   </div>
@@ -311,15 +311,16 @@
 
     <div class="col-3 mb-3" style="left: 3%; height: 100%;">
       <!-- 로그인 상태 확인 -->
-      <div th:if="${session.sessId != null}">
-        <input type="hidden" id="userId" th:value="${session.sessId}">
+      <!--/*@thymesVar id="cookies" type=""*/-->
+      <div th:if="${username != 'Guest'}">
         <div class="user-info">
           <table class="userInfoTable" style="border: 1px solid #dedede" ; width="100%">
             <tr>
               <td style=" width: 25%; padding: 5%;">
-                <img src="/img/undraw_profile.svg" style="height: 100px;">
+                <img th:src="${profileImage != null ? profileImage : '/img/undraw_profile.svg'}"
+                     style="height: 100px;">
               </td>
-              <td style="padding: 5%; text-align: center; vertical-align: middle;"><p>환영합니다, <br><span th:text="${session.sessId}"></span>님!</p></td>
+              <td style="padding: 5%; text-align: center; vertical-align: middle;"><p>환영합니다, <br><span th:text="${username}"></span>님!</p></td>
             </tr>
             <tr style="text-align: center; height: 50px;">
               <td style="vertical-align: middle; width: 50%">
@@ -343,7 +344,7 @@
       </div>
 
       <!-- 비로그인 상태 -->
-      <div th:if="${session.sessId == null}">
+      <div th:if="${username == 'Guest' || username == '' || username == null}">
         <div>
           <form action="/api/users/custom-login" method="post">
             <div class="login">
@@ -397,7 +398,7 @@
       </div>
 
 
-      <div th:style="'margin: ' + (${session.sessId != null} ? '20%' : '70%') + ' 0 10% 0;'">
+      <div th:style="'margin: ' + (${username != 'Guest'} ? '20%' : '70%') + ' 0 10% 0;'">
         <span style="margin: 3%; color: black; font-size: medium;">트랜드 랭킹</span>
       </div>
       <table class="table">
@@ -511,5 +512,4 @@
 
 
 </body>
-
 </html>
