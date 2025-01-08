@@ -25,4 +25,3 @@ public class AccountAdapter extends org.springframework.security.core.userdetail
     public boolean isEnabled() {
         return user.isActive();
     }
-}

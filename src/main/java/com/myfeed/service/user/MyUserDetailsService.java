@@ -1,5 +1,6 @@
 package com.myfeed.service.user;
 
+import com.myfeed.jwt.AccountAdapter;
 import com.myfeed.model.user.MyUserDetails;
 import com.myfeed.model.user.User;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,9 @@ public class MyUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email);
         }
 
-        log.info("form Login 시도: " + user.getNickname());
-        return new MyUserDetails(user);
+//        log.info("form Login 시도: " + user.getNickname());
+//        return new MyUserDetails(user);
+        return new AccountAdapter(user);
     }
+
 }
