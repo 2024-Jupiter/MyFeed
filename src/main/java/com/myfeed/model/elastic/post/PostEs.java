@@ -15,15 +15,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-@Document(indexName = "posts")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Setter
 @ToString
+@Document(indexName = "posts")
 public class PostEs {
     @Id
-    @Column(name = "id", nullable = false)
+    @Field(name = "id",type = FieldType.Keyword)
     private String id;
 
     // 글쓴이 정보

@@ -8,6 +8,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import com.myfeed.annotation.CurrentUser;
 import com.myfeed.model.elastic.PostEsClientDto;
 import com.myfeed.model.elastic.SearchField;
 import com.myfeed.model.elastic.post.PostEs;
@@ -48,16 +49,16 @@ public class PostEsService {
     @Autowired private ElasticsearchOperations elasticsearchOperations;
 
     // 제목 검색 - 일반 게시글
-    public Page<PostEs> searchGeneralPosts(String keyword, SearchField field,int page) {
+    public Page<PostEs> searchGeneralPosts(String keyword, SearchField field,int page ) {
 
         // 로그 저장을 위해 현재 사용자 정보 가져오기
         var user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (user.equals("anonymousUser")) {
-//        여기 수정하자 createdAt 잘 저장되게
             esLogService.saveWithNativeQuery("anonymous", keyword);
-            esLogService.getPopularSearchLogs();
+            System.out.println("log save complete");
+//            esLogService.getPopularKeyword();
         } else {
-//            esLogService.saveSearchLog(user.toString(), keyword);
+            esLogService.saveWithNativeQuery(user.toString(), keyword);
         }
         // 결과 값 선언
         Page<PostEs> posts = null;

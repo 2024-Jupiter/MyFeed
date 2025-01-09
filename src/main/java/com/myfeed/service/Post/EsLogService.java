@@ -15,19 +15,20 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.AggregationsContainer;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.stereotype.Service;
 
 @Service
-@AllArgsConstructor
 public class EsLogService {
 
     @Autowired private SearchLogEsDataRepository searchLogEsDataRepository;
@@ -36,6 +37,20 @@ public class EsLogService {
     @Autowired private ElasticsearchTemplate elasticsearchTemplate;
 
     // 검색 로그 저장
+    public void saveWithEsDataRepository(String userId, String searchWord) {
+        System.out.println("===========saveSearchLog with repository==========");
+        String uid = userId;
+        if (userId == null || userId.isEmpty()) {
+            uid = "anonymous";
+        }
+        UserSearchLogEs searchLog = UserSearchLogEs.builder()
+            .id(UUID.randomUUID().toString())
+            .userId(uid)
+            .searchText(searchWord)
+            .createdAt(LocalDateTime.now().withNano(0))
+            .build();
+        searchLogEsDataRepository.save(searchLog);
+    }
     public void saveWithNativeQuery(String userId, String searchWord) {
         System.out.println("===========saveSearchLog with client==========");
         String uid = userId;
@@ -46,13 +61,14 @@ public class EsLogService {
             .id(UUID.randomUUID().toString())
             .userId(uid)
             .searchText(searchWord)
-            .createdAt(LocalDateTime.now())
+            .createdAt(LocalDateTime.now().withNano(0))
             .build();
         try {
             esClient.index(i -> i
                 .index("user_search_logs")
                 .document(searchLog)
             );
+            System.out.println("==save done==");
         } catch (ElasticsearchException e) {
             System.out.println("====== 여기가 에러나나 error: " + e);
             // 에러 처리
@@ -62,6 +78,7 @@ public class EsLogService {
     }
     // decaying function을 이용한 검색 로그 조회 3순위까지
     public void getPopularSearchLogs() {
+        System.out.println("===========getPopularSearchLogs==========");
         var query = NativeQuery.builder()
             .withQuery(new StringQuery("""
         {
@@ -97,9 +114,69 @@ public class EsLogService {
         System.out.println("Native search :" + query);
         SearchHits<UserSearchLogEs> searchHits = elasticsearchTemplate.search(query, UserSearchLogEs.class);
         System.out.println("searchHits: " + searchHits);
-//        Terms terms = searchHits.getAggregations().get("top_keywords");
+//        searchHits.getAggregations().aggregations().;
 
     }
+    // decaying function을 이용한 검색 로그 조회 3순위까지
+    // 범위는 최근 30일 이내,
+    public void getPopularKeyword() {
+        var query = NativeQuery.builder()
+        .withQuery(new StringQuery("""
+        {
+          "function_score": {
+            "query": {
+              "bool": {
+                "filter": [
+                  {
+                    "range": {
+                      "createdAt": {
+                        "gte": "now-30d/d"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "functions": [
+              {
+                "exp": {
+                  "createdAt": {
+                    "scale": "7d",
+                    "offset": "1d",
+                    "decay": 0.5
+                  }
+                },
+                "weight": 5.0
+              },
+              {
+                "field_value_factor": {
+                  "field": "searchCount",
+                  "factor": 1.2,
+                  "modifier": "log1p",
+                  "missing": 1
+                }
+              }
+            ],
+            "score_mode": "multiply",
+            "boost_mode": "sum"
+          }
+        }
+        """))
+        .withAggregation("top_keywords",
+                Aggregation.of(a -> a
+                        .terms(t -> t
+                                .field("searchText.keyword")
+                                .size(3)
+                        ))
+        )
+        .build();
+
+        SearchHits<UserSearchLogEs> searchHits = elasticsearchTemplate.search(query, UserSearchLogEs.class);
+        System.out.println("searchHits: " + searchHits.hasAggregations());
+        var aggregations = searchHits.getAggregations();
+        System.out.println("aggregations: " + aggregations.aggregations());
+    }
+
 
     // 1. 전체 기간 상위 검색어
     public List<KeywordCount> findAllTimeTopKeywords() throws IOException {
@@ -222,6 +299,11 @@ public class EsLogService {
     public List<UserSearchLogEs> findAll() {
 
         return searchLogEsDataRepository.findAll();
+    }
+
+    public UserSearchLogEs findById(String id) {
+        return searchLogEsDataRepository.findById(id).orElseThrow();
+
     }
 }
 

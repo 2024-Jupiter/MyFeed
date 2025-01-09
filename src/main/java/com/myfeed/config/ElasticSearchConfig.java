@@ -48,14 +48,13 @@ public class ElasticSearchConfig {
         // objectMapper에 JavaTimeModule을 추가
         ObjectMapper objectMapper =
                 new ObjectMapper()
-                        .registerModule(new JavaTimeModule())
-                        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+                        .registerModule(new JavaTimeModule());
+//                        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         // RestClient 및 ElasticsearchClient 생성
         RestClient restClient = builder.build();
         RestClientTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper(objectMapper));
         return new ElasticsearchClient(transport);
-
     }
 }
 

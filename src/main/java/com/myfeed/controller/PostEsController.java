@@ -26,10 +26,6 @@ public class PostEsController {
     @Autowired PostEsService postEsService;
     @Autowired EsLogService esLogService;
 
-    @GetMapping("/logs")
-    public List<UserSearchLogEs> logTest() {
-        return esLogService.findAll();
-    }
     // 최신 게시글 조회 (비유저 메인 페이지 )
     @GetMapping("/recent")
     @ResponseBody
