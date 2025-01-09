@@ -31,7 +31,7 @@ public class PostServiceImpl implements PostService {
     // 게시글 작성 (postEs로 post 전달)
     @Transactional
     @Override
-    public void createPost(Long userId, PostDto postDto) {
+    public Long createPost(Long userId, PostDto postDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new  ExpectedException(ErrorCode.USER_NOT_FOUND));
 
         if (postDto.getCategory().equals(Category.NEWS) && user.getRole().equals(Role.USER)) {
@@ -60,6 +60,7 @@ public class PostServiceImpl implements PostService {
         Post savedPost = postRepository.save(post);
         eventPublisher.publishEvent(new PostSyncEvent(savedPost.getId(), "CREATE_OR_UPDATE"));
 
+        return savedPost.getId();
     }
 
     // 이미지 형식 확인
@@ -115,7 +116,18 @@ public class PostServiceImpl implements PostService {
         postRepository.deleteById(id);
         eventPublisher.publishEvent(new PostSyncEvent(id, "DELETE"));
     }
+    @Override
+    public Page<Post> getPagedPosts(int page) {
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("updatedAt").descending());
+        Page<Post> posts = postRepository.findAll(pageable);
 
+        for (Post post : posts) {
+            if (post.getStatus() == BlockStatus.BLOCK_STATUS) {
+                throw new ExpectedException(ErrorCode.INCLUDED_BLOCK_POST);
+            }
+        }
+        return posts;
+    }
     // 내 게시글 페이지 네이션
     @Override
     public Page<Post> getPagedPostsByUserId(int page,User user) {
@@ -151,5 +163,4 @@ public class PostServiceImpl implements PostService {
     public void decrementPostLikeCountById(Long id) {
         postRepository.decrementLikeCountById(id);
     }
-
 }

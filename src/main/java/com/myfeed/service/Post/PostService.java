@@ -16,7 +16,7 @@ public interface PostService {
     Page<Post> getPagedPostsByUserId(int page, User user);
 
     // 게시글 생성
-    void createPost(Long userId, PostDto postDto);
+    Long createPost(Long userId, PostDto postDto);
 
     // 게시글 수정
     void updatePost(Long id, User user, UpdateDto updateDto);
@@ -32,4 +32,6 @@ public interface PostService {
 
     // 좋아요 감소 (동시성)
     void decrementPostLikeCountById(Long id);
+
+    Page<Post> getPagedPosts(int page);
 }
