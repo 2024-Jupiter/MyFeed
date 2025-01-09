@@ -1,9 +1,8 @@
 package com.myfeed.sync;
 
 import com.myfeed.exception.ExpectedException;
-import com.myfeed.model.post.Image;
+import com.myfeed.model.elastic.post.PostEs;
 import com.myfeed.model.post.Post;
-import com.myfeed.model.post.PostEs;
 import com.myfeed.model.user.User;
 import com.myfeed.repository.jpa.PostRepository;
 import com.myfeed.repository.jpa.UserRepository;
@@ -38,7 +37,6 @@ public class PostSyncEventListener {
             postEs.setCategory(post.getCategory());
             postEs.setViewCount(post.getViewCount());
             postEs.setLikeCount(post.getLikeCount());
-
             postEsService.syncToElasticsearch(postEs);
         } else if ("DELETE".equals(event.getOperation())) {
             postEsService.deleteFromElasticsearch(String.valueOf(event.getPostId()));

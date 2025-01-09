@@ -163,6 +163,4 @@ public class PostServiceImpl implements PostService {
     public void decrementPostLikeCountById(Long id) {
         postRepository.decrementLikeCountById(id);
     }
-
-
 }
