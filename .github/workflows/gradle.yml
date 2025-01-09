@@ -43,7 +43,7 @@ jobs:
         ./gradlew clean build -x test
 
     - name: Docker Image Build
-      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }} .
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/myfeed .
 
     - name: DockerHub Login
       uses: docker/login-action@v2
@@ -52,7 +52,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
     - name: DockerHub Push
-      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}:myfeed
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
 
     - name: Application Run
       uses: appleboy/ssh-action@v0.1.6
@@ -64,8 +64,8 @@ jobs:
         script: |
           sudo docker kill ${{ secrets.PROJECT_NAME }}
           sudo docker rm -f ${{ secrets.PROJECT_NAME }}
-          sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
+          sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
           sudo docker run -p 8070:8070 \
-          --name ${{ secrets.PROJECT_NAME }} \
-          -d ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.PROJECT_NAME }}
+          --name myfeed \
+          -d ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
