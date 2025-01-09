@@ -62,8 +62,8 @@ jobs:
         key: ${{ secrets.EC2_KEY }}
 
         script: |
-          sudo docker kill ${{ secrets.PROJECT_NAME }}
-          sudo docker rm -f ${{ secrets.PROJECT_NAME }}
+          sudo docker kill myfeed
+          sudo docker rm -f myfeed
           sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
           sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
           sudo docker run -p 8070:8070 \
