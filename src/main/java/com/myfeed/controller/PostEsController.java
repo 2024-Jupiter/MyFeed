@@ -104,14 +104,6 @@ public class PostEsController {
     }
 
 
-    //  이하 크롤링 데이터 저장 관련 메소드
-
-    @GetMapping("init/news")
-    @ResponseBody
-    public String ElasticsearchNewsInit() {
-        postEsService.initNewsData();
-        return "<h1>일래스틱 서치에 뉴스 데이터를 저장 했습니다.</h1>";
-    }
     @GetMapping("/init/velog")
     @ResponseBody
     public String ElasticsearchPostsInit() {

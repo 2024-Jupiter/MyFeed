@@ -36,7 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/api/users/find-id", "/api/users/find-password",
                                 "/api/users/check-email", "/api/users/check-nickname","/api/send-sms/send-authcode",
                                 "/api/users/custom-login", "/api/users/register", "/api/replies/**",
-                                "/api/posts/**", "/api/postEs/**", "/api/users/*/detail",
+                                "/api/posts/**", "/api/search/**", "/api/users/*/detail",
                                 "/api/users/*", "/view/home", "/api/admin/reports/posts/{postId}",
                                 "/api/admin/reports/replies/{replyId}").permitAll()
                         .requestMatchers("/login/oauth2/code/google", "auth/google/callback",

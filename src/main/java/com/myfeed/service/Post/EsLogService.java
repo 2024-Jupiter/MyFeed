@@ -1,6 +1,7 @@
 package com.myfeed.service.Post;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.TermsAggregation;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
@@ -10,11 +11,19 @@ import com.myfeed.model.elastic.UserSearchLogEs;
 import com.myfeed.repository.elasticsearch.SearchLogEsDataRepository;
 import com.myfeed.service.Post.record.KeywordCount;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,28 +32,73 @@ public class EsLogService {
 
     @Autowired private SearchLogEsDataRepository searchLogEsDataRepository;
     @Autowired private ElasticsearchClient esClient;
+    @Autowired private ElasticsearchOperations esOperations;
+    @Autowired private ElasticsearchTemplate elasticsearchTemplate;
 
     // 검색 로그 저장
-    public void saveSearchLog(String userId, String searchWord) {
-        System.out.println("===========saveSearchLog==========");
-        String id = userId;
+    public void saveWithNativeQuery(String userId, String searchWord) {
+        System.out.println("===========saveSearchLog with client==========");
+        String uid = userId;
         if (userId == null || userId.isEmpty()) {
-            id = "anonymous";
+            uid = "anonymous";
         }
-
         UserSearchLogEs searchLog = UserSearchLogEs.builder()
-            .userId(id)
+            .id(UUID.randomUUID().toString())
+            .userId(uid)
             .searchText(searchWord)
-            .createdAt(LocalDateTime.now().toString())
+            .createdAt(LocalDateTime.now())
             .build();
-
         try {
-            UserSearchLogEs saved = searchLogEsDataRepository.save(searchLog);
-            System.out.println("Document indexed successfully. ID: " + saved.getId());
-        } catch (Exception e) {
-            System.out.println("Failed to index document: " + e.getMessage());
-            System.out.println("id :"+searchLog.getId()+" created at :"+searchLog.getCreatedAt());
+            esClient.index(i -> i
+                .index("user_search_logs")
+                .document(searchLog)
+            );
+        } catch (ElasticsearchException e) {
+            System.out.println("====== 여기가 에러나나 error: " + e);
+            // 에러 처리
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+    }
+    // decaying function을 이용한 검색 로그 조회 3순위까지
+    public void getPopularSearchLogs() {
+        var query = NativeQuery.builder()
+            .withQuery(new StringQuery("""
+        {
+          "function_score": {
+            "query": {
+              "match_all": {}
+            },
+            "functions": [
+              {
+                "exp": {
+                  "createdAt": {
+                    "scale": "7d",
+                    "offset": "1d",
+                    "decay": 0.5
+                  }
+                },
+                "weight": 5.0
+              }
+            ],
+            "boost_mode": "multiply"
+          }
+        }
+        """))
+            .withAggregation("top_keywords",
+                Aggregation.of(a -> a
+                    .terms(TermsAggregation.of(t -> t
+                        .field("searchText.keyword")
+                        .size(3)
+                    ))
+                )
+            )
+            .build();
+        System.out.println("Native search :" + query);
+        SearchHits<UserSearchLogEs> searchHits = elasticsearchTemplate.search(query, UserSearchLogEs.class);
+        System.out.println("searchHits: " + searchHits);
+//        Terms terms = searchHits.getAggregations().get("top_keywords");
+
     }
 
     // 1. 전체 기간 상위 검색어

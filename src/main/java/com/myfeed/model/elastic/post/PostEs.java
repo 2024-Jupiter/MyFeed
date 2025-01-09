@@ -2,8 +2,6 @@ package com.myfeed.model.elastic.post;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.myfeed.model.post.Category;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.myfeed.model.reply.ReplyDetailDto;
 import com.myfeed.model.reply.ReplyEs;
 import jakarta.persistence.*;
 import lombok.*;

@@ -11,7 +11,7 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.myfeed.model.elastic.PostEsClientDto;
 import com.myfeed.model.elastic.SearchField;
 import com.myfeed.model.elastic.post.PostEs;
-import com.myfeed.model.elastic.post.ReplyEs;
+import com.myfeed.model.reply.ReplyEs;
 import com.myfeed.repository.elasticsearch.PostEsDataRepository;
 import com.myfeed.repository.elasticsearch.PostEsRepository;
 import com.myfeed.service.Post.crawlingdata.NewsJsonReader;
@@ -31,6 +31,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,8 +49,16 @@ public class PostEsService {
 
     // 제목 검색 - 일반 게시글
     public Page<PostEs> searchGeneralPosts(String keyword, SearchField field,int page) {
+
+        // 로그 저장을 위해 현재 사용자 정보 가져오기
+        var user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (user.equals("anonymousUser")) {
 //        여기 수정하자 createdAt 잘 저장되게
-        esLogService.saveSearchLog("anonymous", keyword);
+            esLogService.saveWithNativeQuery("anonymous", keyword);
+            esLogService.getPopularSearchLogs();
+        } else {
+//            esLogService.saveSearchLog(user.toString(), keyword);
+        }
         // 결과 값 선언
         Page<PostEs> posts = null;
         PageRequest pageRequest = PageRequest.of(page - 1, 10);
@@ -63,6 +72,7 @@ public class PostEsService {
             // 제목+내용 검색
             case TITLE_CONTENT -> postEsRepository.searchGeneralPostsByTitleAndContent(keyword, pageRequest);
         };
+        System.out.printf("검색 결과: %s\n", posts);
         return posts;
     }
 
@@ -328,24 +338,6 @@ public class PostEsService {
         }).toList();
         postEsDataRepository.saveAll(list);
         System.out.println("Successfully saved to Elasticsearch");
-    }
-
-    @Async
-    public void initNewsData() {
-        System.out.println("Inserting news data...");
-        List<NewsDto> newsDtos = new NewsJsonReader().loadJson();
-        postEsDataRepository.saveAll(newsDtos.stream().map(newsDto -> {
-            return PostEs.builder()
-                    .nickname(newsDto.author())
-                    .title(newsDto.title())
-                    .content(newsDto.content())
-                    .category(Category.NEWS)
-                    .viewCount(0)
-                    .likeCount(0)
-                    .replies(new ArrayList<ReplyEs>())
-                    .createdAt(newsDto.getParsedDate())
-                    .build();
-        }).toList());
     }
 
     public PostEs findById(String id) {

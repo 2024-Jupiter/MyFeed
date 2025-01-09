@@ -1,7 +1,7 @@
 package com.myfeed.model.elastic;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.myfeed.model.elastic.post.ReplyEs;
+import com.myfeed.model.reply.ReplyEs;
 import com.myfeed.model.post.Category;
 
 import java.util.List;

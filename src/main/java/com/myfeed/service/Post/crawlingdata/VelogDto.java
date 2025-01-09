@@ -1,6 +1,6 @@
 package com.myfeed.service.Post.crawlingdata;
 
-import com.myfeed.model.elastic.post.ReplyEs;
+import com.myfeed.model.reply.ReplyEs;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
