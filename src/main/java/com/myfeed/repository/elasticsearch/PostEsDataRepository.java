@@ -24,7 +24,7 @@ public interface PostEsDataRepository extends ElasticsearchRepository<PostEs, St
     Page<PostEs> searchByTitle(String keyword, Pageable pageable);
 
     // 1-1. 제목+카테고리 검색
-    @SourceFilters(excludes = "content")
+    @SourceFilters(excludes = {"content","replies"})
     @Query("""
             {
               "bool": {
@@ -52,7 +52,7 @@ public interface PostEsDataRepository extends ElasticsearchRepository<PostEs, St
     Page<PostEs> searchByContent(String keyword , Pageable pageable);
 
     // 2. 내용 검색 + 카테고리 검색
-    @SourceFilters(excludes = "content")
+    @SourceFilters(excludes = {"content","replies"})
     @Query("""
             {
               "bool": {
@@ -67,7 +67,7 @@ public interface PostEsDataRepository extends ElasticsearchRepository<PostEs, St
 
 
     // 3.  제목+내용 검색 (OR 조건) + 카테고리 검색
-    @SourceFilters(excludes = "content")
+    @SourceFilters(excludes = {"content","replies"})
     @Query("""
         {
          "bool": {
