@@ -1,11 +1,13 @@
 package com.myfeed.controller;
 
 
+import com.myfeed.annotation.CurrentUser;
 import com.myfeed.log.annotation.LogUserBehavior;
 import com.myfeed.model.elastic.PostEsClientDto;
 import com.myfeed.model.elastic.SearchField;
 import com.myfeed.model.elastic.UserSearchLogEs;
 import com.myfeed.model.elastic.post.PostEs;
+import com.myfeed.model.user.User;
 import com.myfeed.service.Post.EsLogService;
 import com.myfeed.service.Post.PostEsService;
 import jakarta.servlet.http.HttpSession;
@@ -42,9 +44,10 @@ public class PostEsController {
     public Page<PostEs> searchPosts(
         @RequestParam String q,
         @RequestParam(name = "p", defaultValue = "1") int page,
-        @RequestParam(name = "field", defaultValue = "TITLE") SearchField field
+        @RequestParam(name = "field", defaultValue = "TITLE") SearchField field,
+        @CurrentUser User user
     ) throws IOException {
-        return postEsService.searchGeneralPosts(q,field, page);
+        return postEsService.searchGeneralPosts(q,field, page,user);
     }
 
     // ID로 postES 상세 검색
@@ -54,7 +57,8 @@ public class PostEsController {
         return postEsService.findById(id);
     }
 
-    // 사용자 검색 로그 상위 3위 키워드로 게시글 추천
+    // 모든 이용자의 검색 로그 상위 3위 키워드로 게시글 추천
+    // 1달간의 검색 로그 중 인기 검색어를 가져오는 쿼리를 활용한 추천
     @GetMapping("/recommend/by-top3-keywords")
     @ResponseBody
     public Page<PostEsClientDto> recommendByTop3Keywords(@RequestParam(name="p", defaultValue = "1") int page, HttpSession session, Model model)
@@ -62,21 +66,16 @@ public class PostEsController {
         return postEsService.getRecommendPostByTop3Keywords(page);
     }
     // 나의 검색 로그 상위 3위 키워드로 게시글 추천
+    // 1달간의 검색 로그 중 인기 검색어를 가져오는 쿼리를 활용한 추천
     @GetMapping("/recommend/by-my-top3-keywords")
     @ResponseBody
-    public String recommend(@RequestParam(name="p", defaultValue = "1") int page, HttpSession session, Model model,@RequestParam(name = "userId") String userId)
+    public Page<PostEsClientDto> recommend(@RequestParam(name="p", defaultValue = "1") int page, HttpSession session, Model model,
+        @CurrentUser User user)
             throws IOException {
-        var pagedResult = postEsService.getRecommendPostForMe(page,userId);
-        return "api/search/posts/recommend";
-    }
-    // 유저의 한달 간 검색어 상위 3위 게시글 추천( 사용 x )
-    @GetMapping("/recommend/by-top3-keywords/month")
-    @ResponseBody
-    public String recommendByTop3KeywordsMonth(@RequestParam(name="p", defaultValue = "1") int page, HttpSession session, Model model,@RequestParam(name = "userId") String userId)
-        throws IOException {
-        var pagedResult = postEsService.getRecommendedPostsByMonthSearchLog(page,userId);
-        System.out.println("pagedResult: " + pagedResult);
-        return "api/search/posts/recommend";
+        if (user == null) {
+            return postEsService.getRecommendPostByTop3Keywords(page);
+        }
+        return postEsService.getRecommendPostForMe(page,user.getId().toString());
     }
 
     // 비슷한 게시물 추천
@@ -88,6 +87,9 @@ public class PostEsController {
     ) throws IOException {
         return postEsService.findSimilarPostsById(postId, pageable);
     }
+
+    // 이하 안쓰는 코드
+
     // 비슷한 게시물 추천 - keywords로 검색 ( 사용 x 작동 o)
     @GetMapping("/recommend/keywords")
     @ResponseBody
@@ -98,7 +100,15 @@ public class PostEsController {
         System.out.println("keywords: " + keywords);
         return postEsService.findSimilarPostsByKeywords(keywords, pageable);
     }
-
+    // 유저의 한달 간 검색어 상위 3위 게시글 추천( 사용 x )
+    @GetMapping("/recommend/by-top3-keywords/month")
+    @ResponseBody
+    public String recommendByTop3KeywordsMonth(@RequestParam(name="p", defaultValue = "1") int page, HttpSession session, Model model,@RequestParam(name = "userId") String userId)
+        throws IOException {
+        var pagedResult = postEsService.getRecommendedPostsByMonthSearchLog(page,userId);
+        System.out.println("pagedResult: " + pagedResult);
+        return "api/search/posts/recommend";
+    }
 
     @GetMapping("/init/velog")
     @ResponseBody
