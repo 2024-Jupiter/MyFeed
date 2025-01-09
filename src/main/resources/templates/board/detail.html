@@ -60,15 +60,16 @@
   <div class="col-lg-6 col-6 text-left">
     <form action="">
       <div class="input-group">
-        <!-- <input
-          type="text"
-          class="form-control"
-          placeholder="검색창"
-        /> -->
+        <input
+            type="text"
+            class="form-control"
+            placeholder="검색창"
+        />
         <div class="input-group-append">
-          <!-- <span class="input-group-text bg-transparent text-primary" style="cursor: pointer;" onclick="document.forms[0].submit()">
-            <i class="fa fa-search"></i>
-          </span> -->
+                <span class="input-group-text bg-transparent text-primary" style="cursor: pointer;"
+                      onclick="document.forms[0].submit()">
+                  <i class="fa fa-search"></i>
+                </span>
         </div>
       </div>
     </form>
@@ -89,9 +90,9 @@
             id="navbarCollapse"
         >
           <div class="navbar-nav mr-auto py-0">
-            <a href="#" class="nav-item nav-link active">홈</a>
-            <a href="#" class="nav-item nav-link">게시판</a>
-            <a href="#" class="nav-item nav-link">메뉴1</a>
+            <a href="index.html" class="nav-item nav-link active">홈</a>
+            <a href="/api/posts/list" class="nav-item nav-link">게시판</a>
+            <a href="detail.html" class="nav-item nav-link">메뉴1</a>
             <div class="nav-item dropdown">
               <a
                   href="#"
@@ -100,11 +101,11 @@
               >드롭다운</a
               >
               <div class="dropdown-menu rounded-0 m-0">
-                <a href="#" class="dropdown-item">하위1</a>
-                <a href="#" class="dropdown-item">하위2</a>
+                <a href="cart.html" class="dropdown-item">하위1</a>
+                <a href="checkout.html" class="dropdown-item">하위2</a>
               </div>
             </div>
-            <a href="#" class="nav-item nav-link">메뉴2</a>
+            <a href="contact.html" class="nav-item nav-link">메뉴2</a>
           </div>
         </div>
       </nav>
@@ -117,79 +118,67 @@
 <div class="container-fluid pt-5">
   <div class="row"
        style="justify-content: space-between; flex-wrap: nowrap; margin: auto; width: 70%;">
-    <div class="col-12 mb-0">
-
-      <table class="userDetail" style="width: 100%; height: 300px;">
-        <tr>
-          <td rowspan="4" style="width: 30%; text-align: center;">
-            <img th:src="${user.profileImage != null and !user.profileImage.isEmpty() ? user.profileImage : '/img/undraw_profile.svg'}"
-                 style="width: 200px; text-align: center; margin-top: 5%;">
-          </td>
-          <td style="    padding: 3% 0 0 2%;
-                    vertical-align: top;
-                    width: 8%;
-                    font-weight: 700;
-                    color: black;
-                    font-size: large;">
-            <span>이메일</span><br><br>
-            <span>닉네임</span><br><br>
-            <span>휴대폰</span><br><br>
-            <span>이름</span><br><br>
-            <span>가입일자</span><br><br>
-          </td>
-          <td style="padding: 3% 0 0 3%;
-                    vertical-align: top;
-                    font-weight: 700;
-                    font-size: large;">
-            <span th:text="${user.email}">inpou1@naver.com</span><br><br>
-            <span th:text="${user.nickname}">우내</span><br><br>
-            <span th:text="${user.phoneNumber}">01056979712</span><br><br>
-            <span th:text="${user.username}">테스터
-                    </span><br><br>
-            <span th:text="${#strings.substringBefore(user.getCreatedAt(), 'T')}">2025-01-03</span><br><br>
-          </td>
-          <td style="vertical-align: top; text-align: center;">
-            <button class="btn btn-info"
-                    style="    width: 60%; padding-bottom: 0.3rem; margin-top: 15%;" id="update">
-              수정
-            </button>
-          </td>
-
-
-        </tr>
-      </table>
-
-      <table style="width: 100%; margin-top: 5%;">
-        <tr>
-          <td>post</td>
-        </tr>
-        <tr>
-          <td>post</td>
-        </tr>
-        <tr>
-          <td>post</td>
-        </tr>
-        <tr>
-          <td>post</td>
-        </tr>
-        <tr>
-          <td>post</td>
-        </tr>
-        <tr>
-          <td>post</td>
-        </tr>
-        <tr>
-          <td>post</td>
-        </tr>
-
-      </table>
-
-
+    <div>
+      <h4 th:text="${post.title}" style="font-size: x-large; font-weight: bold"></h4>
+    </div>
+    <div style="display: inline-flex">
+      <p>작성자: <span th:text="${post.nickname}"></span></p>
+      <p>조회수: <span th:text="${post.viewCount}"></span></p>
+      <p>작성 날짜: <span th:text="${#strings.substring(post.earliestTime, 0, #strings.indexOf(post.earliestTime, 'T'))}"></span></p>
     </div>
   </div>
 </div>
 
+
+<div class="container-fluid pt-5">
+  <div class="row border-top pt-3" style="margin: auto;
+    width: 70%;
+    justify-content: flex-start; height: 600px;">
+    <div th:text="${post.content}" style="font-size: large; color: black;"></div>
+  </div>
 </div>
+
+
+<div class="container-fluid pt-5">
+  <div  style="margin: auto; width: 70%; justify-content: flex-start;" class="row border-top pt-3">
+    <h2>댓글</h2>
+    <ul>
+      <li th:each="reply: ${replies}">
+  <p th:text="${reply.nickname} + ': ' + ${reply.content}"></p>
+  <small th:text="${reply.earliestTime}"></small>-->
+  </li>
+  </ul>
+</div>
+
+  <!-- 댓글 작성 폼 -->
+  <div style="margin: auto; width: 70%; margin-top: 20px;" class="control-group">
+    <form id="replyForm" th:action="@{/api/replies/create}" method="post">
+<!--      <input type="hidden" name="postId" th:value="${post.id}" />-->
+      <div class="control-group">
+        <textarea class="form-control" name="content" rows="3" placeholder="댓글을 작성하세요." required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary mt-2">댓글 작성</button>
+    </form>
+  </div>
+</div>
+
+
+<div>
+               <span th:each="page : ${pageList}">
+                   <a th:href="@{/api/posts/detail(id=${post.id}, p=${page})}"
+                      th:text="${page}" th:classappend="${page == currentPage} ? 'active' : ''"></a>
+               </span>
+</div>
+
+<div class="container-fluid pt-5">
+<div style="margin: auto; width: 70%; justify-content: flex-end;" class="row">
+<a th:href="@{/api/posts/list}" style="float: right">목록으로 돌아가기</a>
+</div>
+</div>
+
+
+<!-- </div> -->
+
 
 <!-- Back to Top -->
 <a href="#" class="btn btn-secondary back-to-top"
@@ -209,5 +198,7 @@
 
 <!-- Template Javascript -->
 <script src="/js/home.js"></script>
+
+
 </body>
 </html>

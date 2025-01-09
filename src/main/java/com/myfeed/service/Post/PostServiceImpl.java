@@ -31,7 +31,7 @@ public class PostServiceImpl implements PostService {
     // 게시글 작성 (postEs로 post 전달)
     @Transactional
     @Override
-    public Post createPost(Long userId, PostDto postDto) {
+    public Long createPost(Long userId, PostDto postDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new  ExpectedException(ErrorCode.USER_NOT_FOUND));
 
         if (postDto.getCategory().equals(Category.NEWS) && user.getRole().equals(Role.USER)) {
@@ -44,23 +44,23 @@ public class PostServiceImpl implements PostService {
                 .viewCount(0).likeCount(0)
                 .build();
 
-        if (!postDto.getImages().isEmpty()) {
-            for (ImageDto imageDto : postDto.getImages()) {
-                if (!isValidImageFormat(imageDto)) {
-                    throw new ExpectedException(ErrorCode.WRONG_IMAGE_FILE);
-                }
-            }
-        }
+//        if (!postDto.getImages().isEmpty()) {
+//            for (ImageDto imageDto : postDto.getImages()) {
+//                if (!isValidImageFormat(imageDto)) {
+//                    throw new ExpectedException(ErrorCode.WRONG_IMAGE_FILE);
+//                }
+//            }
+//        }
 
-        List<Image> images = convertImageDtosToImages(postDto.getImages(), post);
-        for (Image image: images) {
-            post.addImage(image);
-        }
+//        List<Image> images = convertImageDtosToImages(postDto.getImages(), post);
+//        for (Image image: images) {
+//            post.addImage(image);
+//        }
 
         Post savedPost = postRepository.save(post);
         eventPublisher.publishEvent(new PostSyncEvent(savedPost.getId(), "CREATE_OR_UPDATE"));
 
-        return savedPost;
+        return savedPost.getId();
     }
 
     // 이미지 형식 확인
@@ -84,7 +84,7 @@ public class PostServiceImpl implements PostService {
     // 게시글 수정 (postEs로 post 전달)
     @Transactional
     @Override
-    public Post updatePost(Long id, UpdateDto updateDto) {
+    public void updatePost(Long id, User user, UpdateDto updateDto) {
         Post post = findPostById(id);
 
         if (post.getStatus() == BlockStatus.BLOCK_STATUS) {
@@ -107,18 +107,27 @@ public class PostServiceImpl implements PostService {
 
         Post savedPost = postRepository.save(post);
         eventPublisher.publishEvent(new PostSyncEvent(savedPost.getId(), "CREATE_OR_UPDATE"));
-
-        return savedPost;
     }
 
     // 게시글 삭제
     @Transactional
     @Override
-    public void deletePostById(Long id) {
+    public void deletePostById(Long id, User user) {
         postRepository.deleteById(id);
         eventPublisher.publishEvent(new PostSyncEvent(id, "DELETE"));
     }
+    @Override
+    public Page<Post> getPagedPosts(int page) {
+        Pageable pageable = PageRequest.of(page - 1, PAGE_SIZE, Sort.by("updatedAt").descending());
+        Page<Post> posts = postRepository.findAll(pageable);
 
+        for (Post post : posts) {
+            if (post.getStatus() == BlockStatus.BLOCK_STATUS) {
+                throw new ExpectedException(ErrorCode.INCLUDED_BLOCK_POST);
+            }
+        }
+        return posts;
+    }
     // 내 게시글 페이지 네이션
     @Override
     public Page<Post> getPagedPostsByUserId(int page,User user) {
@@ -154,4 +163,6 @@ public class PostServiceImpl implements PostService {
     public void decrementPostLikeCountById(Long id) {
         postRepository.decrementLikeCountById(id);
     }
+
+
 }

@@ -1,13 +1,10 @@
 package com.myfeed.service.Post;
 
-import com.myfeed.model.post.Category;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.post.PostDto;
 import com.myfeed.model.post.UpdateDto;
 import com.myfeed.model.user.User;
 import org.springframework.data.domain.Page;
-
-import java.util.List;
 
 public interface PostService {
     public static final int PAGE_SIZE = 10;
@@ -19,13 +16,13 @@ public interface PostService {
     Page<Post> getPagedPostsByUserId(int page, User user);
 
     // 게시글 생성
-    Post createPost(Long userId, PostDto postDto);
+    Long createPost(Long userId, PostDto postDto);
 
     // 게시글 수정
-    Post updatePost(Long id, UpdateDto updateDto);
+    void updatePost(Long id, User user, UpdateDto updateDto);
 
     // 게시글 삭제
-    void deletePostById(Long id);
+    void deletePostById(Long id, User user);
 
     // 조회수 증가 (동시성)
     void incrementPostViewCountById(Long id);
@@ -35,4 +32,6 @@ public interface PostService {
 
     // 좋아요 감소 (동시성)
     void decrementPostLikeCountById(Long id);
+
+    Page<Post> getPagedPosts(int page);
 }

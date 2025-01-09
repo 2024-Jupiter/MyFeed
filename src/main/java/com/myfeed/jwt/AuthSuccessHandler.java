@@ -1,6 +1,7 @@
 package com.myfeed.jwt;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -20,13 +21,22 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws IOException, ServletException {
+        System.out.println("AuthSuccessHandler.onAuthenticationSuccess");
         // accessToken, refreshToken 발급
         String accessToken = jwtTokenUtil.generateToken(authentication.getName());
         //  tokenProvider.generateRefreshToken(authentication, accessToken);
 
-        //헤더에 토큰을 포함해 클라이언트에게 전달
-        response.setHeader("Authorization", "Bearer " + accessToken);
-        response.setStatus(HttpServletResponse.SC_OK);
+        //헤더에 쿠키를 포함해 클라이언트에게 전달
+        response.addCookie(createCookie("accessToken", accessToken));
         response.sendRedirect("/api/users/test");
+    }
+
+    private Cookie createCookie(String key, String value) {
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(60 * 60 * 1000);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        return cookie;
     }
 }
