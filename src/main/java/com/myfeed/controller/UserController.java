@@ -4,6 +4,7 @@ package com.myfeed.controller;
 import com.myfeed.exception.CustomException;
 import com.myfeed.exception.ExpectedException;
 import com.myfeed.annotation.CurrentUser;
+import com.myfeed.log.annotation.LogUserBehavior;
 import com.myfeed.model.post.Post;
 import com.myfeed.model.user.LoginProvider;
 import com.myfeed.model.user.RegisterDto;
@@ -68,6 +69,7 @@ public class UserController {
 
     // 회원 가입(폼)
     @GetMapping("/register")
+    @LogUserBehavior
     public String registerForm() {
         return "users/register";
     }

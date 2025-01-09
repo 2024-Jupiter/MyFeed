@@ -63,7 +63,8 @@ public class LogConfig {
 		// 서비스 로직 실행
 		Object response = joinPoint.proceed();
 
-		log.info(getMessage(customLog));
+		// log.info(getMessage(customLog));
+		log.info("{}", getMessage(customLog));
 
 		return response;
 	}
