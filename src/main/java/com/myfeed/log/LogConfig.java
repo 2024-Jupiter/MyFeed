@@ -63,8 +63,7 @@ public class LogConfig {
 		// 서비스 로직 실행
 		Object response = joinPoint.proceed();
 
-		// log.info(getMessage(customLog));
-		log.info("{}", getMessage(customLog));
+		log.info(getMessage(customLog));
 
 		return response;
 	}
@@ -72,10 +71,10 @@ public class LogConfig {
 	private String getMessage(CustomLog customLog) throws JsonProcessingException {
 		Map<String, String> map = new LinkedHashMap<>();
 
+		// map.put("httpMethod", customLog.getHttpMethod());
+		// map.put("uri", customLog.getUri());
+		// map.put("boardId", customLog.getBoardId());
 		map.put("createdAt", customLog.getCreatedAt());
-		map.put("httpMethod", customLog.getHttpMethod());
-		map.put("uri", customLog.getUri());
-		map.put("boardId", customLog.getBoardId());
 
 		return new ObjectMapper().writeValueAsString(map);
 	}

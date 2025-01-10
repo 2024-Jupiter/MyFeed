@@ -1,43 +1,37 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-
-name: CI/CD using github actions & docker
+name: CI/CD
 
 on:
   push:
     branches: [ "main-real" ]
-  pull_request:
-    branches: [ "main-real" ]
 
 jobs:
-  build:
 
+  build:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
 
+    # ---- 설정 파일 ---
     - name: make application-deploy.yaml
-      if: contains(github.ref, 'main')
+      if: contains(github.ref, 'main-real')
       run: |
-        cd ./src/main/resources
-        touch ./application-local.yaml
-        echo "${{ secrets.APPLICATION_DEPLOY }}" > ./application-local.yaml
+        mkdir ./src/main/resources
+        echo "${{ secrets.APPLICATION_DEPLOY }}" > ./src/main/resources/application-local.yaml
       shell: bash
+    # -----------------
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+#    - name: Setup Gradle
+#      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
-    - name: Build with Gradle Wrapper
+    - name: Grant execute permission for Gradle Wrapper & Build with Gradle Wrapper
       run: |
         chmod +x ./gradlew
         ./gradlew clean build -x test
