@@ -25,10 +25,8 @@ jobs:
       run: |
         echo "${{ secrets.APPLICATION_DEPLOY }}" > ./src/main/resources/application-local.yaml
       shell: bash
-    # -----------------
 
-#    - name: Setup Gradle
-#      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+    # -----------------
 
     - name: Grant execute permission for Gradle Wrapper & Build with Gradle Wrapper
       run: |
@@ -47,18 +45,20 @@ jobs:
     - name: DockerHub Push
       run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
 
-    - name: Application Run
-      uses: appleboy/ssh-action@v0.1.6
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_KEY }}
+  # --- 밑에 작업은 따로 jobs : deploy로 빼기
 
-        script: |
-          sudo docker kill myfeed
-          sudo docker rm -f myfeed
-          sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
-          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
-          sudo docker run -p 8070:8070 \
-          --name myfeed \
-          -d ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
+#    - name: Application Run
+#      uses: appleboy/ssh-action@v0.1.6
+#      with:
+#        host: ${{ secrets.EC2_HOST }}
+#        username: ${{ secrets.EC2_USERNAME }}
+#        key: ${{ secrets.EC2_KEY }}
+#
+#        script: |
+#          sudo docker kill myfeed
+#          sudo docker rm -f myfeed
+#          sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
+#          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
+#          sudo docker run -p 8070:8070 \
+#          --name myfeed \
+#          -d ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
