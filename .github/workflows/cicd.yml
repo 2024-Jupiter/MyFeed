@@ -23,7 +23,6 @@ jobs:
     - name: make application-deploy.yaml
       if: contains(github.ref, 'main-real')
       run: |
-        mkdir ./src/main/resources
         echo "${{ secrets.APPLICATION_DEPLOY }}" > ./src/main/resources/application-local.yaml
       shell: bash
     # -----------------
