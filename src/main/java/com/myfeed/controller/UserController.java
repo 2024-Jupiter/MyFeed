@@ -49,7 +49,7 @@ public class UserController {
 
     @GetMapping("/test")
     public String testEndpoint(@CurrentUser User user, Model model) {
-        System.out.println("hi");
+        System.out.println("hello");
         System.out.println("---------아이디" + user.getId());
         if (user == null) {
             model.addAttribute("username", "Guest");
