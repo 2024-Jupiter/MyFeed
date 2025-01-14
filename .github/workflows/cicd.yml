@@ -39,22 +39,18 @@ jobs:
 #    - name: Test with Gradle Wrapper
 #      run: SPRING_PROFILES_ACTIVE=[test] ./gradlew test
 
-  docker:
-    needs: build
-    if: github.event_name == 'push' && contains(github.ref, 'main-real')
-    runs-on: ubuntu-22.04
-    steps:
-    - name: Docker Image Build
-      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/myfeed .
-
     - name: DockerHub Login
+      if: github.event_name == 'push' && contains(github.ref, 'main-real')
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-    - name: DockerHub Push
-      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
+    - name: Docker Image Build & Push
+      if: github.event_name == 'push' && contains(github.ref, 'main-real')
+      run: |
+        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/myfeed .
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
 
   deploy:
     needs: docker
