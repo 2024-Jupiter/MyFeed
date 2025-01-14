@@ -2,13 +2,16 @@ name: CI/CD
 
 on:
   push:
-    branches: [ "main-real" ]
+    branches: ['main-real', 'develop']
+    paths-ignore: ['src/resources/**']
+  pull_request:
+    branches: ['main-real', 'develop']
+    paths-ignore: ['src/resources/**']
 
 jobs:
 
   build:
     runs-on: ubuntu-22.04
-
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -19,20 +22,28 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    # ---- 설정 파일 ---
     - name: make application-deploy.yaml
       if: contains(github.ref, 'main-real')
       run: |
         echo "${{ secrets.APPLICATION_DEPLOY }}" > ./src/main/resources/application-local.yaml
       shell: bash
 
-    # -----------------
-
-    - name: Grant execute permission for Gradle Wrapper & Build with Gradle Wrapper
+    - name: Grant execute permission for Gradle Wrapper
       run: |
         chmod +x ./gradlew
+
+    - name: Build with Gradle Wrapper
+      run: |
         ./gradlew clean build -x test
 
+#    - name: Test with Gradle Wrapper
+#      run: SPRING_PROFILES_ACTIVE=[test] ./gradlew test
+
+  docker:
+    needs: build
+    if: github.event_name == 'push' && contains(github.ref, 'main-real')
+    runs-on: ubuntu-22.04
+    steps:
     - name: Docker Image Build
       run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/myfeed .
 
@@ -45,20 +56,22 @@ jobs:
     - name: DockerHub Push
       run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
 
-  # --- 밑에 작업은 따로 jobs : deploy로 빼기
-
-#    - name: Application Run
-#      uses: appleboy/ssh-action@v0.1.6
-#      with:
-#        host: ${{ secrets.EC2_HOST }}
-#        username: ${{ secrets.EC2_USERNAME }}
-#        key: ${{ secrets.EC2_KEY }}
-#
-#        script: |
-#          sudo docker kill myfeed
-#          sudo docker rm -f myfeed
-#          sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
-#          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
-#          sudo docker run -p 8070:8070 \
-#          --name myfeed \
-#          -d ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
+  deploy:
+    needs: docker
+    if: github.event_name == 'push' && contains(github.ref, 'main-real')
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Application Run
+      uses: appleboy/ssh-action@v0.1.6
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          sudo docker kill myfeed
+          sudo docker rm -f myfeed
+          sudo docker rmi ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
+          sudo docker run -p 8070:8070 \
+          --name myfeed \
+          -d ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
