@@ -53,7 +53,7 @@ jobs:
         docker push ${{ secrets.DOCKERHUB_USERNAME }}/myfeed
 
   deploy:
-    needs: docker
+    needs: build
     if: github.event_name == 'push' && contains(github.ref, 'main-real')
     runs-on: ubuntu-22.04
     steps:
